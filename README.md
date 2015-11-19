@@ -22,6 +22,9 @@ Apache2
 
 ### Examples
 
+![](https://github.com/ncsoft/Unreal.js/blob/master/doc/images/UnrealJs_example_2048.gif)
+
+
 #### Create a new actor
 ```js
 let myActor = new Actor(GWorld,{X:10,Y:20,Z:30});
