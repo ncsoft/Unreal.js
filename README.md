@@ -45,7 +45,7 @@ class MyActor extends Actor {
     this.MyProp/*EditAnywhere+Replicated+int*/;
   }
   RPC(x/*int*/) /*Server+Reliable*/ {
-    console.log('This function is replicated',This.MyProp++);
+    console.log('This function is replicated',this.MyProp++);
   }
 }
 let MyActor_C = require('uclass')()(global,MyActor);
