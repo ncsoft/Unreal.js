@@ -8,25 +8,6 @@ Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4.
 - Full access to the whole UnrealEngine API
 - Free to subclass existing classes including blueprint
 - Web-dev like UMG (Jade, pseudo-css, pseudo-angular.js)
-```jade
-div
-	span.full
-		Button.full
-			text {{text}}
-		div.full
-			Button.full(fn.on-clicked="inc()")
-				text {{count}}
-			Button.full(fn.on-clicked="add()")
-				text Click button above!
-	span
-		text.yellow >
-		EditableText(Binding.Text='text',fn.on-text-changed='text = ^arguments[0]',HintText="Your secret goes here")
-		
-	list.full(repeat='item in items',on-click="discard(item)") 
-		HorizontalBox.small
-			text.full {{item.key}}
-			text.full {{item.value}}
-```
 - Live reload
 - Communicate with outer world: REST, process(pipe), arraybuffer, ...
 - Bridge API for editor extension
@@ -79,4 +60,27 @@ let kick = () => {
   setTimeout(kick,1000);
 };
 kick();
+```
+
+#### GameUI-dev like web-dev
+```jade
+div
+	span.full
+		Button.full
+			text {{text}}
+		div.full
+			Button.full(fn.on-clicked="inc()")
+				text {{count}}
+			Button.full(fn.on-clicked="add()")
+				text Click button above!
+	span
+		text.yellow >
+		EditableText(Binding.Text='text',
+			fn.on-text-changed='text = ^arguments[0]',
+			HintText="Your secret goes here")
+		
+	list.full(repeat='item in items',on-click="discard(item)") 
+		HorizontalBox.small
+			text.full {{item.key}}
+			text.full {{item.value}}
 ```
