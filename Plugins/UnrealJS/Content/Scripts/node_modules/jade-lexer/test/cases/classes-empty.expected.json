@@ -1,0 +1,9 @@
+{"type":"tag","line":1,"val":"a","selfClosing":false}
+{"type":"attrs","line":1,"attrs":[{"name":"class","val":"''","escaped":true}]}
+{"type":"newline","line":2}
+{"type":"tag","line":2,"val":"a","selfClosing":false}
+{"type":"attrs","line":2,"attrs":[{"name":"class","val":"null","escaped":true}]}
+{"type":"newline","line":3}
+{"type":"tag","line":3,"val":"a","selfClosing":false}
+{"type":"attrs","line":3,"attrs":[{"name":"class","val":"undefined","escaped":true}]}
+{"type":"eos","line":3}

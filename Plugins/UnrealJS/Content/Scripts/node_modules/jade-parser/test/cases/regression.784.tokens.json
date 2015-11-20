@@ -1,0 +1,5 @@
+{"type":"code","line":1,"val":"var url = 'http://www.google.com'","escape":false,"buffer":false}
+{"type":"newline","line":2}
+{"type":"class","line":2,"val":"url"}
+{"type":"text","line":2,"val":"#{url.replace('http://', '').replace(/^www\\./, '')}"}
+{"type":"eos","line":2}

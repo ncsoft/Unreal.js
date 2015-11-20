@@ -1,0 +1,11 @@
+{"type":"tag","line":1,"val":"html","selfClosing":false}
+{"type":"indent","line":2,"val":2}
+{"type":"tag","line":2,"val":"body","selfClosing":false}
+{"type":"indent","line":3,"val":4}
+{"type":"include","line":3,"val":"yield-title-head"}
+{"type":"indent","line":4,"val":6}
+{"type":"text","line":4,"val":"My Title"}
+{"type":"outdent","line":4}
+{"type":"outdent","line":4}
+{"type":"outdent","line":4}
+{"type":"eos","line":4}

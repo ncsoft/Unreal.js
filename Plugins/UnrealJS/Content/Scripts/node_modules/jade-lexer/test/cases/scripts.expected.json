@@ -1,0 +1,20 @@
+{"type":"tag","line":1,"val":"script","selfClosing":false}
+{"type":"dot","line":1}
+{"type":"start-pipeless-text","line":1}
+{"type":"text","line":2,"val":"if (foo) {"}
+{"type":"newline","line":3}
+{"type":"text","line":3,"val":"  bar();"}
+{"type":"newline","line":4}
+{"type":"text","line":4,"val":"}"}
+{"type":"end-pipeless-text","line":4}
+{"type":"newline","line":5}
+{"type":"tag","line":5,"val":"script","selfClosing":false}
+{"type":"code","line":5,"val":"'foo()'","escape":false,"buffer":true}
+{"type":"newline","line":6}
+{"type":"tag","line":6,"val":"script","selfClosing":false}
+{"type":"text","line":6,"val":"foo()"}
+{"type":"newline","line":7}
+{"type":"tag","line":7,"val":"script","selfClosing":false}
+{"type":"newline","line":8}
+{"type":"tag","line":8,"val":"div","selfClosing":false}
+{"type":"eos","line":8}

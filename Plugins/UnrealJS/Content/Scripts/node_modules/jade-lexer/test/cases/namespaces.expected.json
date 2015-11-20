@@ -1,0 +1,6 @@
+{"type":"tag","line":1,"val":"fb:user:role","selfClosing":false}
+{"type":"text","line":1,"val":"Something"}
+{"type":"newline","line":2}
+{"type":"tag","line":2,"val":"foo","selfClosing":false}
+{"type":"attrs","line":2,"attrs":[{"name":"fb:foo","val":"'bar'","escaped":true}]}
+{"type":"eos","line":2}

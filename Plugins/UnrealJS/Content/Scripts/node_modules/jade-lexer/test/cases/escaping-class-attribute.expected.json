@@ -1,0 +1,19 @@
+{"type":"tag","line":1,"val":"foo","selfClosing":false}
+{"type":"attrs","line":1,"attrs":[{"name":"attr","val":"\"<%= bar %>\"","escaped":true}]}
+{"type":"newline","line":2}
+{"type":"tag","line":2,"val":"foo","selfClosing":false}
+{"type":"attrs","line":2,"attrs":[{"name":"class","val":"\"<%= bar %>\"","escaped":true}]}
+{"type":"newline","line":3}
+{"type":"tag","line":3,"val":"foo","selfClosing":false}
+{"type":"attrs","line":3,"attrs":[{"name":"attr","val":"\"<%= bar %>\"","escaped":false}]}
+{"type":"newline","line":4}
+{"type":"tag","line":4,"val":"foo","selfClosing":false}
+{"type":"attrs","line":4,"attrs":[{"name":"class","val":"\"<%= bar %>\"","escaped":false}]}
+{"type":"newline","line":5}
+{"type":"tag","line":5,"val":"foo","selfClosing":false}
+{"type":"attrs","line":5,"attrs":[{"name":"class","val":"\"<%= bar %> lol rofl\"","escaped":false}]}
+{"type":"newline","line":6}
+{"type":"tag","line":6,"val":"foo","selfClosing":false}
+{"type":"attrs","line":6,"attrs":[{"name":"class","val":"\"<%= bar %> lol rofl <%= lmao %>\"","escaped":false}]}
+{"type":"newline","line":7}
+{"type":"eos","line":7}

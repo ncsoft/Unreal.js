@@ -1,0 +1,10 @@
+{"type":"tag","line":1,"val":"head","selfClosing":false}
+{"type":"indent","line":2,"val":2}
+{"type":"tag","line":2,"val":"script","selfClosing":false}
+{"type":"attrs","line":2,"attrs":[{"name":"type","val":"'text/javascript'","escaped":true}]}
+{"type":"dot","line":2}
+{"type":"start-pipeless-text","line":2}
+{"type":"text","line":3,"val":"alert('hello world');"}
+{"type":"end-pipeless-text","line":3}
+{"type":"outdent","line":3}
+{"type":"eos","line":3}

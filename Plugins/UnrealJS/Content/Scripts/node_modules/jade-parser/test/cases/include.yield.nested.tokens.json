@@ -1,0 +1,10 @@
+{"type":"newline","line":2}
+{"type":"include","line":2,"val":"auxiliary/yield-nested"}
+{"type":"indent","line":3,"val":2}
+{"type":"tag","line":3,"val":"p","selfClosing":false}
+{"type":"text","line":3,"val":"some content"}
+{"type":"newline","line":4}
+{"type":"tag","line":4,"val":"p","selfClosing":false}
+{"type":"text","line":4,"val":"and some more"}
+{"type":"outdent","line":4}
+{"type":"eos","line":4}

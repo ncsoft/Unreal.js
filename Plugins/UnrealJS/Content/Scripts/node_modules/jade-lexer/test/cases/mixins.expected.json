@@ -1,0 +1,67 @@
+{"type":"mixin","line":1,"val":"comment","args":"title, str"}
+{"type":"indent","line":2,"val":2}
+{"type":"class","line":2,"val":"comment"}
+{"type":"indent","line":3,"val":4}
+{"type":"tag","line":3,"val":"h2","selfClosing":false}
+{"type":"code","line":3,"val":"title","escape":true,"buffer":true}
+{"type":"newline","line":4}
+{"type":"tag","line":4,"val":"p","selfClosing":false}
+{"type":"class","line":4,"val":"body"}
+{"type":"code","line":4,"val":"str","escape":true,"buffer":true}
+{"type":"outdent","line":7}
+{"type":"outdent","line":7}
+{"type":"mixin","line":7,"val":"comment","args":"title, str"}
+{"type":"indent","line":8,"val":2}
+{"type":"class","line":8,"val":"comment"}
+{"type":"indent","line":9,"val":4}
+{"type":"tag","line":9,"val":"h2","selfClosing":false}
+{"type":"code","line":9,"val":"title","escape":true,"buffer":true}
+{"type":"newline","line":10}
+{"type":"tag","line":10,"val":"p","selfClosing":false}
+{"type":"class","line":10,"val":"body"}
+{"type":"code","line":10,"val":"str","escape":true,"buffer":true}
+{"type":"outdent","line":12}
+{"type":"outdent","line":12}
+{"type":"id","line":12,"val":"user"}
+{"type":"indent","line":13,"val":2}
+{"type":"tag","line":13,"val":"h1","selfClosing":false}
+{"type":"text","line":13,"val":"Tobi"}
+{"type":"newline","line":14}
+{"type":"class","line":14,"val":"comments"}
+{"type":"indent","line":15,"val":4}
+{"type":"call","line":15,"val":"comment","args":"'This',\n            (('is regular, javascript'))"}
+{"type":"outdent","line":17}
+{"type":"outdent","line":17}
+{"type":"mixin","line":17,"val":"list","args":null}
+{"type":"indent","line":18,"val":2}
+{"type":"tag","line":18,"val":"ul","selfClosing":false}
+{"type":"indent","line":19,"val":4}
+{"type":"tag","line":19,"val":"li","selfClosing":false}
+{"type":"text","line":19,"val":"foo"}
+{"type":"newline","line":20}
+{"type":"tag","line":20,"val":"li","selfClosing":false}
+{"type":"text","line":20,"val":"bar"}
+{"type":"newline","line":21}
+{"type":"tag","line":21,"val":"li","selfClosing":false}
+{"type":"text","line":21,"val":"baz"}
+{"type":"outdent","line":23}
+{"type":"outdent","line":23}
+{"type":"tag","line":23,"val":"body","selfClosing":false}
+{"type":"indent","line":24,"val":2}
+{"type":"mixin","line":24,"val":"list","args":null}
+{"type":"newline","line":25}
+{"type":"call","line":25,"val":"list","args":""}
+{"type":"newline","line":26}
+{"type":"call","line":26,"val":"list","args":""}
+{"type":"outdent","line":28}
+{"type":"mixin","line":28,"val":"foobar","args":"str"}
+{"type":"indent","line":29,"val":2}
+{"type":"tag","line":29,"val":"div","selfClosing":false}
+{"type":"id","line":29,"val":"interpolation"}
+{"type":"code","line":29,"val":"str + 'interpolated'","escape":true,"buffer":true}
+{"type":"outdent","line":31}
+{"type":"code","line":31,"val":"var suffix = \"bar\"","escape":false,"buffer":false}
+{"type":"newline","line":32}
+{"type":"call","line":32,"val":"#{'foo' + suffix}","args":"'This is '"}
+{"type":"newline","line":33}
+{"type":"eos","line":33}

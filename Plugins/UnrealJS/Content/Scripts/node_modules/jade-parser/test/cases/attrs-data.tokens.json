@@ -1,0 +1,15 @@
+{"type":"code","line":1,"val":"var user = { name: 'tobi' }","escape":false,"buffer":false}
+{"type":"newline","line":2}
+{"type":"tag","line":2,"val":"foo","selfClosing":false}
+{"type":"attrs","line":2,"attrs":[{"name":"data-user","val":"user","escaped":true}]}
+{"type":"newline","line":3}
+{"type":"tag","line":3,"val":"foo","selfClosing":false}
+{"type":"attrs","line":3,"attrs":[{"name":"data-items","val":"[1,2,3]","escaped":true}]}
+{"type":"newline","line":4}
+{"type":"tag","line":4,"val":"foo","selfClosing":false}
+{"type":"attrs","line":4,"attrs":[{"name":"data-username","val":"'tobi'","escaped":true}]}
+{"type":"newline","line":5}
+{"type":"tag","line":5,"val":"foo","selfClosing":false}
+{"type":"attrs","line":5,"attrs":[{"name":"data-escaped","val":"{message: \"Let's rock!\"}","escaped":true}]}
+{"type":"newline","line":6}
+{"type":"eos","line":6}

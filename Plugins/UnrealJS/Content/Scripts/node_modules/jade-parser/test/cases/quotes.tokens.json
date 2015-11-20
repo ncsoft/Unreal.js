@@ -1,0 +1,6 @@
+{"type":"tag","line":1,"val":"p","selfClosing":false}
+{"type":"text","line":1,"val":"\"foo\""}
+{"type":"newline","line":2}
+{"type":"tag","line":2,"val":"p","selfClosing":false}
+{"type":"text","line":2,"val":"'foo'"}
+{"type":"eos","line":2}

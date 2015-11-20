@@ -1,0 +1,47 @@
+{"type":"code","line":1,"val":"var id = 5","escape":false,"buffer":false}
+{"type":"newline","line":2}
+{"type":"code","line":2,"val":"function answer() { return 42; }","escape":false,"buffer":false}
+{"type":"newline","line":3}
+{"type":"tag","line":3,"val":"a","selfClosing":false}
+{"type":"attrs","line":3,"attrs":[{"name":"href","val":"'/user/' + id","escaped":true},{"name":"class","val":"'button'","escaped":true}]}
+{"type":"newline","line":4}
+{"type":"tag","line":4,"val":"a","selfClosing":false}
+{"type":"attrs","line":4,"attrs":[{"name":"href","val":"'/user/' + id","escaped":true},{"name":"class","val":"'button'","escaped":true}]}
+{"type":"newline","line":5}
+{"type":"tag","line":5,"val":"meta","selfClosing":false}
+{"type":"attrs","line":5,"attrs":[{"name":"key","val":"'answer'","escaped":true},{"name":"value","val":"answer()","escaped":true}]}
+{"type":"newline","line":6}
+{"type":"tag","line":6,"val":"a","selfClosing":false}
+{"type":"attrs","line":6,"attrs":[{"name":"class","val":"['class1', 'class2']","escaped":true}]}
+{"type":"newline","line":7}
+{"type":"tag","line":7,"val":"a","selfClosing":false}
+{"type":"class","line":7,"val":"tag-class"}
+{"type":"attrs","line":7,"attrs":[{"name":"class","val":"['class1', 'class2']","escaped":true}]}
+{"type":"newline","line":9}
+{"type":"tag","line":9,"val":"a","selfClosing":false}
+{"type":"attrs","line":9,"attrs":[{"name":"href","val":"'/user/' + id","escaped":true},{"name":"class","val":"'button'","escaped":true}]}
+{"type":"newline","line":10}
+{"type":"tag","line":10,"val":"a","selfClosing":false}
+{"type":"attrs","line":10,"attrs":[{"name":"href","val":"'/user/' + id","escaped":true},{"name":"class","val":"'button'","escaped":true}]}
+{"type":"newline","line":11}
+{"type":"tag","line":11,"val":"meta","selfClosing":false}
+{"type":"attrs","line":11,"attrs":[{"name":"key","val":"'answer'","escaped":true},{"name":"value","val":"answer()","escaped":true}]}
+{"type":"newline","line":12}
+{"type":"tag","line":12,"val":"a","selfClosing":false}
+{"type":"attrs","line":12,"attrs":[{"name":"class","val":"['class1', 'class2']","escaped":true}]}
+{"type":"newline","line":13}
+{"type":"tag","line":13,"val":"a","selfClosing":false}
+{"type":"class","line":13,"val":"tag-class"}
+{"type":"attrs","line":13,"attrs":[{"name":"class","val":"['class1', 'class2']","escaped":true}]}
+{"type":"newline","line":15}
+{"type":"tag","line":15,"val":"div","selfClosing":false}
+{"type":"attrs","line":15,"attrs":[{"name":"id","val":"id","escaped":true}]}
+{"type":"&attributes","line":15,"val":"{foo: 'bar'}"}
+{"type":"newline","line":16}
+{"type":"code","line":16,"val":"var bar = null","escape":false,"buffer":false}
+{"type":"newline","line":17}
+{"type":"tag","line":17,"val":"div","selfClosing":false}
+{"type":"attrs","line":17,"attrs":[{"name":"foo","val":"null","escaped":true},{"name":"bar","val":"bar","escaped":true}]}
+{"type":"&attributes","line":17,"val":"{baz: 'baz'}"}
+{"type":"newline","line":18}
+{"type":"eos","line":18}

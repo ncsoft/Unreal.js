@@ -1,0 +1,7 @@
+{"type":"comment","line":1,"val":" regression test for https://github.com/jadejs/jade/issues/1435","buffer":false}
+{"type":"text","line":2,"val":""}
+{"type":"newline","line":3}
+{"type":"include","line":3,"val":"../fixtures/mixin-include.jade"}
+{"type":"newline","line":5}
+{"type":"call","line":5,"val":"bang"}
+{"type":"eos","line":5}

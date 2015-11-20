@@ -1,0 +1,8 @@
+{"type":"code","line":1,"val":"var id = 5","escape":false,"buffer":false}
+{"type":"newline","line":2}
+{"type":"tag","line":2,"val":"a","selfClosing":false}
+{"type":"attrs","line":2,"attrs":[{"name":"href","val":"'/user/' + (id) + ''","escaped":true}]}
+{"type":"newline","line":3}
+{"type":"tag","line":3,"val":"foo","selfClosing":false}
+{"type":"attrs","line":3,"attrs":[{"name":"bar","val":"'stuff \\#{here} yup'","escaped":true}]}
+{"type":"eos","line":3}

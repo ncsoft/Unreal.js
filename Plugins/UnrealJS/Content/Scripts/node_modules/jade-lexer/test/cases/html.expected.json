@@ -1,0 +1,14 @@
+{"type":"newline","line":2}
+{"type":"text-html","line":2,"val":"<ul>"}
+{"type":"indent","line":3,"val":2}
+{"type":"text-html","line":3,"val":"<li>foo</li>"}
+{"type":"newline","line":4}
+{"type":"text-html","line":4,"val":"<li>bar</li>"}
+{"type":"newline","line":5}
+{"type":"text-html","line":5,"val":"<li>baz</li>"}
+{"type":"outdent","line":6}
+{"type":"text-html","line":6,"val":"</ul>"}
+{"type":"newline","line":8}
+{"type":"tag","line":8,"val":"p","selfClosing":false}
+{"type":"text","line":8,"val":"You can <em>embed</em> html as well."}
+{"type":"eos","line":8}

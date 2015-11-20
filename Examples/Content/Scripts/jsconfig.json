@@ -1,0 +1,8 @@
+{	
+	"compilerOptions": {
+		"target": "ES6",
+		"noLib": false,
+		"charset": "utf8",
+		"locale": "ko-kr"
+	}
+}

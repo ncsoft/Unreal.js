@@ -1,0 +1,7 @@
+{"type":"code","line":1,"val":"var foo = 'bar'","escape":false,"buffer":false}
+{"type":"newline","line":2}
+{"type":"code","line":2,"val":"var list = [1,2,3]","escape":false,"buffer":false}
+{"type":"newline","line":3}
+{"type":"tag","line":3,"val":"a","selfClosing":false}
+{"type":"attrs","line":3,"attrs":[{"name":"class","val":"list","escaped":true},{"name":"id","val":"foo","escaped":true}]}
+{"type":"eos","line":3}

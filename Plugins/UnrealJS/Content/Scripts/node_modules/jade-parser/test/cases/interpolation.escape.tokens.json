@@ -1,0 +1,14 @@
+{"type":"newline","line":2}
+{"type":"code","line":2,"val":"var id = 42;","escape":false,"buffer":false}
+{"type":"newline","line":3}
+{"type":"tag","line":3,"val":"foo","selfClosing":false}
+{"type":"indent","line":4,"val":2}
+{"type":"text","line":4,"val":"some"}
+{"type":"newline","line":5}
+{"type":"text","line":5,"val":"\\#{text}"}
+{"type":"newline","line":6}
+{"type":"text","line":6,"val":"here"}
+{"type":"newline","line":7}
+{"type":"text","line":7,"val":"My ID #{\"is {\" + id + \"}\"}"}
+{"type":"outdent","line":7}
+{"type":"eos","line":7}

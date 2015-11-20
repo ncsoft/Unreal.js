@@ -1,0 +1,95 @@
+{"type":"newline","line":2}
+{"type":"code","line":2,"val":"var users = []","escape":false,"buffer":false}
+{"type":"newline","line":4}
+{"type":"tag","line":4,"val":"ul","selfClosing":false}
+{"type":"indent","line":5,"val":2}
+{"type":"each","line":5,"val":"user","code":"users"}
+{"type":"indent","line":6,"val":4}
+{"type":"tag","line":6,"val":"li","selfClosing":false}
+{"type":"code","line":6,"val":"user.name","escape":true,"buffer":true}
+{"type":"outdent","line":7}
+{"type":"code","line":7,"val":"else","isElse":true,"isIf":false,"requiresBlock":true}
+{"type":"indent","line":8,"val":4}
+{"type":"tag","line":8,"val":"li","selfClosing":false}
+{"type":"text","line":8,"val":"no users!"}
+{"type":"outdent","line":11}
+{"type":"outdent","line":11}
+{"type":"code","line":11,"val":"var users = [{ name: 'tobi', friends: ['loki'] }, { name: 'loki' }]","escape":false,"buffer":false}
+{"type":"newline","line":13}
+{"type":"code","line":13,"val":"if ( users)","isElse":false,"isIf":true,"requiresBlock":true}
+{"type":"indent","line":14,"val":2}
+{"type":"tag","line":14,"val":"ul","selfClosing":false}
+{"type":"indent","line":15,"val":4}
+{"type":"each","line":15,"val":"user","code":"users"}
+{"type":"indent","line":16,"val":6}
+{"type":"tag","line":16,"val":"li","selfClosing":false}
+{"type":"code","line":16,"val":"user.name","escape":true,"buffer":true}
+{"type":"outdent","line":17}
+{"type":"code","line":17,"val":"else","isElse":true,"isIf":false,"requiresBlock":true}
+{"type":"indent","line":18,"val":6}
+{"type":"tag","line":18,"val":"li","selfClosing":false}
+{"type":"text","line":18,"val":"no users!"}
+{"type":"outdent","line":20}
+{"type":"outdent","line":20}
+{"type":"outdent","line":20}
+{"type":"code","line":20,"val":"var user = { name: 'tobi', age: 10 }","escape":false,"buffer":false}
+{"type":"newline","line":22}
+{"type":"tag","line":22,"val":"ul","selfClosing":false}
+{"type":"indent","line":23,"val":2}
+{"type":"each","line":23,"val":"val","key":"key","code":"user"}
+{"type":"indent","line":24,"val":4}
+{"type":"tag","line":24,"val":"li","selfClosing":false}
+{"type":"text","line":24,"val":"#{key}: #{val}"}
+{"type":"outdent","line":25}
+{"type":"code","line":25,"val":"else","isElse":true,"isIf":false,"requiresBlock":true}
+{"type":"indent","line":26,"val":4}
+{"type":"tag","line":26,"val":"li","selfClosing":false}
+{"type":"text","line":26,"val":"user has no details!"}
+{"type":"outdent","line":28}
+{"type":"outdent","line":28}
+{"type":"code","line":28,"val":"var user = {}","escape":false,"buffer":false}
+{"type":"newline","line":30}
+{"type":"tag","line":30,"val":"ul","selfClosing":false}
+{"type":"indent","line":31,"val":2}
+{"type":"each","line":31,"val":"prop","key":"key","code":"user"}
+{"type":"indent","line":32,"val":4}
+{"type":"tag","line":32,"val":"li","selfClosing":false}
+{"type":"text","line":32,"val":"#{key}: #{val}"}
+{"type":"outdent","line":33}
+{"type":"code","line":33,"val":"else","isElse":true,"isIf":false,"requiresBlock":true}
+{"type":"indent","line":34,"val":4}
+{"type":"tag","line":34,"val":"li","selfClosing":false}
+{"type":"text","line":34,"val":"user has no details!"}
+{"type":"outdent","line":36}
+{"type":"outdent","line":36}
+{"type":"tag","line":36,"val":"ul","selfClosing":false}
+{"type":"indent","line":37,"val":2}
+{"type":"each","line":37,"val":"prop","key":"key","code":"user"}
+{"type":"indent","line":38,"val":4}
+{"type":"tag","line":38,"val":"li","selfClosing":false}
+{"type":"text","line":38,"val":"#{key}: #{val}"}
+{"type":"outdent","line":39}
+{"type":"code","line":39,"val":"else","escape":false,"buffer":false}
+{"type":"indent","line":40,"val":4}
+{"type":"tag","line":40,"val":"li","selfClosing":false}
+{"type":"text","line":40,"val":"user has no details!"}
+{"type":"outdent","line":42}
+{"type":"outdent","line":42}
+{"type":"code","line":42,"val":"var user = Object.create(null)","escape":false,"buffer":false}
+{"type":"newline","line":43}
+{"type":"code","line":43,"val":"user.name = 'tobi'","escape":false,"buffer":false}
+{"type":"newline","line":45}
+{"type":"tag","line":45,"val":"ul","selfClosing":false}
+{"type":"indent","line":46,"val":2}
+{"type":"each","line":46,"val":"val","key":"key","code":"user"}
+{"type":"indent","line":47,"val":4}
+{"type":"tag","line":47,"val":"li","selfClosing":false}
+{"type":"text","line":47,"val":"#{key}: #{val}"}
+{"type":"outdent","line":48}
+{"type":"code","line":48,"val":"else","isElse":true,"isIf":false,"requiresBlock":true}
+{"type":"indent","line":49,"val":4}
+{"type":"tag","line":49,"val":"li","selfClosing":false}
+{"type":"text","line":49,"val":"user has no details!"}
+{"type":"outdent","line":50}
+{"type":"outdent","line":50}
+{"type":"eos","line":50}

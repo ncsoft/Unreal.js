@@ -1,0 +1,9 @@
+{"type":"tag","line":1,"val":"html","selfClosing":false}
+{"type":"indent","line":2,"val":2}
+{"type":"tag","line":2,"val":"body","selfClosing":false}
+{"type":"indent","line":3,"val":4}
+{"type":"tag","line":3,"val":"h1","selfClosing":false}
+{"type":"text","line":3,"val":"Title"}
+{"type":"outdent","line":3}
+{"type":"outdent","line":3}
+{"type":"eos","line":3}

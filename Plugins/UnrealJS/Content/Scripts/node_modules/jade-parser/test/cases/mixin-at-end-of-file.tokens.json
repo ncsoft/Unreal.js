@@ -1,0 +1,8 @@
+{"type":"include","line":1,"val":"./auxiliary/mixin-at-end-of-file.jade"}
+{"type":"newline","line":3}
+{"type":"call","line":3,"val":"slide","args":""}
+{"type":"indent","line":4,"val":2}
+{"type":"tag","line":4,"val":"p","selfClosing":false}
+{"type":"text","line":4,"val":"some awesome content"}
+{"type":"outdent","line":5}
+{"type":"eos","line":5}

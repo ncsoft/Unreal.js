@@ -1,0 +1,6 @@
+{"type":"tag","line":1,"val":"p","selfClosing":false}
+{"type":"code","line":1,"val":"'<script>'","escape":true,"buffer":true}
+{"type":"newline","line":2}
+{"type":"tag","line":2,"val":"p","selfClosing":false}
+{"type":"code","line":2,"val":"'<script>'","escape":false,"buffer":true}
+{"type":"eos","line":2}

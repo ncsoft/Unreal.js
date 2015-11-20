@@ -1,0 +1,17 @@
+{"type":"tag","line":1,"val":"html","selfClosing":false}
+{"type":"indent","line":2,"val":2}
+{"type":"tag","line":2,"val":"body","selfClosing":false}
+{"type":"indent","line":3,"val":4}
+{"type":"include","line":3,"val":"some.md","filter":"md","attrs":null}
+{"type":"newline","line":4}
+{"type":"tag","line":4,"val":"script","selfClosing":false}
+{"type":"indent","line":5,"val":6}
+{"type":"include","line":5,"val":"include-filter-coffee.coffee","filter":"coffee","attrs":{"type":"attrs","line":5,"attrs":[{"name":"minify","val":"true","escaped":true}]}}
+{"type":"outdent","line":6}
+{"type":"tag","line":6,"val":"script","selfClosing":false}
+{"type":"indent","line":7,"val":6}
+{"type":"include","line":7,"val":"include-filter-coffee.coffee","filter":"coffee","attrs":{"type":"attrs","line":7,"attrs":[{"name":"minify","val":"false","escaped":true}]}}
+{"type":"outdent","line":8}
+{"type":"outdent","line":8}
+{"type":"outdent","line":8}
+{"type":"eos","line":8}

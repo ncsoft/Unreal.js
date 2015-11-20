@@ -1,0 +1,13 @@
+{"type":"code","line":1,"val":"var x = 1;","escape":false,"buffer":false}
+{"type":"newline","line":2}
+{"type":"tag","line":2,"val":"ul","selfClosing":false}
+{"type":"indent","line":3,"val":2}
+{"type":"code","line":3,"val":"while (x < 10)","requiresBlock":true}
+{"type":"indent","line":4,"val":4}
+{"type":"code","line":4,"val":"x++;","escape":false,"buffer":false}
+{"type":"newline","line":5}
+{"type":"tag","line":5,"val":"li","selfClosing":false}
+{"type":"code","line":5,"val":"x","escape":true,"buffer":true}
+{"type":"outdent","line":6}
+{"type":"outdent","line":6}
+{"type":"eos","line":6}

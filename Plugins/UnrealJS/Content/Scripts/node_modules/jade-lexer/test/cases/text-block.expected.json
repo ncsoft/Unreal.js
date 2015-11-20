@@ -1,0 +1,14 @@
+{"type":"newline","line":2}
+{"type":"tag","line":2,"val":"label","selfClosing":false}
+{"type":"text","line":2,"val":"Username:"}
+{"type":"indent","line":3,"val":2}
+{"type":"tag","line":3,"val":"input","selfClosing":false}
+{"type":"attrs","line":3,"attrs":[{"name":"type","val":"'text'","escaped":true},{"name":"name","val":"'user[name]'","escaped":true}]}
+{"type":"outdent","line":5}
+{"type":"tag","line":5,"val":"label","selfClosing":false}
+{"type":"text","line":5,"val":"Password:"}
+{"type":"indent","line":6,"val":2}
+{"type":"tag","line":6,"val":"input","selfClosing":false}
+{"type":"attrs","line":6,"attrs":[{"name":"type","val":"'text'","escaped":true},{"name":"name","val":"'user[pass]'","escaped":true}]}
+{"type":"outdent","line":6}
+{"type":"eos","line":6}

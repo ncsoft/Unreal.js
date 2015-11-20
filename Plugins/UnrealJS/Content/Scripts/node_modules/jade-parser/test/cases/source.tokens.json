@@ -1,0 +1,13 @@
+{"type":"tag","line":1,"val":"html","selfClosing":false}
+{"type":"indent","line":2,"val":2}
+{"type":"tag","line":2,"val":"audio","selfClosing":false}
+{"type":"attrs","line":2,"attrs":[{"name":"preload","val":"'auto'","escaped":true},{"name":"autobuffer","val":true,"escaped":false},{"name":"controls","val":true,"escaped":false}]}
+{"type":"indent","line":3,"val":4}
+{"type":"tag","line":3,"val":"source","selfClosing":false}
+{"type":"attrs","line":3,"attrs":[{"name":"src","val":"'foo'","escaped":true}]}
+{"type":"newline","line":4}
+{"type":"tag","line":4,"val":"source","selfClosing":false}
+{"type":"attrs","line":4,"attrs":[{"name":"src","val":"'bar'","escaped":true}]}
+{"type":"outdent","line":4}
+{"type":"outdent","line":4}
+{"type":"eos","line":4}

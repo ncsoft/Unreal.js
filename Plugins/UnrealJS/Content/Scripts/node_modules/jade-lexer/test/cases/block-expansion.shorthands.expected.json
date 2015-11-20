@@ -1,0 +1,11 @@
+{"type":"tag","line":1,"val":"ul","selfClosing":false}
+{"type":"indent","line":2,"val":2}
+{"type":"tag","line":2,"val":"li","selfClosing":false}
+{"type":"class","line":2,"val":"list-item"}
+{"type":":","line":2}
+{"type":"class","line":2,"val":"foo"}
+{"type":":","line":2}
+{"type":"id","line":2,"val":"bar"}
+{"type":"text","line":2,"val":"baz"}
+{"type":"outdent","line":2}
+{"type":"eos","line":2}

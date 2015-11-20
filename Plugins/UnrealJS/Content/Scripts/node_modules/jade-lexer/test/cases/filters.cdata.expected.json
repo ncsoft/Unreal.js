@@ -1,0 +1,18 @@
+{"type":"newline","line":2}
+{"type":"code","line":2,"val":"users = [{ name: 'tobi', age: 2 }]","escape":false,"buffer":false}
+{"type":"newline","line":4}
+{"type":"tag","line":4,"val":"fb:users","selfClosing":false}
+{"type":"indent","line":5,"val":2}
+{"type":"each","line":5,"val":"user","code":"users"}
+{"type":"indent","line":6,"val":4}
+{"type":"tag","line":6,"val":"fb:user","selfClosing":false}
+{"type":"attrs","line":6,"attrs":[{"name":"age","val":"user.age","escaped":true}]}
+{"type":"indent","line":7,"val":6}
+{"type":"filter","line":7,"val":"cdata"}
+{"type":"start-pipeless-text","line":7}
+{"type":"text","line":8,"val":"#{user.name}"}
+{"type":"end-pipeless-text","line":8}
+{"type":"outdent","line":8}
+{"type":"outdent","line":8}
+{"type":"outdent","line":8}
+{"type":"eos","line":8}

@@ -1,0 +1,12 @@
+{"type":"tag","line":1,"val":"html","selfClosing":false}
+{"type":"indent","line":2,"val":2}
+{"type":"include","line":2,"val":"include-with-text-head"}
+{"type":"indent","line":3,"val":4}
+{"type":"tag","line":3,"val":"script","selfClosing":false}
+{"type":"attrs","line":3,"attrs":[{"name":"src","val":"'/caustic.js'","escaped":true}]}
+{"type":"newline","line":4}
+{"type":"tag","line":4,"val":"script","selfClosing":false}
+{"type":"attrs","line":4,"attrs":[{"name":"src","val":"'/app.js'","escaped":true}]}
+{"type":"outdent","line":5}
+{"type":"outdent","line":5}
+{"type":"eos","line":5}

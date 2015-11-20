@@ -1,0 +1,56 @@
+{"type":"newline","line":2}
+{"type":"mixin","line":2,"val":"article","args":"name"}
+{"type":"indent","line":3,"val":2}
+{"type":"tag","line":3,"val":"section","selfClosing":false}
+{"type":"class","line":3,"val":"article"}
+{"type":"indent","line":4,"val":4}
+{"type":"tag","line":4,"val":"h1","selfClosing":false}
+{"type":"code","line":4,"val":"name","escape":true,"buffer":true}
+{"type":"newline","line":5}
+{"type":"mixin-block","line":5}
+{"type":"outdent","line":7}
+{"type":"outdent","line":7}
+{"type":"tag","line":7,"val":"html","selfClosing":false}
+{"type":"indent","line":8,"val":2}
+{"type":"tag","line":8,"val":"body","selfClosing":false}
+{"type":"indent","line":9,"val":4}
+{"type":"call","line":9,"val":"article","args":"'Foo'"}
+{"type":":","line":9}
+{"type":"tag","line":9,"val":"p","selfClosing":false}
+{"type":"text","line":9,"val":"I'm article foo"}
+{"type":"outdent","line":11}
+{"type":"outdent","line":11}
+{"type":"mixin","line":11,"val":"article","args":"name"}
+{"type":"indent","line":12,"val":2}
+{"type":"tag","line":12,"val":"section","selfClosing":false}
+{"type":"class","line":12,"val":"article"}
+{"type":"indent","line":13,"val":4}
+{"type":"tag","line":13,"val":"h1","selfClosing":false}
+{"type":"code","line":13,"val":"name","escape":true,"buffer":true}
+{"type":"newline","line":14}
+{"type":"tag","line":14,"val":"p","selfClosing":false}
+{"type":"indent","line":15,"val":6}
+{"type":"mixin-block","line":15}
+{"type":"outdent","line":17}
+{"type":"outdent","line":17}
+{"type":"outdent","line":17}
+{"type":"tag","line":17,"val":"html","selfClosing":false}
+{"type":"indent","line":18,"val":2}
+{"type":"tag","line":18,"val":"body","selfClosing":false}
+{"type":"indent","line":19,"val":4}
+{"type":"call","line":19,"val":"article","args":"'Something'"}
+{"type":"dot","line":19}
+{"type":"start-pipeless-text","line":19}
+{"type":"text","line":20,"val":"I'm a much longer"}
+{"type":"newline","line":21}
+{"type":"text","line":21,"val":"text-only article,"}
+{"type":"newline","line":22}
+{"type":"text","line":22,"val":"but you can still"}
+{"type":"newline","line":23}
+{"type":"text","line":23,"val":"inline html tags"}
+{"type":"newline","line":24}
+{"type":"text","line":24,"val":"in me if you want."}
+{"type":"end-pipeless-text","line":24}
+{"type":"outdent","line":24}
+{"type":"outdent","line":24}
+{"type":"eos","line":24}

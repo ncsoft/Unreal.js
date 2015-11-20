@@ -1,0 +1,14 @@
+{"type":"mixin","line":1,"val":"list","args":"tag, ...items"}
+{"type":"indent","line":2,"val":2}
+{"type":"interpolation","line":2,"val":"tag"}
+{"type":"indent","line":3,"val":4}
+{"type":"each","line":3,"val":"item","code":"items"}
+{"type":"indent","line":4,"val":6}
+{"type":"tag","line":4,"val":"li","selfClosing":false}
+{"type":"code","line":4,"val":"item","escape":true,"buffer":true}
+{"type":"outdent","line":6}
+{"type":"outdent","line":6}
+{"type":"outdent","line":6}
+{"type":"call","line":6,"val":"list","args":"'ul', 1, 2, 3, 4"}
+{"type":"newline","line":7}
+{"type":"eos","line":7}

@@ -1,0 +1,27 @@
+{"type":"tag","line":1,"val":"html","selfClosing":false}
+{"type":"indent","line":2,"val":2}
+{"type":"tag","line":2,"val":"body","selfClosing":false}
+{"type":"indent","line":3,"val":4}
+{"type":"code","line":3,"val":"var friends = 1","escape":false,"buffer":false}
+{"type":"newline","line":4}
+{"type":"case","line":4,"val":"friends"}
+{"type":"indent","line":5,"val":6}
+{"type":"when","line":5,"val":"0"}
+{"type":"indent","line":6,"val":8}
+{"type":"tag","line":6,"val":"p","selfClosing":false}
+{"type":"text","line":6,"val":"you have no friends"}
+{"type":"outdent","line":7}
+{"type":"when","line":7,"val":"1"}
+{"type":"indent","line":8,"val":8}
+{"type":"tag","line":8,"val":"p","selfClosing":false}
+{"type":"text","line":8,"val":"you have a friend"}
+{"type":"outdent","line":9}
+{"type":"default","line":9}
+{"type":"indent","line":10,"val":8}
+{"type":"tag","line":10,"val":"p","selfClosing":false}
+{"type":"text","line":10,"val":"you have #{friends} friends"}
+{"type":"outdent","line":10}
+{"type":"outdent","line":10}
+{"type":"outdent","line":10}
+{"type":"outdent","line":10}
+{"type":"eos","line":10}

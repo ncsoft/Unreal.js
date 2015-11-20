@@ -1,0 +1,14 @@
+{
+	"version": "0.1.0",	
+	"configurations": [		
+		{
+			"name": "Attach",
+			"type": "node",
+			// TCP/IP address. Default is "localhost".
+			"address": "localhost",
+			// Port to attach to.
+			"port": 5858,
+			"sourceMaps": false
+		}
+	]
+}
