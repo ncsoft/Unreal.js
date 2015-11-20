@@ -450,7 +450,7 @@
       }      
     }
     
-    instance.set_styles = update_styles;					
+    instance.set_styles = update_styles;                    
     
     if (design.$link != undefined) {
       design.$link(instance,scope,attrs || {});
