@@ -869,7 +869,7 @@ public:
 					if (!FPaths::DirectoryExists(base_path)) return false;
 
 					auto script_path = base_path / required_module;
-					if (script_path.Find(TEXT(".js")) == INDEX_NONE)
+					if (!script_path.EndsWidth(TEXT(".js")))
 					{
 						if (inner(script_path + TEXT(".js"))) return true;
 						if (inner(script_path / TEXT("index.js"))) return true;
