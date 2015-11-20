@@ -80,11 +80,12 @@ UPackage* UJavascriptLibrary::CreatePackage(UObject* Outer, FString PackageName)
 
 UActorComponent* UJavascriptLibrary::FindComponentObjectByName(AActor* Actor, const FName& InName)
 {
+#if 0
 	if (Actor != nullptr && ::IsValid(Actor) == true)
 	{
 		return Actor->FindComponentByName<UActorComponent>(InName);
 	}
-
+#endif
 	return nullptr;
 }
 
