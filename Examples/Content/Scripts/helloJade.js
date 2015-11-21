@@ -13,7 +13,7 @@
             let instantiator = require('instantiator');
             let page = instantiator(design)                
         
-            let widget = WidgetBlueprintLibrary.CreateWidget(GWorld, JavascriptWidget, PC)            
+            let widget = GWorld.CreateWidget(JavascriptWidget, PC)            
             widget.JavascriptContext = Context    
             widget.bSupportsKeyboardFocus = true
         
@@ -30,6 +30,7 @@
             return cleanup
         }
         
+        // live-reloading jade!
         let devjade = require('devjade')                     
         cleanup = devjade('views/helloJade.jade',setup)
         

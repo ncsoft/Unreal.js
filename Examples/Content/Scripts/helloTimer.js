@@ -9,6 +9,8 @@
         let timer = null;
         function update() {
             actor.TextRender.SetText(`Hello Timer : ${new Date().toISOString()}`)
+
+            // just like node.js, we can use timer functions. (setTimeout, setInterval, ...)
             timer = setTimeout(update, 1000)            
         }
         

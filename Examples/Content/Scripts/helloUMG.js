@@ -9,18 +9,20 @@
         let widget = null        
         let PC = GetPC()
         
-        // Widget을 만들자
-        widget = WidgetBlueprintLibrary.CreateWidget(GWorld, JavascriptWidget, PC)            
+        // create a widget
+        widget = GWorld.CreateWidget(JavascriptWidget, PC)            
         widget.JavascriptContext = Context    
         widget.bSupportsKeyboardFocus = true
         
         let UMG = require('UMG')
+
+        // low-level json which describes UMG structure to set up.
         let design = UMG.span({},
-                UMG(Button,{'slot.size.size-rule':'Fill'},UMG.text({},"Hello")),
-                UMG.div({'slot.size.size-rule':'Fill'},
-                    UMG(Button,{'slot.size.size-rule':'Fill'},UMG.text({},"UMG")),
-                    UMG(Button,{'slot.size.size-rule':'Fill'},UMG.text({},"!!!!"))
-                )                    
+            UMG(Button,{'slot.size.size-rule':'Fill'},UMG.text({},"Hello")),
+            UMG.div({'slot.size.size-rule':'Fill'},
+                UMG(Button,{'slot.size.size-rule':'Fill'},UMG.text({},"UMG")),
+                UMG(Button,{'slot.size.size-rule':'Fill'},UMG.text({},"!!!!"))
+            )                    
         )
         
         let instantiator = require('instantiator')
@@ -31,7 +33,7 @@
         widget.SetRootWidget(page)
         widget.AddToViewport()    
     
-        // UIOnly mode로 설정    
+        // Switch PC to UI only mode.
         PC.bShowMouseCursor = true
         PC.SetInputMode_UIOnly(page)
         

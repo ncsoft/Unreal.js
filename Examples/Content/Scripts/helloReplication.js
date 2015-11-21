@@ -19,6 +19,7 @@
             console.log("Hello, this is MyActor")
         }
         
+        // RPC function!
         test(data/*float*/)/*NetMulticast*/ {
             if (this.Role == 'ROLE_Authority') {
                 this.Hello++
@@ -29,21 +30,22 @@
         
     let MyActor_C = require('uclass')()(global,MyActor)
     
-    Context.SetAsDebugContext()
-    
     let _ = require('lodash')    
     
     function GetPC() {
         return GWorld.GetAllActorsOfClass(PlayerController).OutActors[0]
     }
     function main() {
+        // Replicated actor should be created in server node.
         if (GWorld.IsServer()) {
             let actor = new MyActor_C(GWorld,{X:1})
+
+            // replace this actor, please.
             actor.SetReplicates(true)
             
             let alive = true
             function kick() {
-                if (!alive) return                
+                if (!alive) return        
                 actor.test(Math.random())
                 setTimeout(kick,1000)
             }
