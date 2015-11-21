@@ -96,7 +96,7 @@ class UMyBlueprintFunctionLibrary : public UBlueprintFunctionLibrary
     GENERATED_BODY();
 public:
     UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
-    bool MySuperFunction(UMySuperActor* SuperActor, FString SuperPath, FVector* OutVector);
+    static bool MySuperFunction(UMySuperActor* SuperActor, FString SuperPath, FVector* OutVector);
 };
 ```
 
