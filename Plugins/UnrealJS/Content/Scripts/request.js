@@ -1,6 +1,6 @@
 (function () {
     "use strict"
-    
+
     function $get(url,succ,fail) {
         var req = new JavascriptHttpRequest()
         req.SetVerb("GET")
@@ -10,10 +10,10 @@
                 try {
                     var json = JSON.parse(req.GetContentAsString())
                     succ(json)
-                    return    
+                    return
                 }
-                catch (e) {                        
-                }          
+                catch (e) {
+                }
             }
             if (fail) {
                 fail(req.GetResponseCode())
@@ -21,13 +21,13 @@
         })
         req.ProcessRequest()
     }
-    
+
     let _ = require('lodash')
     let request = (verb,url,options = {}) => {
-        let headers = options.headers || {}            
-        let data = options.data    
-        let res = options.res || "json"                      
-        
+        let headers = options.headers || {}
+        let data = options.data
+        let res = options.res || "json"
+
         return new Promise((resolve,reject) => {
             let req = new JavascriptHttpRequest()
             req.SetVerb(verb)
@@ -36,7 +36,7 @@
                 req.SetHeader(k,v)
             })
             if (data) {
-                if (typeof data == 'string') {                         
+                if (typeof data == 'string') {
                     req.SetContentAsString(data)
                 } else if (data instanceof ArrayBuffer) {
                     memory.bind(data)
@@ -61,15 +61,15 @@
                     } else if (res == "raw") {
                         resolve(req)
                     }
-                } else { 
+                } else {
                     reject(new Error(`${req.GetStatus()}`))
-                }            
+                }
             }
-            req.ProcessRequest()                
+            req.ProcessRequest()
         })
     }
-    
+
     request.$get = $get // old deprecated
-    
+
     module.exports = request
 }())

@@ -1,13 +1,13 @@
 /// <reference path="typings/ue.d.ts">/>
-(function (global) {    
+(function (global) {
     "use strict"
-     
+
     try {
-        let main = require('2048')        
+        let main = require('2048')
         module.exports = () => {
             let cleanup = null
             process.nextTick(() => {
-                cleanup = main()               
+                cleanup = main()
             });
             return () => cleanup()
         }

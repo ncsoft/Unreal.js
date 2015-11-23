@@ -182,7 +182,7 @@
                 sync_position: function (pos) {
                     if (!actor) return
 
-                    var l = { X: 0, Y: pos.x * spacing, Z: pos.y * spacing + 100 }                    
+                    var l = { X: 0, Y: pos.x * spacing, Z: pos.y * spacing + 100 }
                     actor.SetActorLocation(l)
                     l.X = l.X + 60
                     textactor.SetActorLocation(l)

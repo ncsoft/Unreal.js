@@ -1,14 +1,14 @@
 (function (target) {
     var makeWindowTimer = require('windowTimers')
     if (Root == undefined || Root.OnTick == undefined) return
-    
+
     var timerLoop = makeWindowTimer(target);
 
     var current_time = 0
     target.$time = 0
 
     var nextTicks = []
-    
+
     var elapsedTime = 0
     function invoke_next(fn) {
         fn(elapsedTime)
@@ -19,7 +19,7 @@
 
         var prev = nextTicks
         nextTicks = []
-        prev.forEach(invoke_next)        
+        prev.forEach(invoke_next)
 
         current_time += elapsedTime
         target.$time = current_time
@@ -34,5 +34,5 @@
         }
     }
 
-    Root.OnTick.Add(root)    
+    Root.OnTick.Add(root)
 })(this)

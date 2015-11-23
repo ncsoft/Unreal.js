@@ -1,4 +1,4 @@
-(function (global) {    
+(function (global) {
     (function () {
         var lastTime = 0;
 

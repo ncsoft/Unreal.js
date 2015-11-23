@@ -4,7 +4,7 @@
     var split = require('css-split');
     var instantiator = require('instantiator')
     var conv = instantiator.conv;
-    
+
     function Style(id,attrs) {
         var s = split(id)
         var doc = {
@@ -12,10 +12,10 @@
             type : s.type,
             attrs: _.clone(conv(attrs)) || {id:s.id},
             children: Array.prototype.slice.call(arguments,2)
-        };    
-        
+        };
+
         return doc
     }
-    
+
     module.exports = Style;
 }())

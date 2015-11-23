@@ -1,3 +1,3 @@
 (function (target) {
-    var lib = JavascriptLibrary.prototype    
+    var lib = JavascriptLibrary.prototype
 })(this)

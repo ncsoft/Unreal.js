@@ -3,22 +3,22 @@
 
 (function (global) {
     "use strict"
-    
+
     function main() {
         // create a new actor
         // ; new ActorClass(world{World}, location{Vector}, rotation{Rotator})
         let actor = new TextRenderActor(GWorld,{X:100,Z:100},{Yaw:180})
 
         // initialie its text render component
-        actor.TextRender.SetHorizontalAlignment('EHTA_Center') 
+        actor.TextRender.SetHorizontalAlignment('EHTA_Center')
         actor.TextRender.SetText('Hello World')
-        
+
         // clean up the mess
         return function () {
-            actor.DestroyActor()    
-        }                
+            actor.DestroyActor()
+        }
     }
-    
+
     // bootstrap to initiate live-reloading dev env.
     try {
         module.exports = () => {
@@ -32,6 +32,6 @@
         }
     }
     catch (e) {
-        require('bootstrap')('helloWorld')    
+        require('bootstrap')('helloWorld')
     }
 })(this)
