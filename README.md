@@ -16,6 +16,10 @@ Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4.
 
   ![](https://github.com/ncsoft/Unreal.js/blob/master/doc/images/UnrealJs_JavascriptConsole.gif) 
 
+- (Full) access to existing javascript libraries via npm, bower, ...
+
+  ![](https://github.com/ncsoft/Unreal.js/blob/master/doc/images/UnrealJs_springy.gif)
+
 ### Install
 - Install git-lfs first to download *.umap, *.uasset properly. (https://git-lfs.github.com/)
 - Download prebuilt V8 and unzip into Engine/Plugins/UnrealJS. (files are located in *releases*)
