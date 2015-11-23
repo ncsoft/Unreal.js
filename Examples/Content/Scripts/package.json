@@ -1,0 +1,14 @@
+{
+  "name": "unrealjs_examples",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "NCSOFT",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "springy": "^2.7.1"
+  }
+}
