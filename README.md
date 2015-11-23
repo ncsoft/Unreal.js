@@ -25,6 +25,9 @@ Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4.
 - Download prebuilt V8 and unzip into Engine/Plugins/UnrealJS. (files are located in *releases*)
 - Open `Examples/JavascriptPlayground.uproject`
 
+### Build
+- To build Unreal.JS, you should have V8 libraries. Building it yourself might be painful, so there are prebuilt V8 ready for Windows platform in *releases*.
+
 ### License
 Apache2
 
