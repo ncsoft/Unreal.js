@@ -4,7 +4,7 @@
 
 struct FV8Exception
 {
-	static void Report(TryCatch& try_catch)
+	static void Report(v8::TryCatch& try_catch)
 	{
 		using namespace v8;
 

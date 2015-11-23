@@ -1,5 +1,6 @@
 #include "JavascriptEditor.h"
 #include "JavascriptEditorMenu.h"
+#include "JavascriptUIExtender.h"
 
 class JAVASCRIPTEDITOR_API SJavascriptMenu : public SVerticalBox
 {

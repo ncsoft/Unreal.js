@@ -6,6 +6,7 @@
 #include "Config.h"
 #include "Translator.h"
 #include "Exception.h"
+#include "IV8.h"
 
 #include "JavascriptIsolate_Private.h"
 #include "JavascriptContext_Private.h"

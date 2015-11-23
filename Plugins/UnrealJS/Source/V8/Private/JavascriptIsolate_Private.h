@@ -1,15 +1,16 @@
 #pragma once
 
 struct FStructMemoryInstance;
+class FJavascriptIsolate;
 
 struct FPendingClassConstruction
 {
 	FPendingClassConstruction() {}
-	FPendingClassConstruction(Handle<v8::Object> InObject, UClass* InClass)
+	FPendingClassConstruction(v8::Handle<v8::Object> InObject, UClass* InClass)
 		: Object(InObject), Class(InClass)
 	{}
 
-	Handle<v8::Object> Object;
+	v8::Handle<v8::Object> Object;
 	UClass* Class;
 	bool bCatched{ false };
 

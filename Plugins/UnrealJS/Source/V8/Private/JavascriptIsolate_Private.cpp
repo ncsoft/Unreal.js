@@ -7,6 +7,7 @@
 #include "Delegates.h"
 #include "JavascriptIsolate_Private.h"
 #include "JavascriptContext_Private.h"
+#include "JavascriptContext.h"
 #include "Helpers.h"
 #include "JavascriptGeneratedClass.h"
 

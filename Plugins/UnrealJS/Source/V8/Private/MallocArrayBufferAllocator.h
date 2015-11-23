@@ -1,6 +1,6 @@
 #pragma once
 
-class FMallocArrayBufferAllocator : public ArrayBuffer::Allocator
+class FMallocArrayBufferAllocator : public v8::ArrayBuffer::Allocator
 {
 public:
 	/**

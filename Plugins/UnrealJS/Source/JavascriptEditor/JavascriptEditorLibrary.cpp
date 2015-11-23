@@ -1,6 +1,7 @@
 #include "JavascriptEditor.h"
 #include "JavascriptEditorLibrary.h"
 #include "Editor/LandscapeEditor/Private/LandscapeEdModeTools.h"
+#include "JavascriptContext.h"
 
 ULandscapeInfo* UJavascriptEditorLibrary::GetLandscapeInfo(ALandscape* Landscape, bool bSpawnNewActor)
 {

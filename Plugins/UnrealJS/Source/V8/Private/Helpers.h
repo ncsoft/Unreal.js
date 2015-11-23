@@ -28,24 +28,24 @@ struct FIsolateHelper
 		return V8_String(isolate_, InString);
 	}
 
-	FORCEINLINE v8::Local<External> External(void* Data)
+	FORCEINLINE v8::Local<v8::External> External(void* Data)
 	{
-		return External::New(isolate_, Data);
+		return v8::External::New(isolate_, Data);
 	}
 
 	FORCEINLINE v8::Local<v8::FunctionTemplate> FunctionTemplate()
 	{
-		return FunctionTemplate::New(isolate_);
+		return v8::FunctionTemplate::New(isolate_);
 	}
 
-	FORCEINLINE v8::Local<v8::FunctionTemplate> FunctionTemplate(FunctionCallback Callback)
+	FORCEINLINE v8::Local<v8::FunctionTemplate> FunctionTemplate(v8::FunctionCallback Callback)
 	{
-		return FunctionTemplate::New(isolate_, Callback);
+		return v8::FunctionTemplate::New(isolate_, Callback);
 	}
 
-	FORCEINLINE v8::Local<v8::FunctionTemplate> FunctionTemplate(FunctionCallback Callback, void* Data)
+	FORCEINLINE v8::Local<v8::FunctionTemplate> FunctionTemplate(v8::FunctionCallback Callback, void* Data)
 	{
-		return FunctionTemplate::New(isolate_, Callback, External(Data));
+		return v8::FunctionTemplate::New(isolate_, Callback, External(Data));
 	}
 
 	void Throw(const FString& InString)

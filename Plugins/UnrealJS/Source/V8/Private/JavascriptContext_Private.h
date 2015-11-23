@@ -26,10 +26,10 @@ struct FJavascriptContext : TSharedFromThis<FJavascriptContext>
 	virtual bool HasProxyFunction(UObject* Holder, UFunction* Function) = 0;
 	virtual bool CallProxyFunction(UObject* Holder, UObject* This, UFunction* FunctionToCall, void* Parms) = 0;	
 
-	virtual Isolate* isolate() = 0;
-	virtual Local<Context> context() = 0;
-	virtual Local<Value> ExportObject(UObject* Object, bool bForce = false) = 0;
-	virtual Local<Value> GetProxyFunction(UObject* Object, const TCHAR* Name) = 0;
+	virtual v8::Isolate* isolate() = 0;
+	virtual v8::Local<v8::Context> context() = 0;
+	virtual v8::Local<v8::Value> ExportObject(UObject* Object, bool bForce = false) = 0;
+	virtual v8::Local<v8::Value> GetProxyFunction(UObject* Object, const TCHAR* Name) = 0;
 
 	static FJavascriptContext* FromV8(v8::Local<v8::Context> Context);
 
