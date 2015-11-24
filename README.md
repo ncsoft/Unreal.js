@@ -7,11 +7,11 @@ Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4.
 - CommonJS modules
 - Full access to the whole UnrealEngine API
 - Free to subclass existing classes including blueprint
-- Web-dev like UMG (Jade, pseudo-css, pseudo-angular.js)
+- Web-dev like UMG ([Jade](http://jade-lang.com), pseudo-css, pseudo-[angular.js](https://angularjs.org/))
 - Live reload
 - Communicate with outer world: REST, process(pipe), arraybuffer, ...
 - Bridge API for editor extension
-- Auto-completion for Visual Studio (auto-generated *.d.ts)
+- Auto-completion for Visual Studio (auto-generated [*.d.ts](http://definitelytyped.org/))
 - Dedicated Javascript console on UnrealEditor
 
   ![](https://github.com/ncsoft/Unreal.js/blob/master/doc/images/UnrealJs_JavascriptConsole.gif) 
@@ -22,7 +22,7 @@ Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4.
 - https://github.com/ncsoft/Unreal.js/wiki
 
 ### Install and play
-- Make sure you have UnrealEngine 4.10 canonical build.
+- Make sure you have [UnrealEngine 4.10 canonical build](https://www.unrealengine.com/dashboard).
 - Install git-lfs first to download *.umap, *.uasset properly. (https://git-lfs.github.com/)
 - Download prebuilt UnrealJS plugin and unzip into Playground/Plugins/UnrealJS.
 - `cd .../Content/Scripts && npm i` to install node.js packages.
