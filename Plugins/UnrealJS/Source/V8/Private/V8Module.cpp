@@ -1,10 +1,9 @@
 #include "V8PCH.h"
 #include <libplatform/libplatform.h>
 #include "JavascriptContext.h"
+#include "IV8.h"
 
 using namespace v8;
-
-#include "IV8.h"
 
 class V8Module : public IV8
 {

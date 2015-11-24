@@ -10,10 +10,9 @@
 #include "JavascriptContext.h"
 #include "Helpers.h"
 #include "JavascriptGeneratedClass.h"
+#include "StructMemoryInstance.h"
 
 using namespace v8;
-
-#include "StructMemoryInstance.h"
 
 template <typename CppType>
 struct TStructReader
@@ -1459,7 +1458,7 @@ public:
 		return handle_scope.Escape(Template);
 	}
 	
-	Local<FunctionTemplate> ExportStruct(UScriptStruct* ScriptStruct)
+	virtual Local<FunctionTemplate> ExportStruct(UScriptStruct* ScriptStruct) override
 	{
 		auto ExportedFunctionTemplatePtr = ScriptStructToFunctionTemplateMap.Find(ScriptStruct);
 		if (ExportedFunctionTemplatePtr == nullptr)
@@ -1586,11 +1585,14 @@ public:
 				}
 			}
 			Local<Value> value;
-
-			auto Class = Cast<UClass>(Object);
-			if (Class)
+			
+			if (auto Class = Cast<UClass>(Object))
 			{
 				value = ExportClass(Class)->GetFunction();
+			}
+			else if (auto Struct = Cast<UScriptStruct>(Object))
+			{
+				value = ExportStruct(Struct)->GetFunction();
 			}
 			else
 			{
