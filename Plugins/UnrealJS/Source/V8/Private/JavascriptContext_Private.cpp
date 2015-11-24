@@ -19,6 +19,7 @@
 #include "JavascriptGeneratedClass_Native.h"
 #include "JavascriptGeneratedClass.h"
 #include "JavascriptGeneratedFunction.h"
+#include "StructMemoryInstance.h"
 
 using namespace v8;
 
@@ -1390,16 +1391,7 @@ public:
 	}
 
 	// To tell Unreal engine's GC not to destroy these objects!
-	virtual void AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector) override
-	{		
-		Public_RunScript(TEXT("gc();"), false);
-
-		// All objects
-		for (auto It = ObjectToObjectMap.CreateIterator(); It; ++It)
-		{
-			Collector.AddReferencedObject(It.Key(), InThis);
-		}
-	}
+	virtual void AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector) override;
 };
 
 FJavascriptContext* FJavascriptContext::FromV8(v8::Local<v8::Context> Context)
@@ -1420,4 +1412,23 @@ FJavascriptContext* FJavascriptContext::FromV8(v8::Local<v8::Context> Context)
 FJavascriptContext* FJavascriptContext::Create(TSharedPtr<FJavascriptIsolate> InEnvironment, TArray<FString>& InPaths)
 {
 	return new FJavascriptContextImplementation(InEnvironment, InPaths);
+}
+
+// To tell Unreal engine's GC not to destroy these objects!
+
+inline void FJavascriptContextImplementation::AddReferencedObjects(UObject * InThis, FReferenceCollector & Collector)
+{
+	Public_RunScript(TEXT("gc();"), false);
+
+	// All objects
+	for (auto It = ObjectToObjectMap.CreateIterator(); It; ++It)
+	{
+		Collector.AddReferencedObject(It.Key(), InThis);
+	}
+
+	// All structs
+	for (auto It = MemoryToObjectMap.CreateIterator(); It; ++It)
+	{
+		Collector.AddReferencedObject(It.Key()->Struct, InThis);
+	}
 }

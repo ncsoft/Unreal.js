@@ -197,6 +197,14 @@ namespace fastcall
 	}
 }
 
+void UJavascriptContext::BeginDestroy()
+{
+	Super::BeginDestroy();
+
+	JavascriptContext.Reset();
+	ContextId.Reset();
+}
+
 void UJavascriptContext::InternalPushArgument(int32 Value)
 {
 	auto isolate = JavascriptContext->isolate();

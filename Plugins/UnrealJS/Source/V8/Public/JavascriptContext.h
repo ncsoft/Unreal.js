@@ -19,6 +19,7 @@ class V8_API UJavascriptContext : public UObject
 
 public:
 	// Begin UObject interface.
+	virtual void BeginDestroy() override;
 	static void AddReferencedObjects(UObject* InThis, FReferenceCollector& Collector);
 	// End UObject interface.
 
