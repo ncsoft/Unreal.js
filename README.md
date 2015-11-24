@@ -17,8 +17,6 @@ Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4.
   ![](https://github.com/ncsoft/Unreal.js/blob/master/doc/images/UnrealJs_JavascriptConsole.gif) 
 
 - (Full) access to existing javascript libraries via npm, bower, ...
-
-  ![](https://github.com/ncsoft/Unreal.js/blob/master/doc/images/UnrealJs_springy.gif)
   
 ### Wiki
 - https://github.com/ncsoft/Unreal.js/wiki
@@ -44,6 +42,10 @@ Apache2
 
   ![](https://github.com/ncsoft/Unreal.js/blob/master/doc/images/UnrealJs_example_2048.gif)
 
+#### Springy
+- http://getspringy.com
+
+  ![](https://github.com/ncsoft/Unreal.js/blob/master/doc/images/UnrealJs_springy.gif)
 
 #### Create a new actor
 ```js
