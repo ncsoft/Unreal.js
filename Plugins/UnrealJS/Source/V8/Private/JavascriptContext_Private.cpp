@@ -101,6 +101,7 @@ static void SetClassFlags(UClass* Class, const TArray<FString>& Flags)
 			Left = Flag;
 		}
 
+#if WITH_EDITOR
 		if (Left.Compare(TEXT("BlueprintType"), ESearchCase::IgnoreCase) == 0)
 		{
 			Class->SetMetaData(TEXT("BlueprintType"), TEXT("true"));
@@ -109,6 +110,7 @@ static void SetClassFlags(UClass* Class, const TArray<FString>& Flags)
 		{
 			Class->SetMetaData(TEXT("BlueprintSpawnableComponent"), TEXT("true"));
 		}
+#endif
 
 		for (const auto& Keyword : Keywords)
 		{
@@ -195,6 +197,7 @@ static UProperty* CreateProperty(UObject* Outer, FName Name, const TArray<FStrin
 				Left = Flag;
 			}
 
+#if WITH_EDITOR
 			bool bWasMeta = false;
 			auto len = ARRAY_COUNT(MetaDataFields);
 			for (decltype(len) Index = 0; Index < len; ++Index)
@@ -208,6 +211,7 @@ static UProperty* CreateProperty(UObject* Outer, FName Name, const TArray<FStrin
 				}
 			}
 			if (bWasMeta) continue;
+#endif			
 			
 			for (const auto& Keyword : Keywords)
 			{
