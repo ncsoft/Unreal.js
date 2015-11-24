@@ -78,17 +78,6 @@ UPackage* UJavascriptLibrary::CreatePackage(UObject* Outer, FString PackageName)
 	return ::CreatePackage(Outer, *PackageName);
 }
 
-UActorComponent* UJavascriptLibrary::FindComponentObjectByName(AActor* Actor, const FName& InName)
-{
-#if 0
-	if (Actor != nullptr && ::IsValid(Actor) == true)
-	{
-		return Actor->FindComponentByName<UActorComponent>(InName);
-	}
-#endif
-	return nullptr;
-}
-
 void UJavascriptLibrary::AddDynamicBinding(UClass* Outer, UDynamicBlueprintBinding* BindingObject)
 {
 	if (Cast<UBlueprintGeneratedClass>(Outer) && BindingObject)

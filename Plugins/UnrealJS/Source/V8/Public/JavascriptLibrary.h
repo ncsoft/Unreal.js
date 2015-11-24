@@ -48,9 +48,6 @@ public:
 	static UPackage* CreatePackage(UObject* Outer, FString PackageName);
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")
-	static UActorComponent* FindComponentObjectByName(AActor* Actor, const FName& InName);
-
-	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")
 	static void AddDynamicBinding(UClass* Outer, UDynamicBlueprintBinding* BindingObject);
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")

@@ -25,25 +25,135 @@ using namespace v8;
 static const int kContextEmbedderDataIndex = 1;
 static const int32 MagicNumber = 0x2852abd3;
 
-static UProperty* CreateProperty(UObject* Outer, FString Decl)
+static TArray<FString> StringArrayFromV8(Handle<Value> InArray) 
 {
-	TArray<FString> SmallArray;
-	const TCHAR* Delims[] = {
-		TEXT("/*"),
-		TEXT("*/"),
-		TEXT("+")
-	};
-	Decl.ParseIntoArray(SmallArray, Delims, ARRAY_COUNT(Delims));
-
-	if (SmallArray.Num() < 2)
+	TArray<FString> OutArray;
+	if (!InArray.IsEmpty() && InArray->IsArray())
 	{
-		return nullptr;
-	}
+		auto arr = Handle<Array>::Cast(InArray);
+		auto len = arr->Length();
 
-	FName Name = *SmallArray[0];
-	SmallArray.RemoveAt(0, 1);
-	FString Type = SmallArray.Pop();	
-	
+		for (decltype(len) Index = 0; Index < len; ++Index)
+		{
+			OutArray.Add(StringFromV8(arr->Get(Index)));
+		}
+	}
+	return OutArray;
+};
+
+static void SetFunctionFlags(UFunction* Function, const TArray<FString>& Flags)
+{
+	static struct FKeyword {
+		const TCHAR* Keyword;
+		int32 Flags;
+	} Keywords[] = {
+		{ TEXT("Exec"), FUNC_Exec },
+		{ TEXT("Server"), FUNC_Net | FUNC_NetServer },
+		{ TEXT("Client"), FUNC_Net | FUNC_NetClient },
+		{ TEXT("NetMulticast"), FUNC_Net | FUNC_NetMulticast },
+		{ TEXT("Reliable"), FUNC_NetReliable },
+		{ TEXT("Unreliable"), FUNC_NetResponse }
+	};
+
+	for (const auto& Flag : Flags)
+	{
+		FString Left, Right;
+		if (!Flag.Split(TEXT(":"), &Left, &Right))
+		{
+			Left = Flag;
+		}
+
+		for (const auto& Keyword : Keywords)
+		{
+			if (Left.Compare(Keyword.Keyword, ESearchCase::IgnoreCase) == 0)
+			{
+				Function->FunctionFlags |= Keyword.Flags;
+			}
+		}
+	}
+}
+
+static void SetClassFlags(UClass* Class, const TArray<FString>& Flags)
+{
+	static struct FKeyword {
+		const TCHAR* Keyword;
+		uint64 Flags;
+	} Keywords[] = {
+		{ TEXT("Abstract"), CLASS_Abstract },
+		{ TEXT("DefaultConfig"), CLASS_DefaultConfig },
+		{ TEXT("Transient"), CLASS_Transient },
+		{ TEXT("AdvancedDisplay"), CLASS_AdvancedDisplay },
+		{ TEXT("NotPlaceable"), CLASS_NotPlaceable },
+		{ TEXT("PerObjectConfig"), CLASS_PerObjectConfig },
+		{ TEXT("EditInlineNew"), CLASS_EditInlineNew },
+		{ TEXT("CollapseCategories"), CLASS_CollapseCategories },
+		{ TEXT("Const"), CLASS_Const },
+		{ TEXT("DefaultToInstanced"), CLASS_DefaultToInstanced },
+		{ TEXT("Hidden"), CLASS_Hidden },
+		{ TEXT("HideDropDown"), CLASS_HideDropDown }
+	};
+
+	for (const auto& Flag : Flags)
+	{
+		FString Left, Right;
+		if (!Flag.Split(TEXT(":"), &Left, &Right))
+		{
+			Left = Flag;
+		}
+
+		if (Left.Compare(TEXT("BlueprintType"), ESearchCase::IgnoreCase) == 0)
+		{
+			Class->SetMetaData(TEXT("BlueprintType"), TEXT("true"));
+		}
+		else if (Left.Compare(TEXT("BlueprintSpawnableComponent"), ESearchCase::IgnoreCase) == 0)
+		{
+			Class->SetMetaData(TEXT("BlueprintSpawnableComponent"), TEXT("true"));
+		}
+
+		for (const auto& Keyword : Keywords)
+		{
+			if (Left.Compare(Keyword.Keyword, ESearchCase::IgnoreCase) == 0)
+			{
+				Class->ClassFlags |= Keyword.Flags;
+			}
+			else if (Left.StartsWith(TEXT("Not")) && Left.Mid(3).Compare(Keyword.Keyword, ESearchCase::IgnoreCase) == 0)
+			{
+				Class->ClassFlags &= ~Keyword.Flags;
+			}
+		}
+	}
+}
+
+static void SetStructFlags(UScriptStruct* Struct, const TArray<FString>& Flags)
+{
+	static struct FKeyword {
+		const TCHAR* Keyword;
+		uint64 Flags;
+	} Keywords[] = {
+		{ TEXT("Atomic"), STRUCT_Atomic },
+		{ TEXT("Immutable"), STRUCT_Immutable }
+	};
+
+	for (const auto& Flag : Flags)
+	{
+		FString Left, Right;
+		if (!Flag.Split(TEXT(":"), &Left, &Right))
+		{
+			Left = Flag;
+		}
+
+		for (const auto& Keyword : Keywords)
+		{
+			if (Left.Compare(Keyword.Keyword, ESearchCase::IgnoreCase) == 0)
+			{
+				Struct->StructFlags = (EStructFlags)(Struct->StructFlags | Keyword.Flags);
+			}			
+		}
+	}
+}
+
+static UProperty* CreateProperty(UObject* Outer, FName Name, const TArray<FString>& Decorators, FString Type, bool bIsArray)
+{	
 	auto SetupProperty = [&](UProperty* NewProperty) {
 		static struct FKeyword {
 			const TCHAR* Keyword;
@@ -55,14 +165,29 @@ static UProperty* CreateProperty(UObject* Outer, FString Decl)
 			{ TEXT("Replicated"), CPF_Net },
 			{ TEXT("NotReplicated"), CPF_RepSkip },
 			{ TEXT("ReplicatedUsing"), CPF_Net | CPF_RepNotify },
-			{ TEXT("EditAnywhere"), CPF_Edit },
+			{ TEXT("Transient"), CPF_Transient },
+			{ TEXT("DuplicateTransient"), CPF_DuplicateTransient },
+			{ TEXT("EditFixedSize"), CPF_EditFixedSize },
+			{ TEXT("EditAnywhere"), CPF_Edit },			
 			{ TEXT("EditDefaultsOnly"), CPF_Edit | CPF_DisableEditOnInstance },
+			{ TEXT("Instanced"), CPF_PersistentInstance | CPF_ExportObject | CPF_InstancedReference },
+			{ TEXT("SimpleDisplay"), CPF_SimpleDisplay },
+			{ TEXT("AdvancedDisplay"), CPF_AdvancedDisplay },			
+			{ TEXT("SaveGame"), CPF_SaveGame },
+			{ TEXT("AssetRegistrySearchable"), CPF_AssetRegistrySearchable },
+			{ TEXT("Interp"), CPF_Edit | CPF_Interp | CPF_BlueprintVisible },
+			{ TEXT("NoClear"), CPF_NoClear },
 			{ TEXT("VisibleAnywhere"), CPF_Edit | CPF_EditConst },
 			{ TEXT("VisibleInstanceOnly"), CPF_Edit | CPF_EditConst | CPF_DisableEditOnTemplate },
 			{ TEXT("VisibleDefaultsOnly"), CPF_Edit | CPF_EditConst | CPF_DisableEditOnInstance },
 		};
 
-		for (const auto& Flag : SmallArray)
+		static const TCHAR* MetaDataFields[] = { 
+			TEXT("Category"), 
+			TEXT("DisplayName")
+		};
+
+		for (const auto& Flag : Decorators)
 		{
 			FString Left, Right;
 			if (!Flag.Split(TEXT(":"), &Left, &Right))
@@ -70,9 +195,23 @@ static UProperty* CreateProperty(UObject* Outer, FString Decl)
 				Left = Flag;
 			}
 
+			bool bWasMeta = false;
+			auto len = ARRAY_COUNT(MetaDataFields);
+			for (decltype(len) Index = 0; Index < len; ++Index)
+			{
+				const auto MetaDataField = MetaDataFields[Index];
+				if (Left.Compare(MetaDataField, ESearchCase::IgnoreCase) == 0)
+				{
+					NewProperty->SetMetaData(MetaDataField, *Right);
+					bWasMeta = true;
+					break;
+				}
+			}
+			if (bWasMeta) continue;
+			
 			for (const auto& Keyword : Keywords)
-			{	
-				if (Left.Compare(Keyword.Keyword,ESearchCase::IgnoreCase) == 0)
+			{
+				if (Left.Compare(Keyword.Keyword, ESearchCase::IgnoreCase) == 0)
 				{
 					NewProperty->SetPropertyFlags(Keyword.Flags);
 
@@ -83,14 +222,14 @@ static UProperty* CreateProperty(UObject* Outer, FString Decl)
 				}
 			}
 		}
-		
+
 		return NewProperty;
 	};
 
 	auto Create = [&]() -> UProperty* {
 		auto Inner = [&](UObject* Outer, const FString& Type) -> UProperty* {
 			// Find TypeObject (to make UObjectHash happy)
-			auto FindTypeObject = [](const TCHAR* ObjectName) {
+			auto FindTypeObject = [](const TCHAR* ObjectName) -> UObject* {
 				const TCHAR* PackagesToSearch[] = {
 					TEXT("Engine"),
 					TEXT("CoreUObject")
@@ -101,24 +240,14 @@ static UProperty* CreateProperty(UObject* Outer, FString Decl)
 					TypeObject = StaticFindObject(UObject::StaticClass(), ANY_PACKAGE, *FString::Printf(TEXT("/Script/%s.%s"), PackageToSearch, ObjectName));
 					if (TypeObject) return TypeObject;
 				}
-				return StaticFindObject(UObject::StaticClass(), ANY_PACKAGE, ObjectName);
+
+				TypeObject = StaticFindObject(UObject::StaticClass(), ANY_PACKAGE, ObjectName);
+				if (TypeObject) return TypeObject;
+
+				return nullptr;
 			};
 
-			UObject* TypeObject = FindTypeObject(*Type);
-
-			if (auto p = Cast<UClass>(TypeObject))
-			{
-				auto q = NewObject<UObjectProperty>(Outer, Name);
-				q->SetPropertyClass(p);
-				return q;
-			}
-			else if (auto p = Cast<UScriptStruct>(TypeObject))
-			{
-				auto q = NewObject<UStructProperty>(Outer, Name);
-				q->Struct = p;
-				return q;
-			}
-			else if (Type == FString("bool"))
+			if (Type == FString("bool"))
 			{
 				auto q = NewObject<UBoolProperty>(Outer, Name);
 				return q;
@@ -140,17 +269,34 @@ static UProperty* CreateProperty(UObject* Outer, FString Decl)
 			}
 			else
 			{
-				auto q = NewObject<UInt64Property>(Outer, Name);
-				return q;
+				UObject* TypeObject = FindTypeObject(*Type);
+
+				if (auto p = Cast<UClass>(TypeObject))
+				{
+					auto q = NewObject<UObjectProperty>(Outer, Name);
+					q->SetPropertyClass(p);
+					return q;
+				}
+				else if (auto p = Cast<UScriptStruct>(TypeObject))
+				{
+					auto q = NewObject<UStructProperty>(Outer, Name);
+					q->Struct = p;
+					return q;
+				}
+				else
+				{
+					auto q = NewObject<UInt64Property>(Outer, Name);
+					return q;
+				}
 			}
 		};
 
-		if (Type.EndsWith(TEXT("[]"))) 
+		if (bIsArray)
 		{
 			auto q = NewObject<UArrayProperty>(Outer, Name);
-			q->Inner = Inner(q, Type.Left(Type.Len()-2));
+			q->Inner = Inner(q, Type);
 			return q;
-		} 
+		}
 		else
 		{
 			return Inner(Outer, Type);
@@ -158,7 +304,24 @@ static UProperty* CreateProperty(UObject* Outer, FString Decl)
 	};
 
 	return SetupProperty(Create());
-};
+}
+
+static UProperty* CreatePropertyFromDecl(FIsolateHelper& I, UObject* Outer, Handle<Value> PropertyDecl)
+{
+	auto Decl = PropertyDecl->ToObject();
+	auto Name = Decl->Get(I.Keyword("Name"));
+	auto Type = Decl->Get(I.Keyword("Type"));
+	auto Decorators = Decl->Get(I.Keyword("Decorators"));
+	auto IsArray = Decl->Get(I.Keyword("IsArray"));
+
+	return CreateProperty(
+		Outer,
+		*StringFromV8(Name),
+		StringArrayFromV8(Decorators),
+		StringFromV8(Type),
+		!IsArray.IsEmpty() && IsArray->BooleanValue()
+		);	
+}
 
 static UProperty* DuplicateProperty(UObject* Outer, UProperty* Property, FName Name) 
 {
@@ -380,6 +543,7 @@ public:
 
 		ExposeRequire();
 		ExportUnrealEngineClasses();
+		ExportUnrealEngineStructs();
 	}
 
 	void PurgeModules()
@@ -546,105 +710,47 @@ public:
 				}
 				else
 				{
-					TArray<FString> Arguments;
+					MakeFunction();
 
+					auto FunctionObj = TheFunction->ToObject();
+					auto Decorators = FunctionObj->Get(I.Keyword("Decorators"));
+					if (!Decorators.IsEmpty() && Decorators->IsArray())
 					{
-						FString TheString = StringFromV8(TheFunction->ToString());
+						SetFunctionFlags(Function, StringArrayFromV8(Decorators));
+					}					
 
-						int32 Index;						
-
-						if (TheString.FindChar('(', Index))
-						{
-							TheString = TheString.Mid(Index + 1);
-						}
-
-						if (TheString.FindChar(')', Index))
-						{
-							FString Rest = TheString.Mid(Index + 1);
-							TheString = TheString.Left(Index);
-
-							if (Rest.FindChar('{', Index))
-							{
-								Rest = Rest.Left(Index);
-
-								TArray<FString> SmallArray;
-								const TCHAR* Delims[] = {
-									TEXT("/*"),
-									TEXT("*/"),
-									TEXT("+")
-								};
-
-								static struct FKeyword {
-									const TCHAR* Keyword;
-									int32 Flags;
-								} Keywords[] = {									
-									{ TEXT("Exec"), FUNC_Exec },
-									{ TEXT("Server"), FUNC_Net | FUNC_NetServer},
-									{ TEXT("Client"), FUNC_Net | FUNC_NetClient },
-									{ TEXT("NetMulticast"), FUNC_Net | FUNC_NetMulticast },
-									{ TEXT("Reliable"), FUNC_NetReliable },
-									{ TEXT("Unreliable"), FUNC_NetResponse }
-								};								
-									
-								Rest.Trim().ParseIntoArray(SmallArray, Delims, ARRAY_COUNT(Delims));
-
-								// If this function is not a UFunction-candiate?
-								if (SmallArray.Num() == 0 && !TheString.Contains(TEXT("/*")))
-								{
-									return false;
-								}
-
-								MakeFunction();
-								
-								for (const auto& Flag : SmallArray)
-								{
-									for (const auto& Keyword : Keywords)
-									{
-										// Partial match is allowed
-										if (Flag.Contains(Keyword.Keyword))
-										{
-											Function->FunctionFlags |= Keyword.Flags;
-										}
-									}
-								}
-							}							
-						}
-
-						TArray<FString> Array;
-						TheString.ParseIntoArray(Array, TEXT(","));
-
-						for (auto Item : Array)
-						{
-							Arguments.Add(Item);							
-						}
-					}
-
-					auto InitializeProperties = [](UFunction* Function, const TArray<FString>& Arguments) {
+					auto InitializeProperties = [&I](UFunction* Function, Handle<Value> Signature) {
 						UField** Storage = &Function->Children;
 						UProperty** PropertyStorage = &Function->PropertyLink;
 
-						for (const auto& Argument : Arguments)
+						if (!Signature.IsEmpty() && Signature->IsArray())
 						{
-							UProperty* NewProperty = CreateProperty(Function, Argument);
+							auto arr = Handle<Array>::Cast(Signature);
+							auto len = arr->Length();
 
-							if (NewProperty)
+							for (decltype(len) Index = 0; Index < len; ++Index)
 							{
-								NewProperty->SetPropertyFlags(CPF_Parm);
-								
-								*Storage = NewProperty;
-								Storage = &NewProperty->Next;
+								auto PropertyDecl = arr->Get(Index);
 
-								*PropertyStorage = NewProperty;
-								PropertyStorage = &NewProperty->PropertyLinkNext;								
+								auto NewProperty = CreatePropertyFromDecl(I, Function, PropertyDecl);
+
+								if (NewProperty)
+								{
+									NewProperty->SetPropertyFlags(CPF_Parm);
+
+									*Storage = NewProperty;
+									Storage = &NewProperty->Next;
+
+									*PropertyStorage = NewProperty;
+									PropertyStorage = &NewProperty->PropertyLinkNext;
+								}
 							}
-							else
-							{
-								// ??
-							}
-						}
+						}						
 					};
 
-					InitializeProperties(Function, Arguments);					
+					auto Signature = FunctionObj->Get(I.Keyword("Signature"));					
+
+					InitializeProperties(Function, Signature);
 				}
 
 				auto FinalizeFunction = [](UFunction* Function) {
@@ -700,7 +806,39 @@ public:
 				Class->AddFunctionToFunctionMap(Function);
 
 				return true;
-			};
+			};			
+
+			auto ClassFlags = Opts->Get(I.Keyword("ClassFlags"));
+			if (!ClassFlags.IsEmpty() && ClassFlags->IsArray())
+			{
+				SetClassFlags(Class,StringArrayFromV8(ClassFlags));
+			}
+
+			auto PropertyDecls = Opts->Get(I.Keyword("Properties"));
+			if (!PropertyDecls.IsEmpty() && PropertyDecls->IsArray())
+			{				
+				auto arr = Handle<Array>::Cast(PropertyDecls);
+				auto len = arr->Length();
+
+				for (decltype(len) Index = 0; Index < len; ++Index)
+				{
+					auto PropertyDecl = arr->Get(Index);
+					if (PropertyDecl->IsObject())
+					{
+						auto Property = CreatePropertyFromDecl(I, Class, PropertyDecl);
+						
+						if (Property)
+						{
+							Class->AddCppProperty(Property);
+
+							if (Property->HasAnyPropertyFlags(CPF_Net))
+							{
+								Class->NumReplicatedProperties++;
+							}
+						}
+					}
+				}
+			}
 
 			auto Functions = Opts->Get(I.Keyword("Functions"));
 			TMap<FString,Handle<Value>> Others;
@@ -719,38 +857,7 @@ public:
 
 					if (!Function->IsFunction()) continue;
 
-					if (UName == TEXT("properties"))
-					{						
-						FString Code = StringFromV8(Function->ToString());
-
-						TArray<FString> SmallArray;
-						const TCHAR* Delims[] = {
-							TEXT("\n"),
-							TEXT(";")
-						};
-						
-						Code.ParseIntoArray(SmallArray, Delims, ARRAY_COUNT(Delims));
-
-						for (auto Line : SmallArray)
-						{
-							Line = Line.Trim();
-
-							if (Line.StartsWith(TEXT("this.")))
-							{
-								auto Property = CreateProperty(Class, Line.Mid(5));
-								if (Property)
-								{
-									Class->AddCppProperty(Property);
-
-									if (Property->HasAnyPropertyFlags(CPF_Net))
-									{
-										Class->NumReplicatedProperties++;
-									}
-								}
-							}
-						}
-					}
-					else if (UName != TEXT("ctor") && UName != TEXT("constructor"))
+					if (UName != TEXT("ctor") && UName != TEXT("constructor"))
 					{
 						if (!AddFunction(*UName, Function))
 						{						
@@ -788,6 +895,78 @@ public:
 		auto self = External::New(isolate(), this);
 
 		global->Set(V8_KeywordString(isolate(), "CreateClass"), FunctionTemplate::New(isolate(), fn, self)->GetFunction());
+	}
+
+	void ExportUnrealEngineStructs()
+	{
+		auto fn = [](const FunctionCallbackInfo<Value>& info) {
+			auto Context = reinterpret_cast<FJavascriptContextImplementation*>((Local<External>::Cast(info.Data()))->Value());
+
+			auto isolate = info.GetIsolate();
+
+			FIsolateHelper I(isolate);
+
+			HandleScope scope(isolate);
+
+			auto Name = StringFromV8(info[0]);
+			auto Opts = info[1]->ToObject();
+			auto Outer = UObjectFromV8(Opts->Get(I.Keyword("Outer")));
+			auto ParentStruct = (UScriptStruct*)UClassFromV8(isolate, Opts->Get(I.Keyword("Parent")));
+			Outer = Outer ? Outer : GetTransientPackage();			
+
+			UScriptStruct* Struct = nullptr;
+			{
+				auto Klass = NewObject<UScriptStruct>(Outer, *Name, RF_Public);				
+				Struct = Klass;
+			}
+
+			// Set properties we need to regenerate the class with
+			if (ParentStruct)
+			{
+				Struct->PropertyLink = ParentStruct->PropertyLink;
+				Struct->SetSuperStruct(ParentStruct);
+				Struct->StructFlags = (EStructFlags)(ParentStruct->StructFlags & STRUCT_Inherit);
+			}						
+
+			auto StructFlags = Opts->Get(I.Keyword("StructFlags"));
+			if (!StructFlags.IsEmpty() && StructFlags->IsArray())
+			{
+				SetStructFlags(Struct, StringArrayFromV8(StructFlags));
+			}
+
+			auto PropertyDecls = Opts->Get(I.Keyword("Properties"));
+			if (!PropertyDecls.IsEmpty() && PropertyDecls->IsArray())
+			{
+				auto arr = Handle<Array>::Cast(PropertyDecls);
+				auto len = arr->Length();
+
+				for (decltype(len) Index = 0; Index < len; ++Index)
+				{
+					auto PropertyDecl = arr->Get(Index);
+					if (PropertyDecl->IsObject())
+					{
+						auto Property = CreatePropertyFromDecl(I, Struct, PropertyDecl);
+
+						if (Property)
+						{
+							Struct->AddCppProperty(Property);
+						}
+					}
+				}
+			}			
+
+			Struct->Bind();
+			Struct->StaticLink(true);
+
+			auto FinalClass = Context->ExportObject(Struct);
+
+			info.GetReturnValue().Set(FinalClass);
+		};
+
+		auto global = context()->Global();
+		auto self = External::New(isolate(), this);
+
+		global->Set(V8_KeywordString(isolate(), "CreateStruct"), FunctionTemplate::New(isolate(), fn, self)->GetFunction());
 	}
 
 	void ExposeRequire()

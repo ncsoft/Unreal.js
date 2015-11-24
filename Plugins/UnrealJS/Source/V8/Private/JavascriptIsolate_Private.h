@@ -38,6 +38,7 @@ public:
 	static void WriteProperty(v8::Isolate* isolate, UProperty* Property, uint8* Buffer, v8::Handle<v8::Value> Value);
 
 	virtual v8::Local<v8::Value> ExportObject(UObject* Object, bool bForce = false) = 0;
+	virtual v8::Local<v8::FunctionTemplate> ExportStruct(UScriptStruct* ScriptStruct) = 0;
 	virtual v8::Local<v8::FunctionTemplate> ExportClass(UClass* Class, bool bAutoRegister = true) = 0;
 	virtual void RegisterClass(UClass* Class, v8::Local<v8::FunctionTemplate> Template) = 0;
 	virtual v8::Local<v8::ObjectTemplate> GetGlobalTemplate() = 0;

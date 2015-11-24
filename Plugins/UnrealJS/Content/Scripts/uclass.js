@@ -39,57 +39,126 @@
                     if (v.test(mod)) {
                         out[k] = true
                     }
-                })                
+                })              
             })
 
             return out
         }
         
+        let RE_class = /\s*class\s+(\w+)(\s+\/\*([^\*]*)\*\/)?(\s+extends\s+([^\s\{]+))?/
+        let RE_func = /(\w+)\s*\(([^.)]*)\)\s*(\/\*([^\*]*)\*\/)?.*/
         function register(target, template) {
             let bindings = []
 
-            let splits = String(template).split(/[\s+|\r|\n]/);
+            let splits = RE_class.exec(template)
+
+            if (!splits) throw "Invalid class definition"
+            
             let orgClassName = splits[1]
             let className = `${orgClassName}_C${fetchClassId()}`
-            let parentClassName = splits[3]
-            let parentClass = eval(parentClassName) 
+            let parentClassName = splits[5]
+            let parentClass = eval(parentClassName)
+            let properties = []
+            let classFlags = (splits[3] || "").split('+').map((x) => x.trim())
+
+            function refactored(x) {
+                let m = /\s*(\w+)(\/\*([^\*]*)\*\/)?\s*/.exec(x)
+                if (m) {
+                    let arr = (m[3] || '').split('+').map((x) => x.trim())
+                    let type = arr.pop()
+                    let is_array = false
+                    if (/\[\]$/.test(type)) {
+                        is_array = true
+                        type = type.substr(0, type.length - 2)
+                    }
+                    if (_.isFunction(target[type])) {
+                        let src = String(target[type])
+                        let e = /function (\w+)\(/.exec(src)
+                        if (e) {
+                            type = e[1]
+                        }
+                    }
+
+                    return {
+                        Name: m[1],
+                        Type: type,
+                        Decorators: arr,
+                        IsArray: is_array
+                    }
+                } else {
+                    return null
+                }
+            }
              
             let proxy = {}
             _.each(Object.getOwnPropertyNames(template.prototype), (k) => {
-                proxy[k] = template.prototype[k]
-
-                let s = String(proxy[k])
-                let functionName = s.substr(0, s.indexOf('(')).replace(/\b/g, '')                
-                s = s.substr(s.indexOf(')')+1)
-                s = s.substr(0, s.indexOf('{'))
-                s = s.substr(s.indexOf('/*') + 2)
-                s = s.substr(0, s.indexOf('*/'))
-                let a = s.split(/[\[\],]/)
-                let flags = _.filter(a, (a) => /^[\-\+]/.test(a))
-                a = _.filter(a,(a) => !/^[\-\+]/.test(a))
-                if (/Binding$/i.test(a[0])) {
-                    let prefix = a[0].substr(0, a[0].length - 7)                    
-                    let pattern = inputbinding_patterns[prefix]
-                    if (!pattern) throw "Invalid binding pattern"
-
-                    let binding = {
-                        type: prefix, 
-                        FunctionNameToBind: functionName
-                    }
-                    flags.forEach((flag) => {
-                        binding[flag.substr(1)] = (flag[0] == '+')
+                if (k == "properties") {
+                    let func = String(template.prototype[k])
+                    func = func.substr(func.indexOf('{')+1)
+                    func = func.substr(0, func.lastIndexOf('}'))
+                    func = _.compact(func.split('\n').map((l) => l.trim())).map((l) => {
+                        if (l.indexOf("this.") != 0) return
+                        l = l.substr(5)
+                        return refactored(l)                        
                     })
-                    bindings.push(_.extend(binding, pattern(a)))                    
-                }
+                    properties = func
+                } else if (k != 'constructor') {
+                    proxy[k] = template.prototype[k]   
+
+                    let s = String(proxy[k])
+
+                    let matches = RE_func.exec(s)
+                    if (!matches) throw "invalid function"
+
+                    let functionName = matches[1]
+                    s = matches[4]
+                    let a = (s || '').split(/[\[\],]/).map((x) => x.trim())
+                    let flags = _.filter(a, (a) => /^[\-\+]/.test(a))
+                    a = _.filter(a, (a) => !/^[\-\+]/.test(a))
+                    let args = ((matches[2] || '').split(',').map((x) => refactored(x)))
+                    if (_.all(args, (x) => !!x)) {
+                        proxy[k].Signature = args
+                    }                    
+                    proxy[k].Decorators = a
+                    if (/Binding$/i.test(a[0])) {
+                        let prefix = a[0].substr(0, a[0].length - 7)
+                        let pattern = inputbinding_patterns[prefix]
+                        if (!pattern) throw "Invalid binding pattern"
+
+                        let binding = {
+                            type: prefix,
+                            FunctionNameToBind: functionName
+                        }
+                        flags.forEach((flag) => {
+                            binding[flag.substr(1)] = (flag[0] == '+')
+                        })
+                        bindings.push(_.extend(binding, pattern(a)))
+                    }
+                }               
             })
             
             let thePackage = JavascriptLibrary.CreatePackage(null,'/Script/Javascript')
             
-            let klass = CreateClass(className,{
-                Parent:parentClass,
-                Functions:proxy,
-                Outer:thePackage
-            });
+            let klass = null
+
+            if (_.contains(classFlags, "Struct")) {
+                klass = CreateStruct(className, {
+                    Parent: parentClass,
+                    Functions: proxy,
+                    StructFlags: classFlags,
+                    Outer: thePackage,
+                    Properties: properties
+                });
+            }
+            else {
+                klass = CreateClass(className, {
+                    Parent: parentClass,
+                    Functions: proxy,
+                    ClassFlags: classFlags,
+                    Outer: thePackage,
+                    Properties: properties
+                });
+            }
             
             if (target != undefined) {
                 target[orgClassName] = klass;
@@ -97,7 +166,7 @@
 
             bindings.forEach((binding) => inputBinding(klass,binding))
             return klass;
-        }          
+        }         
         
         return register;
     }
