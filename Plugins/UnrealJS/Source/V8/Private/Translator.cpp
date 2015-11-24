@@ -35,12 +35,17 @@ namespace v8
 
 	UClass* UClassFromV8(Isolate* isolate_, Local<Value> Value)
 	{
-		if (Value.IsEmpty())
+		if (Value.IsEmpty() || !Value->IsObject())
 		{
 			return nullptr;
 		}
 
 		auto v8_obj = Value->ToObject();
+		if (v8_obj.IsEmpty())
+		{
+			return nullptr;
+		}
+
 		if (v8_obj->IsFunction())
 		{
 			auto vv = v8_obj->Get(V8_KeywordString(isolate_, "StaticClass"));
@@ -50,7 +55,7 @@ namespace v8
 			}
 		}
 
-		if (!v8_obj.IsEmpty() && v8_obj->IsExternal())
+		if (v8_obj->IsExternal())
 		{
 			auto v8_class = Local<External>::Cast(v8_obj);
 
