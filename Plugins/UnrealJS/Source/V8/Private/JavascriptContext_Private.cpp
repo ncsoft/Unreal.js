@@ -715,9 +715,15 @@ public:
 				}
 				else
 				{
+					auto FunctionObj = TheFunction->ToObject();
+					auto IsUFUNCTION = FunctionObj->Get(I.Keyword("IsUFUNCTION"));
+					if (IsUFUNCTION.IsEmpty() || !IsUFUNCTION->BooleanValue())
+					{
+						return false;
+					}
+
 					MakeFunction();
 
-					auto FunctionObj = TheFunction->ToObject();
 					auto Decorators = FunctionObj->Get(I.Keyword("Decorators"));
 					if (!Decorators.IsEmpty() && Decorators->IsArray())
 					{

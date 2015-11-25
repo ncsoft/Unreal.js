@@ -48,6 +48,7 @@
         let RE_class = /\s*class\s+(\w+)(\s+\/\*([^\*]*)\*\/)?(\s+extends\s+([^\s\{]+))?/
         let RE_func = /(\w+)\s*\(([^.)]*)\)\s*(\/\*([^\*]*)\*\/)?.*/
         function register(target, template) {
+            target = target || {}
             let bindings = []
 
             let splits = RE_class.exec(template)
@@ -62,7 +63,7 @@
             let classFlags = (splits[3] || "").split('+').map((x) => x.trim())
 
             function refactored(x) {
-                let m = /\s*(\w+)(\/\*([^\*]*)\*\/)?\s*/.exec(x)
+                let m = /\s*(\w+)\s*(\/\*([^\*]*)\*\/)?\s*/.exec(x)
                 if (m) {
                     let arr = (m[3] || '').split('+').map((x) => x.trim())
                     let type = arr.pop()
@@ -79,11 +80,15 @@
                         }
                     }
 
-                    return {
-                        Name: m[1],
-                        Type: type,
-                        Decorators: arr,
-                        IsArray: is_array
+                    if (type) {
+                        return {
+                            Name: m[1],
+                            Type: type,
+                            Decorators: arr,
+                            IsArray: is_array
+                        }                        
+                    } else {
+                        return null
                     }
                 } else {
                     return null
@@ -98,14 +103,14 @@
                     func = func.substr(0, func.lastIndexOf('}'))
                     func = _.compact(func.split('\n').map((l) => l.trim())).map((l) => {
                         if (l.indexOf("this.") != 0) return
-                        l = l.substr(5)
+                        l = l.substr(5)                        
                         return refactored(l)                        
                     })
                     properties = func
                 } else if (k != 'constructor') {
-                    proxy[k] = template.prototype[k]   
+                    let F = proxy[k] = template.prototype[k]   
 
-                    let s = String(proxy[k])
+                    let s = String(F)
 
                     let matches = RE_func.exec(s)
                     if (!matches) throw "invalid function"
@@ -113,14 +118,22 @@
                     let functionName = matches[1]
                     s = matches[4]
                     let a = (s || '').split(/[\[\],]/).map((x) => x.trim())
+                    a = _.compact(a)
                     let flags = _.filter(a, (a) => /^[\-\+]/.test(a))
                     a = _.filter(a, (a) => !/^[\-\+]/.test(a))
-                    let args = ((matches[2] || '').split(',').map((x) => refactored(x)))
+                    let args = ((matches[2] || '').split(',').map((x) => refactored(x.trim())))
+                    F.IsUFUNCTION = false
                     if (_.all(args, (x) => !!x)) {
-                        proxy[k].Signature = args
-                    }                    
-                    proxy[k].Decorators = a
+                        F.Signature = args
+                        F.IsUFUNCTION = true
+                    }
+
+                    F.Decorators = a
+                    if (a.length > 0) {
+                        F.IsUFUNCTION = true
+                    }
                     if (/Binding$/i.test(a[0])) {
+                        F.IsUFUNCTION = true
                         let prefix = a[0].substr(0, a[0].length - 7)
                         let pattern = inputbinding_patterns[prefix]
                         if (!pattern) throw "Invalid binding pattern"
