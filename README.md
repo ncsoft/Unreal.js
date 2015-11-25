@@ -37,15 +37,13 @@ Apache2
 
 ### Examples
 
-#### Unreal 2048
-- https://github.com/gabrielecirulli/2048 
-  - [View source code](https://github.com/ncsoft/Unreal.js/blob/master/Examples/Content/Scripts/2048/)
+#### [2048](https://github.com/gabrielecirulli/2048)
+- [View source code](https://github.com/ncsoft/Unreal.js/blob/master/Examples/Content/Scripts/2048/)
 
   ![](https://github.com/ncsoft/Unreal.js/blob/master/doc/images/UnrealJs_example_2048.gif)
 
-#### Springy
-- http://getspringy.com 
-  - [View source code](https://github.com/ncsoft/Unreal.js/blob/master/Examples/Content/Scripts/helloSpringy.js)
+#### [Springy](http://getspringy.com)
+- [View source code](https://github.com/ncsoft/Unreal.js/blob/master/Examples/Content/Scripts/helloSpringy.js)
 
   ![](https://github.com/ncsoft/Unreal.js/blob/master/doc/images/UnrealJs_springy.gif)
 
