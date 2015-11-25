@@ -1,6 +1,14 @@
 #pragma once
 
+#define V8_ENABLE_DIRECTORY_WATCHER 0
+#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
+#define V8_ENABLE_DIRECTORY_WATCHER 1
+#endif
+
+#if V8_ENABLE_DIRECTORY_WATCHER
 #include "IDirectoryWatcher.h"
+#endif
+
 #include "DirectoryWatcher.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDirectoryWatcherCallback);
@@ -13,7 +21,9 @@ class V8_API UDirectoryWatcher : public UObject
 public:	
 	virtual void BeginDestroy() override;
 
+#if V8_ENABLE_DIRECTORY_WATCHER
 	IDirectoryWatcher::FDirectoryChanged Changed;
+#endif
 
 	FDelegateHandle DelegateHandle;
 

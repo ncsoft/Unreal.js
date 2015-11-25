@@ -382,7 +382,7 @@ public:
 				{
 					Inner->InitializeValue(ElementBuffer);
 					Inner->CopyCompleteValueFromScriptVM(ElementBuffer, helper.GetRawPtr(Index));
-					arr->Set(context, Index, ReadProperty(isolate_, Inner, ElementBuffer, FNoPropertyOwner()));
+					if (arr->Set(context, Index, ReadProperty(isolate_, Inner, ElementBuffer, FNoPropertyOwner())).FromMaybe(true)) {} // V8_WARN_UNUSED_RESULT;
 					Inner->DestroyValue(ElementBuffer);
 				}				
 			}
@@ -390,7 +390,7 @@ public:
 			{
 				for (decltype(len) Index = 0; Index < len; ++Index)
 				{
-					arr->Set(context, Index, ReadProperty(isolate_, Inner, helper.GetRawPtr(Index), Owner));
+					if (arr->Set(context, Index, ReadProperty(isolate_, Inner, helper.GetRawPtr(Index), Owner)).FromMaybe(true)) {} // V8_WARN_UNUSED_RESULT;
 				}
 			}
 
@@ -1632,9 +1632,11 @@ public:
 	void SetWeak(UniquePersistent<U>& Handle, T* GarbageCollectedObject)
 	{		
 		typedef TPair<FJavascriptIsolateImplementation*, T*> WeakData;
-		typedef TPairInitializer<WeakData::KeyInitType, WeakData::ValueInitType> InitializerType;
+		typedef typename WeakData::KeyInitType WeakDataKeyInitType;
+		typedef typename WeakData::ValueInitType WeakDataValueInitType;
+		typedef TPairInitializer<WeakDataKeyInitType, WeakDataValueInitType> InitializerType;
 
-		Handle.SetWeak<WeakData>(new WeakData(InitializerType(this, GarbageCollectedObject)), [](const WeakCallbackData<U, WeakData>& data) {
+		Handle.template SetWeak<WeakData>(new WeakData(InitializerType(this, GarbageCollectedObject)), [](const WeakCallbackData<U, WeakData>& data) {
 			auto Parameter = data.GetParameter();
 
 			Parameter->Key->OnGarbageCollectedByV8(Parameter->Value);
