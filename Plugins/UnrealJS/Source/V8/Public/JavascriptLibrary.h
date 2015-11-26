@@ -55,4 +55,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")
 	static void HandleSeamlessTravelPlayer(AGameMode* GameMode, AController*& C);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")
+	static void SetRootComponent(AActor* Actor, USceneComponent* Component);
 };

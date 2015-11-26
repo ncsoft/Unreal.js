@@ -99,3 +99,29 @@ void UJavascriptComponent::ProcessEvent(UFunction* Function, void* Parms)
 	Super::ProcessEvent(Function, Parms);
 }
 
+UObject* UJavascriptComponent::ResolveAsset(FName Name, bool bTryLoad)
+{
+	for (const auto& Item : Assets)
+	{
+		if (Item.Name == Name)
+		{
+			return bTryLoad ? Item.Asset.TryLoad() : Item.Asset.ResolveObject();
+		}
+	}
+
+	return nullptr;
+}
+
+UClass* UJavascriptComponent::ResolveClass(FName Name)
+{	
+	for (const auto& Item : ClassAssets)
+	{
+		if (Item.Name == Name)
+		{
+			return Item.Class;
+		}
+	}
+
+	return nullptr;
+}
+

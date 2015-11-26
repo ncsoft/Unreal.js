@@ -65,7 +65,7 @@ void UJavascriptHttpRequest::EndProcessing()
 {
 	delete Processor;
 	Processor = nullptr;
-	
+
 	Request->OnProcessRequestComplete().Unbind();
 	Request->OnRequestProgress().Unbind();
 }

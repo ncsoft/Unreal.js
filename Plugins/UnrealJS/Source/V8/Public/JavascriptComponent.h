@@ -3,6 +3,30 @@
 #include "JavascriptContext.h"
 #include "JavascriptComponent.generated.h"
 
+USTRUCT()
+struct V8_API FJavascriptAsset
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Category = "Javascript")
+	FName Name;
+
+	UPROPERTY(EditAnywhere, Category = "Javascript")
+	FStringAssetReference Asset;
+};
+
+USTRUCT()
+struct V8_API FJavascriptClassAsset
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Category = "Javascript")
+	FName Name;
+
+	UPROPERTY(EditAnywhere, Category = "Javascript")
+	TSubclassOf<UObject> Class;
+};
+
 /**
  * 
  */
@@ -37,13 +61,19 @@ public:
 	UPROPERTY()
 	FJavascriptNameSignature OnInvoke;
 
+	UPROPERTY(EditAnywhere, Category = "Javascript")
+	TArray<FJavascriptAsset> Assets;
+
+	UPROPERTY(EditAnywhere, Category = "Javascript")
+	TArray<FJavascriptClassAsset> ClassAssets;
+
 	// Begin UActorComponent interface.
 	virtual void Activate(bool bReset = false) override;
 	virtual void Deactivate() override;	
 	virtual void OnRegister() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 	virtual void BeginDestroy() override;
-	// Begin UActorComponent interface.
+	// Begin UActorComponent interface.	
 
 	UFUNCTION(BlueprintCallable, Category = "Javascript")
 	void ForceGC();
@@ -55,6 +85,12 @@ public:
 	void Invoke(FName Name);
 
 	virtual void ProcessEvent(UFunction* Function, void* Parms) override;	
+
+	UFUNCTION(BlueprintCallable, Category = "Javascript")
+	UObject* ResolveAsset(FName Name, bool bTryLoad = true);
+
+	UFUNCTION(BlueprintCallable, Category = "Javascript")
+	UClass* ResolveClass(FName Name);
 
 	template <typename... Rest>
 	bool FastCall(Rest... rest)

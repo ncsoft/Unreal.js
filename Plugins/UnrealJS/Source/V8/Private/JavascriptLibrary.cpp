@@ -106,3 +106,8 @@ void UJavascriptLibrary::HandleSeamlessTravelPlayer(AGameMode* GameMode, AContro
 {
 	GameMode->HandleSeamlessTravelPlayer(C);
 }
+
+void UJavascriptLibrary::SetRootComponent(AActor* Actor, USceneComponent* Component)
+{
+	Actor->SetRootComponent(Component);
+}
