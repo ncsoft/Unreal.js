@@ -15,6 +15,6 @@
         let key = `Input${binding.type}DelegateBindings`
         let prev = bindingObject[key]
         prev.push(binding)
-        bindingObject[key] = prev
+        bindingObject[key] = JSON.parse(JSON.stringify(prev)) //@HACK: WORKAROUND AOS CRASH
     }
 })()

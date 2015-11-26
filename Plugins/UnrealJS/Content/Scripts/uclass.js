@@ -57,8 +57,10 @@
             
             let orgClassName = splits[1]
             let className = `${orgClassName}_C${fetchClassId()}`
-            let parentClassName = splits[5]
-            let parentClass = eval(parentClassName)
+            let parentClass = Object.getPrototypeOf(template.prototype).constructor
+            if (parentClass == Object) {
+                parentClass = null
+            }
             let properties = []
             let classFlags = (splits[3] || "").split('+').map((x) => x.trim())
 
