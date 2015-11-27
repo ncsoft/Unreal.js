@@ -373,9 +373,25 @@ public:
 			auto arr = Array::New(isolate_, len);
 			auto context = isolate_->GetCurrentContext();
 
-			for (decltype(len) Index = 0; Index < len; ++Index)
-			{	
-				arr->Set(context, Index, ReadProperty(isolate_, p->Inner, helper.GetRawPtr(Index), Owner));
+			auto Inner = p->Inner;
+
+			if (Inner->IsA(UStructProperty::StaticClass()))
+			{
+				uint8* ElementBuffer = (uint8*)FMemory_Alloca(Inner->GetSize());				
+				for (decltype(len) Index = 0; Index < len; ++Index)
+				{
+					Inner->InitializeValue(ElementBuffer);
+					Inner->CopyCompleteValueFromScriptVM(ElementBuffer, helper.GetRawPtr(Index));
+					arr->Set(context, Index, ReadProperty(isolate_, Inner, ElementBuffer, FNoPropertyOwner()));
+					Inner->DestroyValue(ElementBuffer);
+				}				
+			}
+			else
+			{
+				for (decltype(len) Index = 0; Index < len; ++Index)
+				{
+					arr->Set(context, Index, ReadProperty(isolate_, Inner, helper.GetRawPtr(Index), Owner));
+				}
 			}
 
 			return arr;

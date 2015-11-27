@@ -54,8 +54,7 @@ struct FStructMemoryInstance
 
 			if (Source)
 			{
-				//Struct->CopyScriptStruct(GetMemory(), Source);
-				CopyScriptStruct(GetMemory(), Source);
+				Struct->CopyScriptStruct(GetMemory(), Source);
 				Source = nullptr;
 			}
 		}
@@ -116,28 +115,5 @@ struct FStructMemoryInstance
 	{
 		auto Memory = RawMemoryFromV8(Value);
 		return reinterpret_cast<FStructMemoryInstance*>(Memory);
-	}
-
-	void CopyScriptStruct(void* InDest, void const* InSrc, int32 ArrayDim = 1)
-	{
-		uint8 *Dest = (uint8*)InDest;
-		check(Dest);
-		uint8 const* Src = (uint8 const*)InSrc;
-		check(Src);
-
-		int32 Stride = Struct->GetStructureSize();
-
-		FMemory::Memcpy(Dest, Src, ArrayDim * Stride);
-
-		if (!(Struct->StructFlags & STRUCT_IsPlainOldData))
-		{
-			for (TFieldIterator<UProperty> It(Struct); It; ++It)
-			{
-				for (int32 Index = 0; Index < ArrayDim; Index++)
-				{
-					It->CopyCompleteValue_InContainer((uint8*)Dest + Index * Stride, (uint8*)Src + Index * Stride);
-				}
-			}
-		}
-	}
+	}	
 };
