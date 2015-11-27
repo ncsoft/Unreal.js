@@ -1,4 +1,7 @@
-set UE4PATH=C:\Program Files (x86)\Epic Games\4.10
+powershell.exe -nologo -noprofile -command "& { $x = (Get-ItemProperty \"hklm:\Software\Classes\Unreal.ProjectFile\shell\run\command\").\"(default)\"; $x = $x.SubString(0,$x.IndexOf(\"Launcher\")) + \"4.10\"; if ($x[0] -eq '\"') { $x.SubString(1) } else { $x } }" > temp.txt
+set /p UE4PATH=<temp.tx
+del temp.txt
+
 call "%UE4PATH%\Engine\Build\BatchFiles\RocketGenerateProjectFiles.bat" %~dp0\Build.uproject -game
 
 
@@ -16,3 +19,4 @@ copy Plugins\UnrealJS\* Staging\Plugins\UnrealJS
 del Release.zip
 powershell.exe -nologo -noprofile -command "& { Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::CreateFromDirectory('Staging', 'Release.zip') }"
 rd /s/q Staging
+
