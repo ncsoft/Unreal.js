@@ -52,7 +52,7 @@ public:
 	bool WriteAliases(FString Target);
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")
-	bool WriteDTS(FString Target);
+	bool WriteDTS(FString Target, bool bIncludingTooltip);
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")
 	void SetAsDebugContext();

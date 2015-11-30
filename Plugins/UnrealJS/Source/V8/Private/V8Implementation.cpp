@@ -129,9 +129,9 @@ bool UJavascriptContext::WriteAliases(FString Filename)
 	return JavascriptContext->WriteAliases(Filename);
 }
 
-bool UJavascriptContext::WriteDTS(FString Filename)
+bool UJavascriptContext::WriteDTS(FString Filename, bool bIncludingTooltip)
 {
-	return JavascriptContext->WriteDTS(Filename);
+	return JavascriptContext->WriteDTS(Filename, bIncludingTooltip);
 }
 
 bool UJavascriptContext::HasProxyFunction(UObject* Holder, UFunction* Function)

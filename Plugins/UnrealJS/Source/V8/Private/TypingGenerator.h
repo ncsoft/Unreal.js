@@ -5,6 +5,7 @@
 struct TypingGeneratorBase
 {
 	TSet<UObject*> visited;
+	bool no_tooltip{ false };
 
 	void mark_visited(UObject* obj)
 	{
@@ -178,6 +179,8 @@ struct TokenWriter
 
 	void tooltip(const char* indent, UField* source)
 	{
+		if (generator.no_tooltip) return;
+
 		FString Tooltip = source->GetToolTipText().ToString();
 		if (Tooltip.Len() > 0)
 		{
@@ -210,7 +213,7 @@ struct TypingGenerator : TypingGeneratorBase
 
 	FString Text;
 
-	TArray<FString> Folded;
+	TArray<FString> Folded;	
 
 	void fold(bool force = false)
 	{

@@ -1316,10 +1316,12 @@ public:
 #endif
 	}
 
-	bool WriteDTS(const FString& Filename)
+	bool WriteDTS(const FString& Filename, bool bIncludingTooltip)
 	{
 #if WITH_EDITOR
 		TypingGenerator instance(*(Environment.Get()));
+
+		instance.no_tooltip = !bIncludingTooltip;
 
 		instance.ExportBootstrap();
 
