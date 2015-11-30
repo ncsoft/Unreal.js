@@ -107,12 +107,11 @@ bool UJavascriptHttpRequest::ProcessRequest()
 	if (IsProcessing()) return false;
 
 	Request->OnProcessRequestComplete().BindLambda([&](FHttpRequestPtr, FHttpResponsePtr, bool status){
-		EndProcessing();
 		OnComplete.ExecuteIfBound(status);
+		EndProcessing();
 	});
 
 	Request->OnRequestProgress().BindLambda([&](FHttpRequestPtr, int32 sent, int32 recv){
-		EndProcessing();
 		OnProgress.ExecuteIfBound(sent,recv);
 	});
 	
