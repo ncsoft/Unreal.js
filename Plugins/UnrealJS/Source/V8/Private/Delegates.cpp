@@ -311,7 +311,7 @@ struct FDelegateManager : IDelegateManager
 		: isolate_(isolate)
 	{}
 
-	~FDelegateManager()
+	virtual ~FDelegateManager()
 	{
 		PurgeAllDelegates();
 	}

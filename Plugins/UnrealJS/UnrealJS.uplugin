@@ -15,7 +15,7 @@
       "Name": "V8",
       "Type": "Runtime",
       "LoadingPhase": "PreDefault",
-      "WhitelistPlatforms": [ "Win64", "Win32" ]
+      "WhitelistPlatforms": [ "Win64", "Win32", "Android" ]
     },
     {
       "Name": "JavascriptUMG",

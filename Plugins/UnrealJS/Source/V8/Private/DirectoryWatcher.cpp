@@ -1,7 +1,11 @@
 #include "V8PCH.h"
+
 #include "DirectoryWatcher.h"
+
+#if V8_ENABLE_DIRECTORY_WATCHER
 #include "DirectoryWatcherModule.h"
 #include "IDirectoryWatcher.h"
+#endif
 
 void UDirectoryWatcher::BeginDestroy()
 {
@@ -16,7 +20,8 @@ bool UDirectoryWatcher::Contains(const FString& File)
 }
 
 void UDirectoryWatcher::Watch(const FString& InDirectory)
-{	
+{
+#if V8_ENABLE_DIRECTORY_WATCHER
 	Unwatch();
 
 	FDirectoryWatcherModule& DirectoryWatcherModule = FModuleManager::Get().LoadModuleChecked<FDirectoryWatcherModule>(TEXT("DirectoryWatcher"));
@@ -51,11 +56,13 @@ void UDirectoryWatcher::Watch(const FString& InDirectory)
 	if (IFileManager::Get().DirectoryExists(*Directory))
 	{
 		DirectoryWatcher->RegisterDirectoryChangedCallback_Handle(Directory, Changed, DelegateHandle, true);
-	}	
+	}
+#endif
 }
 
 void UDirectoryWatcher::Unwatch()
 {
+#if V8_ENABLE_DIRECTORY_WATCHER
 	FDirectoryWatcherModule& DirectoryWatcherModule = FModuleManager::Get().LoadModuleChecked<FDirectoryWatcherModule>(TEXT("DirectoryWatcher"));
 	IDirectoryWatcher* DirectoryWatcher = DirectoryWatcherModule.Get();
 
@@ -64,4 +71,5 @@ void UDirectoryWatcher::Unwatch()
 		DirectoryWatcher->UnregisterDirectoryChangedCallback_Handle(Directory, DelegateHandle);
 		Directory = TEXT("");
 	}
+#endif
 }

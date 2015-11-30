@@ -1388,7 +1388,7 @@ public:
 		auto func = GetProxyFunction(Holder, FunctionToCall);
 		if (!func.IsEmpty() && func->IsFunction())
 		{
-			CallJavascriptFunction(context(), This ? ExportObject(This) : context()->Global(), FunctionToCall, Local<Function>::Cast(func), Parms);
+			CallJavascriptFunction(context(), This ? ExportObject(This) : Local<Value>::Cast(context()->Global()), FunctionToCall, Local<Function>::Cast(func), Parms);
 
 			return true;
 		}
