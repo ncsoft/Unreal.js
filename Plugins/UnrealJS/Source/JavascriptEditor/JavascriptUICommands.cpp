@@ -134,3 +134,5 @@ TSharedPtr<FUICommandInfo> UJavascriptUICommands::GetAction(FString Id)
 	return TSharedPtr<FUICommandInfo>();
 }
 #endif
+
+PRAGMA_ENABLE_OPTIMIZATION
