@@ -1,6 +1,7 @@
 #include "V8PCH.h"
 #include "JavascriptLibrary.h"
 #include "Engine/DynamicBlueprintBinding.h"
+#include "JavascriptContext.h"
 
 void UJavascriptLibrary::SetMobile(USceneComponent* SceneComponent)
 {
