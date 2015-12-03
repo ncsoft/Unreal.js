@@ -11,7 +11,7 @@ Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4.
 - Live reload
 - Communicate with outer world: REST, process(pipe), arraybuffer, ...
 - Bridge API for editor extension
-- Auto-completion for Visual Studio (auto-generated [*.d.ts](http://definitelytyped.org/))
+- Auto-completion for Visual Studio Code (auto-generated [*.d.ts](http://definitelytyped.org/))
 - Dedicated Javascript console on UnrealEditor
 
   ![](https://github.com/ncsoft/Unreal.js/blob/master/doc/images/UnrealJs_JavascriptConsole.gif) 
