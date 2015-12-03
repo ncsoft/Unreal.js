@@ -111,3 +111,77 @@ void UJavascriptLibrary::SetRootComponent(AActor* Actor, USceneComponent* Compon
 {
 	Actor->SetRootComponent(Component);
 }
+
+int32 UJavascriptLibrary::GetFileSize(UObject* Object, FString Filename)
+{
+	auto size = IFileManager::Get().FileSize(*Filename);
+	if (size > INT_MAX) return -1;
+	return (int32)size;
+}
+
+bool UJavascriptLibrary::ReadFile(UObject* Object, FString Filename)
+{
+	FArchive* Reader = IFileManager::Get().CreateFileReader(*Filename);
+	if (!Reader)
+	{
+		return false;
+	}
+
+	int32 Size = Reader->TotalSize();
+	if (Size != FArrayBufferAccessor::GetSize())
+	{
+		return false;
+	}
+
+	Reader->Serialize(FArrayBufferAccessor::GetData(), Size);
+	return Reader->Close();	
+}
+
+bool UJavascriptLibrary::WriteFile(UObject* Object, FString Filename)
+{
+	FArchive* Writer = IFileManager::Get().CreateFileWriter(*Filename);
+	if (!Writer)
+	{
+		return false;
+	}
+		
+	Writer->Serialize(FArrayBufferAccessor::GetData(), FArrayBufferAccessor::GetSize());
+	return Writer->Close();
+}
+
+FString UJavascriptLibrary::GetDir(UObject* Object, FString WhichDir)
+{
+	if (WhichDir == TEXT("Launch")) return FPaths::LaunchDir();
+	else if (WhichDir == TEXT("Engine")) return FPaths::EngineDir();
+	else if (WhichDir == TEXT("EngineUser")) return FPaths::EngineUserDir();
+	else if (WhichDir == TEXT("EngineVersionAgnosticUser")) return FPaths::EngineVersionAgnosticUserDir();
+	else if (WhichDir == TEXT("EngineContent")) return FPaths::EngineContentDir();
+	else if (WhichDir == TEXT("EngineConfig")) return FPaths::EngineConfigDir();
+	else if (WhichDir == TEXT("EngineIntermediate")) return FPaths::EngineIntermediateDir();
+	else if (WhichDir == TEXT("EngineSaved")) return FPaths::EngineSavedDir();
+	else if (WhichDir == TEXT("EnginePlugins")) return FPaths::EnginePluginsDir();
+	else if (WhichDir == TEXT("Root")) return FPaths::RootDir();
+	else if (WhichDir == TEXT("Game")) return FPaths::GameDir();
+	else if (WhichDir == TEXT("GameUser")) return FPaths::GameUserDir();
+	else if (WhichDir == TEXT("GameContent")) return FPaths::GameContentDir();
+	else if (WhichDir == TEXT("GameConfig")) return FPaths::GameConfigDir();
+	else if (WhichDir == TEXT("GameSaved")) return FPaths::GameSavedDir();
+	else if (WhichDir == TEXT("GameIntermediate")) return FPaths::GameIntermediateDir();
+	else if (WhichDir == TEXT("GamePlugins")) return FPaths::GamePluginsDir();
+	else if (WhichDir == TEXT("SourceConfig")) return FPaths::SourceConfigDir();
+	else if (WhichDir == TEXT("GeneratedConfig")) return FPaths::GeneratedConfigDir();
+	else if (WhichDir == TEXT("Sandboxes")) return FPaths::SandboxesDir();
+	else if (WhichDir == TEXT("Profiling")) return FPaths::ProfilingDir();
+	else if (WhichDir == TEXT("ScreenShot")) return FPaths::ScreenShotDir();
+	else if (WhichDir == TEXT("BugIt")) return FPaths::BugItDir();
+	else if (WhichDir == TEXT("VideoCapture")) return FPaths::VideoCaptureDir();
+	else if (WhichDir == TEXT("GameLog")) return FPaths::GameLogDir();
+	else if (WhichDir == TEXT("Automation")) return FPaths::AutomationDir();
+	else if (WhichDir == TEXT("AutomationTransient")) return FPaths::AutomationTransientDir();
+	else if (WhichDir == TEXT("AutomationLog")) return FPaths::AutomationLogDir();
+	else if (WhichDir == TEXT("Cloud")) return FPaths::CloudDir();
+	else if (WhichDir == TEXT("GameDevelopers")) return FPaths::GameDevelopersDir();
+	else if (WhichDir == TEXT("GameUserDeveloper")) return FPaths::GameUserDeveloperDir();
+	else if (WhichDir == TEXT("Diff")) return FPaths::DiffDir();
+	else return TEXT("");
+}

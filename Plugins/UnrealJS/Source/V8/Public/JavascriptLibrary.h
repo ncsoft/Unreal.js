@@ -58,4 +58,16 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")
 	static void SetRootComponent(AActor* Actor, USceneComponent* Component);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")
+	static int32 GetFileSize(UObject* Object, FString Filename);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")
+	static bool ReadFile(UObject* Object, FString Filename);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")
+	static bool WriteFile(UObject* Object, FString Filename);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")
+	static FString GetDir(UObject* Object, FString WhichDir);
 };
