@@ -12,22 +12,22 @@ var devrequire = function (opts) {
     function default_get_change(watcher) {
         var has_changed = function (x) { return watcher.Contains(x) }
         var changed_modules = _.filter(_.values(modules), has_changed)
-        return changed_modules        
-    }    
+        return changed_modules
+    }
     function default_exec() {
-        self.purge_modules()        
+        self.purge_modules()
         return require(target)()
     }
     var get_change = opts.get_change || default_get_change;
     var exec = opts.exec || default_exec;
     var should_notify = opts.notify || (self.JavascriptNotification != undefined);
-    var notification_message = opts.message || "Hot reload(JS)"       
-    
+    var notification_message = opts.message || "Hot reload(JS)"
+
     var cleanup = exec()
     if (!_.isFunction(cleanup)) {
         cleanup = function () { }
     }
-    
+
     /** aggregated watcher */
     var watcher = {
         list : [],
@@ -57,12 +57,12 @@ var devrequire = function (opts) {
             });
         }
     };
-    
+
     watcher.OnChanged.Add(function () {
         var changed_modules = get_change(watcher)
         var module_changed = changed_modules.length > 0
         if (module_changed) {
-            cleanup()            
+            cleanup()
             cleanup = exec()
             gc()
             if (!_.isFunction(cleanup)) {
@@ -81,11 +81,11 @@ var devrequire = function (opts) {
             }
         }
     })
-    
+
     Context.Paths.forEach(function(dir){
         watcher.Watch(dir)
-    });    
-    
+    });
+
     return function () {
         watcher.Discard()
     }

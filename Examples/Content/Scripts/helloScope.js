@@ -1,8 +1,8 @@
 (function (global) {
     "use strict"
-    
+
     let _ = require('lodash')
-    
+
     function rootScope(scope) {
         scope.text = 'Hello Scope!'
         scope.count = 0
@@ -11,19 +11,19 @@
         scope.discard = (item) => {
             scope.items = _.filter(scope.items,(i) => i != item)
         }
-        scope.add = () => {            
+        scope.add = () => {
             scope.items.push({key:Math.random(),value:Math.random()})
         }
         _.range(0,10).forEach(()=>scope.add())
     }
-    
+
     function makePage(design) {
         let UMG = require('UMG');
         let Style = require('style');
-        
+
         let page = UMG.app(design,rootScope)
         let ES = JavascriptEditorStyle;
-                
+
         page.set_styles([
             Style('.full',{'slot.size.size-rule':'Fill'}),
             Style('Button',{'WidgetStyle':ES.GetButtonStyle('FlatButton.Default')},
@@ -36,46 +36,46 @@
             ),
             Style('EditableText',{WidgetStyle:{'font.size':43}})
         ])
-        
+
         return page
     }
-    
+
     function GetPC() {
         return PlayerController.C(GWorld.GetAllActorsOfClass(PlayerController).OutActors[0])
     }
-    
+
     function main() {
-        let cleanup = null        
+        let cleanup = null
         let PC = GetPC()
-        
+
         function setup(design) {
-            let page = makePage(design)                                
-        
-            let widget = WidgetBlueprintLibrary.CreateWidget(GWorld, JavascriptWidget, PC)            
-            widget.JavascriptContext = Context    
+            let page = makePage(design)
+
+            let widget = WidgetBlueprintLibrary.CreateWidget(GWorld, JavascriptWidget, PC)
+            widget.JavascriptContext = Context
             widget.bSupportsKeyboardFocus = true
-        
+
             page.Visibility = 'Visible'
             widget.SetRootWidget(page)
             widget.AddToViewport()
             PC.SetInputMode_UIOnly(page)
             PC.bShowMouseCursor = true
-            
+
             let cleanup = function() {
                 widget.RemoveFromViewport()
             }
             cleanup.$files = design.$files
             return cleanup
         }
-        
-        let devjade = require('devjade')                     
+
+        let devjade = require('devjade')
         cleanup = devjade('views/helloScope.jade',setup)
-        
-        return function () {            
-            cleanup()    
-        }                
+
+        return function () {
+            cleanup()
+        }
     }
-    
+
     try {
         module.exports = () => {
             let cleanup = null
@@ -84,6 +84,6 @@
         }
     }
     catch (e) {
-        require('bootstrap')('helloScope')    
+        require('bootstrap')('helloScope')
     }
 })(this)

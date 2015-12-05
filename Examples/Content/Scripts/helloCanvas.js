@@ -1,27 +1,27 @@
 (function (global) {
     "use strict"
 
-    // find a local player controller    
+    // find a local player controller
     function GetPC() {
         // out-ref function returns an object which contains out-ref params and return param.
         // eg) bool USomeClass::Func(int a, int* b, int* c); -> {$:{bool}, b:{int}, c:{int}}
         return PlayerController.C(GWorld.GetAllActorsOfClass(PlayerController).OutActors[0])
     }
-    
+
     function main() {
         // set cursor type
-        GetPC().DefaultMouseCursor = Symbol('Default') 
-                
+        GetPC().DefaultMouseCursor = Symbol('Default')
+
         // declare our own HUD class
         class MyHUD extends HUD {
-            ctor() {                
+            ctor() {
             }
-            
+
             // override ReceiveDrawHUD
             ReceiveDrawHUD() {
                 // don't forget to its super function
                 super.ReceiveDrawHUD()
-                
+
                 // have fun with Canvas
                 let text = `Hello Canvas : ${new Date().toISOString()}`
 
@@ -38,18 +38,18 @@
                 )
             }
         }
-        
+
         // register new HUD class
-        let MyHUD_C = require('uclass')()(global,MyHUD);            
+        let MyHUD_C = require('uclass')()(global,MyHUD);
 
         // and instantiate it
-        GetPC().ClientSetHUD(MyHUD_C)        
-        
+        GetPC().ClientSetHUD(MyHUD_C)
+
         // no mess to clean
-        return function () {                
-        }                
+        return function () {
+        }
     }
-    
+
     try {
         module.exports = () => {
             let cleanup = null

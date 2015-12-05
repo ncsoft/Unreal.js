@@ -8,9 +8,9 @@ var load = require('jade-load');
 var link = require('jade-linker');
 
 
-module.exports = function (UMG,file) {    
+module.exports = function (UMG,file) {
     var path = {
-        join : function () {            
+        join : function () {
             return Array.prototype.join.call(arguments,'/')
         },
         dirname : function (x) {
@@ -23,7 +23,7 @@ module.exports = function (UMG,file) {
             var y = arr[arr.length-1].split('.')
             if (y.length>1) {
                 y.length = y.length - 1
-            }            
+            }
             return y.join('.')
         }
     }
@@ -34,22 +34,22 @@ module.exports = function (UMG,file) {
         try {
             var ast = load.string(str, options.filename, {
             lex: lex,
-            parse: function (tokens, filename) {          
-                tokens = stripComments(tokens, { filename: filename });        
+            parse: function (tokens, filename) {
+                tokens = stripComments(tokens, { filename: filename });
                 return parse(tokens, filename);
             },
             resolve: function (filename, source) {
                 filename = filename.trim();
                 if (filename[0] !== '/' && !source)
                 throw new Error('the "filename" option is required to use includes and extends with "relative" paths');
-        
+
                 if (filename[0] === '/' && !options.basedir)
                 throw new Error('the "basedir" option is required to use includes and extends with "absolute" paths');
-                    
+
                 filename = path.join(filename[0] === '/' ? options.basedir : path.dirname(source), filename);
-        
+
                 if (path.basename(filename).indexOf('.') === -1) filename += '.jade';
-        
+
                 return filename;
             },
             read: function (filename) {
@@ -62,7 +62,7 @@ module.exports = function (UMG,file) {
             ast = link(ast);
             //ast = filters.handleFilters(ast, exports.filters);
             return ast
-        } catch (err) {    
+        } catch (err) {
             console.log("ERROR!",String(err))
             if (err.code && typeof err.code === 'string' && err.code.substr(0, 4) === 'JADE') {
             runtime.rethrow(
@@ -75,25 +75,25 @@ module.exports = function (UMG,file) {
             throw err;
         }
     }
-    
+
     var filenames = []
-    
-    function umg_jade(ast) {        
-        
+
+    function umg_jade(ast) {
+
         function text(ast) {
             if (ast.val.trim().length == 0) return;
-                        
+
             return UMG.text({},ast.val)
         }
-        function tag(ast) {             
+        function tag(ast) {
             var attrs = {}
             ast.attrs.forEach(function(attr){
-                var val                
-                if (attr.escaped) {                    
-                    val = eval(attr.val);                    
-                } else {                    
-                    val = eval(attr.val); 
-                }      
+                var val
+                if (attr.escaped) {
+                    val = eval(attr.val);
+                } else {
+                    val = eval(attr.val);
+                }
                 if (attrs[attr.name]) {
                     if (_.isArray(attrs[attr.name])) {
                         attrs[attr.name].push(val)
@@ -102,7 +102,7 @@ module.exports = function (UMG,file) {
                     }
                 } else {
                     attrs[attr.name] = val
-                }      
+                }
             })
             var children = [];
             if (ast.name != 'text') {
@@ -115,7 +115,7 @@ module.exports = function (UMG,file) {
             if (UMG[ast.name]) {
                 args = [attrs];
                 args = args.concat(children);
-                
+
                 return UMG[ast.name].apply(UMG,args)
             } else{
                 args = [ast.name,attrs];
@@ -124,29 +124,29 @@ module.exports = function (UMG,file) {
             }
         }
         function block(ast) {
-            if (ast.filename) {                
+            if (ast.filename) {
                 filenames.push(ast.filename)
-            }                        
+            }
             return _.compact(ast.nodes.map(function (node) {
                 if (node.type == 'Tag') {
                     return tag(node);
-                } 
+                }
                 else if (node.type == 'Text')
                 {
                     return text(node)
-                } 
+                }
                 else if (node.type == 'Block')
                 {
                     return block(node)[0]
                 }
             }))
-        }       
-        
+        }
+
         return block(ast);
-    }    
-    
+    }
+
     var ast = test(fs.readFileSync(file,'utf8'),{filename:file})
-    var design = umg_jade(ast)[0];    
+    var design = umg_jade(ast)[0];
     design.$files = _.unique(filenames)
     return design;
 }

@@ -1,6 +1,6 @@
 module.exports = function (widget,vbox) {
   "use strict";
-    
+
   var instantiate = require('instantiator')
 
   function test() {
@@ -8,7 +8,7 @@ module.exports = function (widget,vbox) {
       id : 'button',
       type : Button,
       children : [
-        {          
+        {
           type : TextBlock,
           attrs : {
             Text : 'Reset'
@@ -17,14 +17,14 @@ module.exports = function (widget,vbox) {
       ]
     }
 
-    var widget = instantiate(design)    
+    var widget = instantiate(design)
     vbox.AddChild(widget)
     return widget
-  }    
+  }
 
   var layout = test()
   var reset_button = Button.C(layout.find('button'))
-  
+
   function KeyboardInputManager() {
     this.events = {};
 
@@ -35,21 +35,21 @@ module.exports = function (widget,vbox) {
     reset_button.RemoveFromParent()
   }
 
-  KeyboardInputManager.prototype.on = function (event, callback) {    
+  KeyboardInputManager.prototype.on = function (event, callback) {
     if (!this.events[event]) {
       this.events[event] = [];
     }
     this.events[event].push(callback);
   };
 
-  KeyboardInputManager.prototype.emit = function (event, data) {    
+  KeyboardInputManager.prototype.emit = function (event, data) {
     var callbacks = this.events[event];
     if (callbacks) {
       callbacks.forEach(function (callback) {
         callback(data);
       });
     }
-  };    
+  };
 
   KeyboardInputManager.prototype.listen = function () {
     var map = {
@@ -62,7 +62,7 @@ module.exports = function (widget,vbox) {
       'Down': () => this.emit("move", 0),
       'Right': () => this.emit("move", 3)
     }
-        
+
     UserWidget.C(widget.proxy).OnKeyDown = (geom,keyevent) => {
       var key = KismetInputLibrary.prototype.GetKey(keyevent).KeyName
 
@@ -73,7 +73,7 @@ module.exports = function (widget,vbox) {
       }
       else {
         return WidgetBlueprintLibrary.Unhandled()
-      }      
+      }
     }
 
     reset_button.OnClicked = () => this.restart();

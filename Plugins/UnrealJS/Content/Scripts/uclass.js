@@ -1,9 +1,9 @@
 (function (global) {
     "use strict";
-    
+
     let _ = require('lodash')
     let inputBinding = require('input-binding')
-    
+
     module.exports = function () {
         global.nextUnrealEngineClassId = global.nextUnrealEngineClassId || 0
         function fetchClassId() {
@@ -39,12 +39,12 @@
                     if (v.test(mod)) {
                         out[k] = true
                     }
-                })              
+                })
             })
 
             return out
         }
-        
+
         let RE_class = /\s*class\s+(\w+)(\s+\/\*([^\*]*)\*\/)?(\s+extends\s+([^\s\{]+))?/
         let RE_func = /(\w+)\s*\(([^.)]*)\)\s*(\/\*([^\*]*)\*\/)?.*/
         function register(target, template) {
@@ -54,7 +54,7 @@
             let splits = RE_class.exec(template)
 
             if (!splits) throw "Invalid class definition"
-            
+
             let orgClassName = splits[1]
             let className = `${orgClassName}_C${fetchClassId()}`
             let parentClass = Object.getPrototypeOf(template.prototype).constructor
@@ -88,7 +88,7 @@
                             Type: type,
                             Decorators: arr,
                             IsArray: is_array
-                        }                        
+                        }
                     } else {
                         return null
                     }
@@ -96,7 +96,7 @@
                     return null
                 }
             }
-             
+
             let proxy = {}
             _.each(Object.getOwnPropertyNames(template.prototype), (k) => {
                 if (k == "properties") {
@@ -105,12 +105,12 @@
                     func = func.substr(0, func.lastIndexOf('}'))
                     func = _.compact(func.split('\n').map((l) => l.trim())).map((l) => {
                         if (l.indexOf("this.") != 0) return
-                        l = l.substr(5)                        
-                        return refactored(l)                        
+                        l = l.substr(5)
+                        return refactored(l)
                     })
                     properties = func
                 } else if (k != 'constructor') {
-                    let F = proxy[k] = template.prototype[k]   
+                    let F = proxy[k] = template.prototype[k]
 
                     let s = String(F)
 
@@ -149,11 +149,11 @@
                         })
                         bindings.push(_.extend(binding, pattern(a)))
                     }
-                }               
+                }
             })
-            
+
             let thePackage = JavascriptLibrary.CreatePackage(null,'/Script/Javascript')
-            
+
             let klass = null
 
             if (_.contains(classFlags, "Struct")) {
@@ -174,15 +174,15 @@
                     Properties: properties
                 });
             }
-            
+
             if (target != undefined) {
                 target[orgClassName] = klass;
             }
 
             bindings.forEach((binding) => inputBinding(klass,binding))
             return klass;
-        }         
-        
+        }
+
         return register;
     }
 }(this))

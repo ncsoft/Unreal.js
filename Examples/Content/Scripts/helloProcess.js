@@ -1,25 +1,25 @@
 (function (global) {
     "use strict"
-    
+
     function GetPC() {
         return PlayerController.C(GWorld.GetAllActorsOfClass(PlayerController).OutActors[0])
     }
-    
+
     function makeDisplay() {
         let text = ''
         let appendText = (message) => {
             if (message != '') {
                 text += message
             }
-        } 
-        
+        }
+
         class MyHUD extends HUD {
-            ctor() {                
+            ctor() {
             }
-            
+
             ReceiveDrawHUD() {
-                super.ReceiveDrawHUD()                
-                
+                super.ReceiveDrawHUD()
+
                 this.Canvas.DrawText(
                     GEngine.SmallFont,
                     text,
@@ -33,27 +33,27 @@
                 )
             }
         }
-        
-        let MyHUD_C = require('uclass')()(global,MyHUD);            
+
+        let MyHUD_C = require('uclass')()(global,MyHUD);
         GetPC().ClientSetHUD(MyHUD_C)
-        
+
         return appendText
     }
-    
+
     function main() {
-        let appendText = makeDisplay()    
-        
+        let appendText = makeDisplay()
+
         appendText("executing node.js:\n")
 
-        // This function will be executed within node.js.        
-        function test() { 
-            [1,2,3,4,5].forEach(function(x,i) { 
-                setTimeout(function () { 
-                    console.log('Node.js is speaking ' + x) 
-                }, i * 1000 ) 
-            } ) 
+        // This function will be executed within node.js.
+        function test() {
+            [1,2,3,4,5].forEach(function(x,i) {
+                setTimeout(function () {
+                    console.log('Node.js is speaking ' + x)
+                }, i * 1000 )
+            } )
         }
-         
+
         let alive = true
 
         // Create a node.js process
@@ -64,33 +64,33 @@
         )
 
         if (proc) {
-            let kick = () => {            
+            let kick = () => {
                 // read from pipe!
                 appendText(proc.ReadFromPipe())
-                
+
                 // if process is still running
-                if (proc.IsRunning()) {                
+                if (proc.IsRunning()) {
                     process.nextTick(kick)
                 } else {
                     appendText("<end of execution>")
                 }
             }
-            
-            kick()            
+
+            kick()
         } else {
             appendText("failed to create process")
         }
-        
+
         return function () {
             alive = false
 
             // close the process if we have one
             if (proc) {
                 proc.Close()
-            }    
-        }                                
+            }
+        }
     }
-    
+
     try {
         module.exports = () => {
             let cleanup = null
@@ -99,7 +99,7 @@
         }
     }
     catch (e) {
-        require('bootstrap')('helloProcess')    
+        require('bootstrap')('helloProcess')
     }
 })(this)
 
