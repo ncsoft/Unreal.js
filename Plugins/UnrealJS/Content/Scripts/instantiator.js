@@ -139,8 +139,13 @@
         setter.call(instance,attr)
         return true
       } else if (instance[k] != undefined) {
-        instance[k] = attr;
-        return true
+        if (instance[k] instanceof UObject) {
+          set_attrs(instance[k],attr)
+          return true
+        } else {
+          instance[k] = attr
+          return true
+        }
       } else {
         return false
       }
