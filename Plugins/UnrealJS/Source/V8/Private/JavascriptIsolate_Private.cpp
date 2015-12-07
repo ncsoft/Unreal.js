@@ -11,6 +11,7 @@
 #include "Helpers.h"
 #include "JavascriptGeneratedClass.h"
 #include "StructMemoryInstance.h"
+#include "JavascriptMemoryObject.h"
 
 using namespace v8;
 
@@ -664,6 +665,25 @@ public:
 			Template->PrototypeTemplate()->Set(I.Keyword(name), I.FunctionTemplate(fn));
 		};		
 
+		add_fn("access", [](const FunctionCallbackInfo<Value>& info)
+		{
+			FIsolateHelper I(info.GetIsolate());
+
+			if (info.Length() == 1)
+			{
+				auto Source = Cast<UJavascriptMemoryObject>(UObjectFromV8(info[0]));
+
+				if (Source)
+				{
+					auto ab = ArrayBuffer::New(info.GetIsolate(), Source->GetMemory(), Source->GetSize());
+					ab->Set(I.Keyword("$source"), info[0]);
+					info.GetReturnValue().Set(ab);
+					return;
+				}
+			}
+			I.Throw(TEXT("memory.fork requires JavascriptMemoryObject"));
+		});
+
 		// memory.bind
 		add_fn("bind", [](const FunctionCallbackInfo<Value>& info)
 		{
@@ -688,7 +708,21 @@ public:
 		{
 			FIsolateHelper I(info.GetIsolate());
 
-			GCurrentContents = v8::ArrayBuffer::Contents();
+			if (info.Length() == 1 && info[0]->IsArrayBuffer())
+			{
+				auto arr = info[0].As<ArrayBuffer>();
+
+				if (arr->IsNeuterable())
+				{
+					arr->Neuter();
+
+					GCurrentContents = v8::ArrayBuffer::Contents();
+				}
+				else
+				{
+					I.Throw(TEXT("ArrayBuffer is not neuterable"));
+				}
+			}
 			
 			info.GetReturnValue().Set(info.Holder());
 		});
