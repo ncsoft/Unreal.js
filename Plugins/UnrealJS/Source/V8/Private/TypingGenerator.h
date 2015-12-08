@@ -461,7 +461,8 @@ struct TypingGenerator : TypingGeneratorBase
 
 		w.push("declare class Memory {\n");
 		w.push("\tbind(ab : ArrayBuffer): void;\n");
-		w.push("\tunbind(): void;\n");
+		w.push("\tunbind(ab : ArrayBuffer): void;\n");
+		w.push("\taccess(obj : JavascriptMemoryObject): ArrayBuffer;\n");
 		w.push("}\n\n");
 		w.push("declare var memory : Memory;\n\n");
 
