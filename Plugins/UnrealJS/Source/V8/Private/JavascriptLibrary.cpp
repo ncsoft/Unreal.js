@@ -46,6 +46,16 @@ UObject* UJavascriptLibrary::GetOutermost(UObject* Object)
 	return Object ? Object->GetOutermost() : nullptr;
 }
 
+bool UJavascriptLibrary::HasAnyFlags(UObject* Object, int32 Flags)
+{
+	return Object && Object->HasAnyFlags((EObjectFlags)Flags);
+}
+
+bool UJavascriptLibrary::HasAnyPackageFlags(UPackage* Package, int32 Flags)
+{
+	return Package && Package->HasAnyPackageFlags((EPackageFlags)Flags);
+}
+
 FString UJavascriptLibrary::GetName(UObject* Object)
 {
 	return Object ? Object->GetName() : TEXT("");
@@ -185,4 +195,9 @@ FString UJavascriptLibrary::GetDir(UObject* Object, FString WhichDir)
 	else if (WhichDir == TEXT("GameUserDeveloper")) return FPaths::GameUserDeveloperDir();
 	else if (WhichDir == TEXT("Diff")) return FPaths::DiffDir();
 	else return TEXT("");
+}
+
+bool UJavascriptLibrary::HasUndo(UEngine* Engine)
+{
+	return !!GUndo;
 }

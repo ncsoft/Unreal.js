@@ -36,6 +36,8 @@ struct FWindowsPlatformMemory_Local : public FWindowsPlatformMemory
 	// End FGenericPlatformMemory interface
 };
 
+// @HACK : Dirty hack for monolithic build
+#if !IS_MONOLITHIC
 FGenericPlatformMemory::FSharedMemoryRegion::FSharedMemoryRegion(const FString& InName, uint32 InAccessMode, void* InAddress, SIZE_T InSize)
 	: AccessMode(InAccessMode)
 	, Address(InAddress)
@@ -43,6 +45,7 @@ FGenericPlatformMemory::FSharedMemoryRegion::FSharedMemoryRegion(const FString& 
 {
 	FCString::Strcpy(Name, sizeof(Name) - 1, *InName);
 }
+#endif
 
 FPlatformMemory::FSharedMemoryRegion* FWindowsPlatformMemory_Local::MapNamedSharedMemoryRegion(const FString& InName, bool bCreate, uint32 AccessMode, SIZE_T Size)
 {

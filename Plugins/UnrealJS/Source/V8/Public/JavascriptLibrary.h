@@ -30,6 +30,12 @@ public:
 	static UObject* GetOutermost(UObject* Object);
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")
+	static bool HasAnyFlags(UObject* Object, int32 Flags);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")
+	static bool HasAnyPackageFlags(UPackage* Package, int32 Flags);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")
 	static FString GetName(UObject* Object);
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")
@@ -70,4 +76,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")
 	static FString GetDir(UObject* Object, FString WhichDir);
+		
+	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
+	static bool HasUndo(UEngine* Engine);
 };
