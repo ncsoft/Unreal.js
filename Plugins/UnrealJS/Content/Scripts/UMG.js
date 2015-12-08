@@ -143,7 +143,7 @@
                     function set_data(flag) {                        
                         if (flag && child == null) {
                             child = elem.add_child(template,scope)
-                            elem.SetVisibility('Visible')                                                                            
+                            elem.SetVisibility('SelfHitTestInvisible')                                                                            
                         } else if (!flag && child) {
                             elem.remove_child(child)
                             elem.SetVisibility('Collapsed')
@@ -364,8 +364,8 @@
 
                 var instances = []
                 
-                // @HACK : ?�건 style???�로 ?�긴 control???�???�용?��? ?�는 문제 ?�문??발생?�는 것인??..
-                // ?�실 ??control??extended style??갖고 ?�??직접 ?�용??주면 ??�?같습?�다.
+                // @HACK : ?�건 style???�로 ?�긴 control???�???�용?��? ?�는 문제 ?�문??발생?�는 것인??..
+                // ?�실 ??control??extended style??갖고 ?�??직접 ?�용??주면 ??��?같습?�다.
                 var pending_fn = null
 
                 var Tabs = children.map(function (child) {
