@@ -491,7 +491,7 @@ public:
 					auto GivenStruct = Instance->Struct;
 
 					// Type-checking needed
-					if (GivenStruct == ScriptStruct)
+					if (GivenStruct->IsChildOf(ScriptStruct))
 					{
 						p->CopyCompleteValue(p->ContainerPtrToValuePtr<void>(Buffer), Instance->GetMemory());
 					}
