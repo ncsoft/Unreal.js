@@ -50,6 +50,7 @@
 
         function setup(design) {
             let page = makePage(design)
+            process.flushTicks()
 
             let widget = WidgetBlueprintLibrary.CreateWidget(GWorld, JavascriptWidget, PC)
             widget.JavascriptContext = Context

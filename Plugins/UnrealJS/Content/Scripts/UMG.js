@@ -194,6 +194,7 @@
                     
                     var repeat = attrs.Repeat || {}
                     var item_key = 'item';
+                    let no_direct_op = !build.direct_op
                     build.register( list, scope, attrs, function (obj) {
                         // for scope inheritance
                         function ChildScopeClass() {}
@@ -205,7 +206,7 @@
                         
                         obj.$scope = child_scope        
                         
-                        var row = elem.add_child(template,child_scope,true);                        
+                        var row = elem.add_child(template,child_scope,no_direct_op);
                         child_scope.$apply = function () {
                             if (child_scope.$guard) {
                                 row.update()
@@ -254,12 +255,45 @@
                     item_key = arr[0];
                     var fn = instantiator.interpolate('generator',arr[1]);
                     set_data(fn.call(scope,true));
+                    if (build.direct_op) {
+                        process.nextTick(() => list.RequestListRefresh())
+                    }
                     
                     list.add_binding(function(instance,scope_instance) {                            
                         set_data(fn.call(scope_instance));
                     });
                 } 
             })            
+        },
+        baselist_raw : function (type, opts, template) {
+            if (_.isString(template)) template = UMG.text({},template) 
+            return this.baselist(opts, template, {
+                type : type,
+                direct_op : true,
+                register : function (elem, scope, attrs, obj) {
+                    let prev = []
+                    let bwd = new Map()
+                    elem.RequestListRefresh = function () {
+                        let cur = elem.Items
+                        let added = _.without(cur,...prev)
+                        let removed = _.without(prev,...cur)
+                        added.forEach((item) => {
+                            bwd.set(item,obj(item))
+                        })
+                        removed.forEach((item) => {
+                            bwd.get(item).RemoveFromParent()
+                            bwd.delete(item)
+                        })
+                        prev = cur
+                    }
+                }
+            })
+        },
+        list_div : function (opts, template) {
+            return this.baselist_raw(VerticalBox, opts, template)
+        },
+        list_span : function (opts, template) {
+            return this.baselist_raw(HorizontalBox, opts, template)
         },
         list : function (opts, template) {
             if (_.isString(template)) template = UMG.text({},template) 

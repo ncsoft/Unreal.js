@@ -11,7 +11,12 @@ div
 		text.yellow >
 		EditableText(Binding.Text='text',fn.on-text-changed='text = ^arguments[0]',HintText="Your secret goes here")
 		
-	list.full(repeat='item in items',on-click="discard(item)") 
-		HorizontalBox.small
-			text.full {{item.key}}
-			text.full {{item.value}}
+	span
+		list.full(repeat='item in items',on-click="discard(item)") 
+			HorizontalBox.small
+				text.full {{item.key}}
+				text.full {{item.value}}
+		list_div.full(repeat='item in items',on-click="discard(item)") 
+			HorizontalBox.small
+				text.full {{item.key}}
+				text.full {{item.value}}
