@@ -54,6 +54,9 @@ void UJavascriptEditorInputProcessor::Activate(bool bActivate)
 		if (!bActivated) return;
 		bActivated = false;
 
-		FSlateApplication::Get().SetInputPreProcessor(false);
+		if (FSlateApplication::IsInitialized())
+		{
+			FSlateApplication::Get().SetInputPreProcessor(false);
+		}
 	}
 }
