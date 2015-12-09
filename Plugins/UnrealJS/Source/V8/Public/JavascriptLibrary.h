@@ -2,6 +2,18 @@
 
 #include "JavascriptLibrary.generated.h"
 
+USTRUCT(BlueprintType)
+struct V8_API FDirectoryItem
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "Scripting | Javascript")
+	FString Name;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Scripting | Javascript")
+	bool bIsDirectory;
+};
+
 UCLASS()
 class V8_API UJavascriptLibrary : public UBlueprintFunctionLibrary
 {
@@ -79,4 +91,7 @@ public:
 		
 	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
 	static bool HasUndo(UEngine* Engine);
+
+	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
+	static bool ReadDirectory(UObject* Object, FString Directory, TArray<FDirectoryItem>& OutItems);
 };

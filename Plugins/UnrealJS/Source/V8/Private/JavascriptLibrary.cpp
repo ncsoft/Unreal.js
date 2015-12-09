@@ -201,3 +201,25 @@ bool UJavascriptLibrary::HasUndo(UEngine* Engine)
 {
 	return !!GUndo;
 }
+
+bool UJavascriptLibrary::ReadDirectory(UObject* Object, FString Directory, TArray<FDirectoryItem>& OutItems)
+{
+	struct FLocalVisitor : IPlatformFile::FDirectoryVisitor
+	{
+		FLocalVisitor(TArray<FDirectoryItem>& InResult)
+			: Result(InResult)
+		{}
+
+		TArray<FDirectoryItem>& Result;
+
+		virtual bool Visit(const TCHAR* FilenameOrDirectory, bool bIsDirectory) override
+		{
+			auto Item = new(Result)FDirectoryItem;
+			Item->Name = FilenameOrDirectory;
+			Item->bIsDirectory = bIsDirectory;
+			return true;
+		}
+	} Visitor(OutItems);
+
+	return IPlatformFile::GetPlatformPhysical().IterateDirectory(*Directory, Visitor);	
+}
