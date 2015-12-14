@@ -169,7 +169,7 @@
                     var old_children = list.enumerate_children.bind(list)
                     function filter_out() {
                         old_children(function (row) {
-                            if (!JavascriptWidget.HasValidCachedWidget(row)) {
+                            if (!JavascriptWidget.HasValidCachedWidget(row) || !row.GetParent()) {
                                 list.remove_child(row,true)
                             }
                         })                        
