@@ -310,6 +310,12 @@ public:
 			ExportClass(*It);
 		}
 
+		// Export all enums
+		for (TObjectIterator<UEnum> It; It; ++It)
+		{
+			ExportEnum(*It);
+		}
+
 		ExportConsole(ObjectTemplate);
 
 		ExportMemory(ObjectTemplate);
@@ -1649,6 +1655,30 @@ public:
 			return Local<FunctionTemplate>::New(isolate_, *ExportedFunctionTemplatePtr);
 		}
 	}	
+
+	Local<Value> ExportEnum(UEnum* Enum)
+	{
+		FIsolateHelper I(isolate_);
+
+		Handle<Context> context = Context::New(isolate_);
+		Context::Scope ContextScope(context);
+
+		auto MaxEnumValue = Enum->GetMaxEnumValue();
+		auto arr = Array::New(isolate_, MaxEnumValue);
+
+		for (decltype(MaxEnumValue) Index = 0; Index < MaxEnumValue; ++Index)
+		{
+			auto value = I.Keyword(Enum->GetEnumName(Index));
+			arr->Set(Index, value);
+			arr->Set(value, value);
+		}
+
+		// public name
+		auto name = I.Keyword(FV8Config::Safeify(Enum->GetName()));
+		GetGlobalTemplate()->Set(name, arr);
+
+		return arr;
+	}
 
 	virtual Local<FunctionTemplate> ExportClass(UClass* Class, bool bAutoRegister = true) override
 	{
