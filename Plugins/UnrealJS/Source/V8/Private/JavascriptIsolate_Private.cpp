@@ -292,6 +292,9 @@ public:
 		Isolate::Scope isolate_scope(isolate_);
 		HandleScope handle_scope(isolate_);
 
+		Handle<Context> context = Context::New(isolate_);
+		Context::Scope ContextScope(context);
+
 		// Create a new object template
 		auto ObjectTemplate = ObjectTemplate::New(isolate_);
 
@@ -682,9 +685,6 @@ public:
 	{
 		FIsolateHelper I(isolate_);
 
-		Handle<Context> context = Context::New(isolate_);
-		Context::Scope ContextScope(context);
-
 		Local<FunctionTemplate> Template = I.FunctionTemplate();
 
 		auto add_fn = [&](const char* name, FunctionCallback fn) {			
@@ -752,9 +752,6 @@ public:
 	void ExportMemory(Local<ObjectTemplate> global_templ)
 	{
 		FIsolateHelper I(isolate_);
-
-		Handle<Context> context = Context::New(isolate_);
-		Context::Scope ContextScope(context);
 
 		Local<FunctionTemplate> Template = I.FunctionTemplate();
 
@@ -1658,10 +1655,7 @@ public:
 
 	Local<Value> ExportEnum(UEnum* Enum)
 	{
-		FIsolateHelper I(isolate_);
-
-		Handle<Context> context = Context::New(isolate_);
-		Context::Scope ContextScope(context);
+		FIsolateHelper I(isolate_);		
 
 		auto MaxEnumValue = Enum->GetMaxEnumValue();
 		auto arr = Array::New(isolate_, MaxEnumValue);
