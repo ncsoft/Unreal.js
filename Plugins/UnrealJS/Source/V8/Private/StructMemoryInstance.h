@@ -41,6 +41,10 @@ struct FStructMemoryInstance
 			{
 				Parent = OwnerInstance->AsShared();
 			}
+			else if (OwnerInstance->Parent.IsValid())
+			{
+				Parent = OwnerInstance->Parent;
+			}
 			else
 			{
 				Object = OwnerInstance->Object.Get();
