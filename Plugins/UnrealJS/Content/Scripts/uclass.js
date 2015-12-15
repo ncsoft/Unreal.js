@@ -5,11 +5,6 @@
     let inputBinding = require('input-binding')
 
     module.exports = function () {
-        global.nextUnrealEngineClassId = global.nextUnrealEngineClassId || 0
-        function fetchClassId() {
-            return global.nextUnrealEngineClassId++
-        }
-
         let mod_patterns = {
             bCtrl: /^ctrl$/i,
             bAlt: /^alt$/i,
@@ -56,7 +51,11 @@
             if (!splits) throw "Invalid class definition"
 
             let orgClassName = splits[1]
-            let className = `${orgClassName}_C${fetchClassId()}`
+            let className
+            for (let index=0;;++index) {
+                className = `${orgClassName}_C${index}`
+                if (!UObject.Find(null,className)) break
+            }
             let parentClass = Object.getPrototypeOf(template.prototype).constructor
             if (parentClass == Object) {
                 parentClass = null
