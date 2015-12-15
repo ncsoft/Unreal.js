@@ -228,9 +228,28 @@ struct TypingGenerator : TypingGeneratorBase
 	{
 		TokenWriter w(*this);
 
+		auto enumName = FV8Config::Safeify(source->GetName());
 		w.push("declare type ");
-		w.push(FV8Config::Safeify(source->GetName()));
-		w.push(" = string | symbol;\n");
+		w.push(enumName);
+		w.push(" = string | symbol;\n");		
+
+		w.push("declare var ");
+		w.push(enumName);
+		w.push(" = { ");
+
+		auto MaxEnumValue = source->GetMaxEnumValue();
+
+		for (decltype(MaxEnumValue) Index = 0; Index < MaxEnumValue; ++Index)
+		{
+			auto name = source->GetEnumName(Index);
+			w.push(name);
+			w.push(":");
+			w.push("'");
+			w.push(name);
+			w.push("',");
+		}
+
+		w.push(" };\n");
 
 		Text.Append(*w);
 
