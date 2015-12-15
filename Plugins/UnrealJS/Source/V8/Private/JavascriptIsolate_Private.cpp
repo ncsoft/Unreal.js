@@ -13,6 +13,19 @@
 #include "StructMemoryInstance.h"
 #include "JavascriptMemoryObject.h"
 
+DECLARE_STATS_GROUP(TEXT("Javascript"), STATGROUP_Javascript, STATCAT_Advanced);
+
+DECLARE_CYCLE_STAT(TEXT("Scavenge"), STAT_Scavenge, STATGROUP_Javascript);
+DECLARE_CYCLE_STAT(TEXT("MarkSweepCompact"), STAT_MarkSweepCompact, STATGROUP_Javascript);
+DECLARE_CYCLE_STAT(TEXT("IncrementalMarking"), STAT_IncrementalMarking, STATGROUP_Javascript);
+DECLARE_CYCLE_STAT(TEXT("ProcessWeakCallbacks"), STAT_ProcessWeakCallbacks, STATGROUP_Javascript);
+
+DECLARE_MEMORY_STAT(TEXT("NewSpace"), STAT_NewSpace, STATGROUP_Javascript);
+DECLARE_MEMORY_STAT(TEXT("OldSpace"), STAT_OldSpace, STATGROUP_Javascript);
+DECLARE_MEMORY_STAT(TEXT("CodeSpace"), STAT_CodeSpace, STATGROUP_Javascript);
+DECLARE_MEMORY_STAT(TEXT("MapSpace"), STAT_MapSpace, STATGROUP_Javascript);
+DECLARE_MEMORY_STAT(TEXT("LoSpace"), STAT_LoSpace, STATGROUP_Javascript);
+
 using namespace v8;
 
 template <typename CppType>
@@ -178,7 +191,85 @@ public:
 		isolate->SetData(0, this);
 
 		Delegates = IDelegateManager::Create(isolate);
-	}		
+
+#if STATS
+		SetupCallbacks();
+#endif
+	}			
+
+#if STATS
+	FCycleCounter Counter[4];	
+
+	void OnGCEvent(bool bStart, GCType type, GCCallbackFlags flags)
+	{
+		auto GetStatId = [](int Index) -> TStatId {
+			switch (Index)
+			{
+			case 0: return GET_STATID(STAT_Scavenge);
+			case 1: return GET_STATID(STAT_MarkSweepCompact);
+			case 2: return GET_STATID(STAT_IncrementalMarking);
+			default: return GET_STATID(STAT_ProcessWeakCallbacks);
+			}
+		};
+
+		auto GCEvent = [&](int Index) {
+			if (bStart)
+			{
+				Counter[Index].Start(GetStatId(Index)); 
+			}
+			else
+			{
+				Counter[Index].Stop();
+			}
+		};
+
+		for (int32 Index = 0; Index < ARRAY_COUNT(Counter); ++Index)
+		{
+			if (type & (1 << Index))
+			{
+				GCEvent(Index);
+			}
+		}		
+	}
+
+	static void OnMemoryAllocationEvent(ObjectSpace space, AllocationAction action, int size)
+	{
+		FName StatId;
+		switch (space)
+		{
+		case kObjectSpaceNewSpace: StatId = GET_STATFNAME(STAT_NewSpace); break;
+		case kObjectSpaceOldSpace: StatId = GET_STATFNAME(STAT_OldSpace); break;
+		case kObjectSpaceCodeSpace: StatId = GET_STATFNAME(STAT_CodeSpace); break;
+		case kObjectSpaceMapSpace: StatId = GET_STATFNAME(STAT_MapSpace); break;
+		case kObjectSpaceLoSpace: StatId = GET_STATFNAME(STAT_LoSpace); break;
+		default: return;
+		}
+
+		if (action == kAllocationActionAllocate)
+		{
+			INC_DWORD_STAT_FNAME_BY(StatId, size);
+		}
+		else
+		{
+			DEC_DWORD_STAT_FNAME_BY(StatId, size);
+		}		
+	}
+
+	void SetupCallbacks()
+	{
+		isolate_->AddGCEpilogueCallback([](Isolate* isolate, GCType type, GCCallbackFlags flags) {
+			GetSelf(isolate)->OnGCEvent(false, type, flags);			
+		});		
+
+		isolate_->AddGCPrologueCallback([](Isolate* isolate, GCType type, GCCallbackFlags flags) {
+			GetSelf(isolate)->OnGCEvent(true, type, flags);
+		});
+
+		isolate_->AddMemoryAllocationCallback([](ObjectSpace space, AllocationAction action,int size) {
+			OnMemoryAllocationEvent(space, action, size);
+		}, kObjectSpaceAll, kAllocationActionAll);
+	}
+#endif
 
 	FJavascriptIsolateImplementation()
 	{
@@ -1137,6 +1228,33 @@ public:
 		Template->Set(I.Keyword("GetDefaultObject"), I.FunctionTemplate(fn, ClassToExport));
 	}
 
+	void AddMemberFunction_Class_Find(Local<FunctionTemplate> Template, UClass* ClassToExport)
+	{
+		FIsolateHelper I(isolate_);
+
+		auto fn = [](const FunctionCallbackInfo<Value>& info) {
+			auto ClassToExport = reinterpret_cast<UClass*>((Local<External>::Cast(info.Data()))->Value());
+
+			auto isolate = info.GetIsolate();
+
+			FIsolateHelper I(isolate);
+
+			if (info.Length() == 2 && info[1]->IsString())
+			{
+				auto Outer = UObjectFromV8(info[0]);
+				auto obj = StaticFindObject(ClassToExport, Outer ? Outer : ANY_PACKAGE, *StringFromV8(info[1]->ToString()));
+				auto out = GetSelf(isolate)->ExportObject(obj);
+				info.GetReturnValue().Set(out);
+			}
+			else
+			{
+				I.Throw(TEXT("Missing resource name to load"));
+			}
+		};
+
+		Template->Set(I.Keyword("Find"), I.FunctionTemplate(fn, ClassToExport));
+	}
+
 	void AddMemberFunction_Class_Load(Local<FunctionTemplate> Template, UClass* ClassToExport)
 	{
 		FIsolateHelper I(isolate_);
@@ -1405,8 +1523,9 @@ public:
 		// load
 		if (!ClassToExport->IsChildOf(AActor::StaticClass()))
 		{
-			AddMemberFunction_Class_Load(Template, ClassToExport);			
+			AddMemberFunction_Class_Load(Template, ClassToExport);
 		}
+		AddMemberFunction_Class_Find(Template, ClassToExport);
 
 		AddMemberFunction_Class_GetClassObject(Template, ClassToExport);
 		AddMemberFunction_Class_CreateDefaultSubobject(Template, ClassToExport);

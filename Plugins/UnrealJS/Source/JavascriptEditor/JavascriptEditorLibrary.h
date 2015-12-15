@@ -40,5 +40,8 @@ class JAVASCRIPTEDITOR_API UJavascriptEditorLibrary : public UBlueprintFunctionL
 
 	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
 	static void RedrawAllViewports(UEditorEngine* Engine, bool bInvalidateHitProxies);
+
+	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
+	static void OpenPopupWindow(UWidget* Widget, const FVector2D& PopupDesiredSize, const FText& HeadingText);
 #endif
 };

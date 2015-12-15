@@ -230,7 +230,7 @@ struct TypingGenerator : TypingGeneratorBase
 
 		w.push("declare type ");
 		w.push(FV8Config::Safeify(source->GetName()));
-		w.push(" = string;\n");
+		w.push(" = string | symbol;\n");
 
 		Text.Append(*w);
 
@@ -290,6 +290,9 @@ struct TypingGenerator : TypingGeneratorBase
 				w.push("\tconstructor();\n");
 				w.push("\tconstructor(Outer: UObject);\n");
 				w.push("\tstatic Load(ResourceName: string): ");
+				w.push(name);
+				w.push(";\n");
+				w.push("\tstatic Find(Outer: UObject, ResourceName: string): ");
 				w.push(name);
 				w.push(";\n");
 			}
