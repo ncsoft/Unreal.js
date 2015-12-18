@@ -1,5 +1,6 @@
 #pragma once
 
+#include "JavascriptEditorGlobalDelegates.h"
 #include "JavascriptEditorLibrary.generated.h"
 
 /**
@@ -43,5 +44,26 @@ class JAVASCRIPTEDITOR_API UJavascriptEditorLibrary : public UBlueprintFunctionL
 
 	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
 	static void OpenPopupWindow(UWidget* Widget, const FVector2D& PopupDesiredSize, const FText& HeadingText);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static void GetAllTags(const FJavascriptAssetData& AssetData, TArray<FName>& OutArray);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static bool GetTagValue(const FJavascriptAssetData& AssetData, const FName& Name, FString& OutValue);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static UClass* GetClass(const FJavascriptAssetData& AssetData);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static UPackage* GetPackage(const FJavascriptAssetData& AssetData);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static UObject* GetAsset(const FJavascriptAssetData& AssetData);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static bool IsAssetLoaded(const FJavascriptAssetData& AssetData);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static bool EditorDestroyActor(UWorld* World, AActor* Actor, bool bShouldModifyLevel);
 #endif
 };

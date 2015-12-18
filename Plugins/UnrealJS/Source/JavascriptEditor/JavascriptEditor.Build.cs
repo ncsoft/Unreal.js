@@ -17,6 +17,12 @@ public class JavascriptEditor : ModuleRules
 
         if (UEBuildConfiguration.bBuildEditor == true)
         {
+            PublicDependencyModuleNames.AddRange(
+                    new string[]
+                    {
+                        "AssetRegistry",
+                    }
+                );
             PrivateIncludePaths.AddRange(
                     new string[] {
                         "Editor/GraphEditor/Private",
@@ -48,7 +54,7 @@ public class JavascriptEditor : ModuleRules
                         "V8",
                         "UMG",
                         "Foliage",
-                        "LandscapeEditor",
+                        "LandscapeEditor"
 				    }
             );
         }

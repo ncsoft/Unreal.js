@@ -168,3 +168,48 @@ void UJavascriptEditorLibrary::OpenPopupWindow(UWidget* Widget, const FVector2D&
 		auto Menu = FSlateApplication::Get().PushMenu(ParentWindow.ToSharedRef(), FWidgetPath(), WindowContents, WindowPosition, TransitionEffect, /*bFocusImmediately=*/ true);
 	}
 }
+
+void UJavascriptEditorLibrary::GetAllTags(const FJavascriptAssetData& AssetData, TArray<FName>& OutArray)
+{
+	AssetData.SourceAssetData.TagsAndValues.GetKeys(OutArray);
+}
+
+bool UJavascriptEditorLibrary::GetTagValue(const FJavascriptAssetData& AssetData, const FName& Name, FString& OutValue)
+{
+	auto Value = AssetData.SourceAssetData.TagsAndValues.Find(Name);
+
+	if (Value)
+	{
+		OutValue = *Value;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+UClass* UJavascriptEditorLibrary::GetClass(const FJavascriptAssetData& AssetData)
+{
+	return AssetData.SourceAssetData.GetClass();
+}
+
+UPackage* UJavascriptEditorLibrary::GetPackage(const FJavascriptAssetData& AssetData)
+{
+	return AssetData.SourceAssetData.GetPackage();
+}
+
+UObject* UJavascriptEditorLibrary::GetAsset(const FJavascriptAssetData& AssetData)
+{
+	return AssetData.SourceAssetData.GetAsset();
+}
+
+bool UJavascriptEditorLibrary::IsAssetLoaded(const FJavascriptAssetData& AssetData)
+{
+	return AssetData.SourceAssetData.IsAssetLoaded();
+}
+
+bool UJavascriptEditorLibrary::EditorDestroyActor(UWorld* World, AActor* Actor, bool bShouldModifyLevel)
+{
+	return World->EditorDestroyActor(Actor, bShouldModifyLevel);
+}

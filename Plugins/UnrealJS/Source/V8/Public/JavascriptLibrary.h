@@ -94,4 +94,19 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
 	static bool ReadDirectory(UObject* Object, FString Directory, TArray<FDirectoryItem>& OutItems);
+
+	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
+	static void ReregisterComponent(UActorComponent* ActorComponent);
+
+	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
+	static void RegisterComponent(UActorComponent* ActorComponent);
+
+	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
+	static void UnregisterComponent(UActorComponent* ActorComponent);
+
+	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
+	static bool IsRegistered(UActorComponent* ActorComponent);
+
+	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
+	static void GetAllActorsOfClassAndTags(UObject* WorldContextObject, TSubclassOf<AActor> ActorClass, const TArray<FName>& Tags_Accept, const TArray<FName>& Tags_Deny, TArray<AActor*>& OutActors);
 };

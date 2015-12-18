@@ -223,3 +223,60 @@ bool UJavascriptLibrary::ReadDirectory(UObject* Object, FString Directory, TArra
 
 	return IPlatformFile::GetPlatformPhysical().IterateDirectory(*Directory, Visitor);	
 }
+
+void UJavascriptLibrary::ReregisterComponent(UActorComponent* ActorComponent)
+{
+	ActorComponent->ReregisterComponent();
+}
+
+void UJavascriptLibrary::RegisterComponent(UActorComponent* ActorComponent)
+{
+	ActorComponent->RegisterComponent();
+}
+
+void UJavascriptLibrary::UnregisterComponent(UActorComponent* ActorComponent)
+{
+	ActorComponent->UnregisterComponent();
+}
+
+bool UJavascriptLibrary::IsRegistered(UActorComponent* ActorComponent)
+{
+	return ActorComponent->IsRegistered();
+}
+
+void UJavascriptLibrary::GetAllActorsOfClassAndTags(UObject* WorldContextObject, TSubclassOf<AActor> ActorClass, const TArray<FName>& Tags_Accept, const TArray<FName>& Tags_Deny, TArray<AActor*>& OutActors)
+{
+	OutActors.Empty();
+
+	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject);
+
+	// We do nothing if not class provided, rather than giving ALL actors!
+	if (ActorClass != NULL && World != nullptr)
+	{
+		for (TActorIterator<AActor> It(World, ActorClass); It; ++It)
+		{
+			AActor* Actor = *It;
+			if (!Actor->IsPendingKill())
+			{
+				bool bReject{ false };
+				bool bAccept{ false };
+				for (const auto& Tag : Actor->Tags)
+				{
+					if (Tags_Deny.Contains(Tag))
+					{
+						bReject = true;
+						break;
+					}
+					if (!bAccept && Tags_Accept.Contains(Tag))
+					{
+						bAccept = true;
+					}
+				}
+				if (bAccept && !bReject)
+				{
+					OutActors.Add(Actor);
+				}				
+			}
+		}
+	}
+}
