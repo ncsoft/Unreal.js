@@ -48,6 +48,11 @@ Apache2
 
   ![](https://github.com/ncsoft/Unreal.js/blob/master/doc/images/UnrealJs_springy.gif)
 
+#### Editor extension
+- [View source code](https://github.com/ncsoft/Unreal.js/blob/master/Examples/Content/Scripts/helloSpiralGenerator.js)
+
+  ![](https://github.com/ncsoft/Unreal.js/blob/master/doc/images/UnrealJs_editor.gif)
+  
 #### Create a new actor
 ```js
 let myActor = new Actor(GWorld,{X:10,Y:20,Z:30});
