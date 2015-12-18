@@ -49,7 +49,7 @@ Apache2
   ![](https://github.com/ncsoft/Unreal.js/blob/master/doc/images/UnrealJs_springy.gif)
 
 #### Editor extension
-- [View source code](https://github.com/ncsoft/Unreal.js/blob/master/Examples/Content/Scripts/helloSpiralGenerator.js)
+- [View source code](https://github.com/ncsoft/Unreal.js/blob/master/Examples/Content/Scripts/extension-spiralGenerator.js)
 
   ![](https://github.com/ncsoft/Unreal.js/blob/master/doc/images/UnrealJs_editor.gif)
   
