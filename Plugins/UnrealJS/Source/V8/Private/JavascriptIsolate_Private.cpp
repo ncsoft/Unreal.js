@@ -62,6 +62,7 @@ class FJavascriptIsolateImplementation : public FJavascriptIsolate
 public:
 	FJavascriptContext* GetContext()
 	{
+
 		return FJavascriptContext::FromV8(isolate_->GetCurrentContext());
 	}
 
@@ -1808,15 +1809,17 @@ public:
 	template <typename U, typename T>
 	void SetWeak(UniquePersistent<U>& Handle, T* GarbageCollectedObject)
 	{		
-		typedef TPair<FJavascriptIsolateImplementation*, T*> WeakData;
+		typedef TPair<FJavascriptContext*, T*> WeakData;
 		typedef typename WeakData::KeyInitType WeakDataKeyInitType;
 		typedef typename WeakData::ValueInitType WeakDataValueInitType;
 		typedef TPairInitializer<WeakDataKeyInitType, WeakDataValueInitType> InitializerType;
 
-		Handle.template SetWeak<WeakData>(new WeakData(InitializerType(this, GarbageCollectedObject)), [](const WeakCallbackData<U, WeakData>& data) {
+		Handle.template SetWeak<WeakData>(new WeakData(InitializerType(GetContext(), GarbageCollectedObject)), [](const WeakCallbackData<U, WeakData>& data) {
 			auto Parameter = data.GetParameter();
 
-			Parameter->Key->OnGarbageCollectedByV8(Parameter->Value);
+			auto Context = Parameter->Key;
+			auto Self = static_cast<FJavascriptIsolateImplementation*>(Context->Environment.Get());
+			Self->OnGarbageCollectedByV8(Context,Parameter->Value);
 
 			delete Parameter;
 		});
@@ -1867,20 +1870,20 @@ public:
 		SetWeak(result, MemoryObject.Get());
 	}
 
-	void OnGarbageCollectedByV8(FStructMemoryInstance* Memory)
+	void OnGarbageCollectedByV8(FJavascriptContext* Context, FStructMemoryInstance* Memory)
 	{
 		// We should keep ourselves clean
-		GetContext()->MemoryToObjectMap.Remove(Memory->AsShared());
+		Context->MemoryToObjectMap.Remove(Memory->AsShared());
 	}
 
-	void OnGarbageCollectedByV8(UObject* Object)
+	void OnGarbageCollectedByV8(FJavascriptContext* Context, UObject* Object)
 	{
 		if (auto klass = Cast<UClass>(Object))
 		{
 			ClassToFunctionTemplateMap.Remove(klass);
 		}
 
-		GetContext()->ObjectToObjectMap.Remove(Object);		
+		Context->ObjectToObjectMap.Remove(Object);		
 	}	
 
 	static FJavascriptIsolateImplementation* GetSelf(Isolate* isolate)
