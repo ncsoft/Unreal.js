@@ -280,3 +280,8 @@ void UJavascriptLibrary::GetAllActorsOfClassAndTags(UObject* WorldContextObject,
 		}
 	}
 }
+
+int32 UJavascriptLibrary::GetCurrentProcessId()
+{
+	return FPlatformProcess::GetCurrentProcessId();
+}

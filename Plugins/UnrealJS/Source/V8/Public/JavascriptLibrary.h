@@ -109,4 +109,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
 	static void GetAllActorsOfClassAndTags(UObject* WorldContextObject, TSubclassOf<AActor> ActorClass, const TArray<FName>& Tags_Accept, const TArray<FName>& Tags_Deny, TArray<AActor*>& OutActors);
+
+	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
+	static int32 GetCurrentProcessId();
 };
