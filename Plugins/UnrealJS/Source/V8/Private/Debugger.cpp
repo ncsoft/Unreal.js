@@ -48,7 +48,7 @@ namespace
 		send("\r\n");
 		send(msg);
 
-		//UE_LOG(Javascript, Log, TEXT("Reply : %s"), UTF8_TO_TCHAR(msg));
+		UE_LOG(Javascript, Log, TEXT("Reply : %s"), UTF8_TO_TCHAR(msg));
 	}
 
 	void Broadcast(const char* msg)
@@ -58,7 +58,7 @@ namespace
 			SendTo(MainSocket,msg);
 		}
 
-		//UE_LOG(Javascript, Log, TEXT("Broadcast : %s"), UTF8_TO_TCHAR(msg));
+		UE_LOG(Javascript, Log, TEXT("Broadcast : %s"), UTF8_TO_TCHAR(msg));
 	}
 }
 
@@ -124,6 +124,26 @@ public:
 		thread = std::thread([this, InPort]{Main(InPort); });				
 	}
 
+	static FString DumpJSON(Handle<Value> value,int32 depth = 1) 
+	{
+		if (depth <= 0) return TEXT("<deep>");
+
+		if (value.IsEmpty()) return TEXT("(empty)");
+		if (!value->IsObject()) return StringFromV8(value);
+		auto Obj = value.As<Object>();
+		auto Names = Obj->GetOwnPropertyNames();
+		auto len = Names->Length();
+		TArray<FString> values;
+		for (decltype(len) Index = 0; Index < len; ++Index)
+		{
+			auto Name = Names->Get(Index);
+			auto Value = Obj->Get(Name);
+			values.Add(FString::Printf(TEXT("%s : %s"), *StringFromV8(Name), *DumpJSON(Value,depth-1)));
+		}
+		return FString::Printf(TEXT("{%s}"), *FString::Join(values,TEXT(",")));
+	}
+
+
 	void Install()
 	{
 		Debug::SetMessageHandler([](const Debug::Message& message){
@@ -151,6 +171,25 @@ public:
 				}
 			}
 		});
+
+		Debug::SetDebugEventListener([](const v8::Debug::EventDetails& event_details) {
+			static const TCHAR* EventTypes[] = { 
+				TEXT("Break"), 
+				TEXT("Exception"), 
+				TEXT("NewFunction"), 
+				TEXT("BeforeCompile"), 
+				TEXT("AfterCompile"), 
+				TEXT("CompileError"), 
+				TEXT("PromiseEvent"), 
+				TEXT("AsyncTaskEvent") 
+			};
+			UE_LOG(Javascript, Log, TEXT("DebugEvent Event(%s) State(%s) Data(%s)"), 
+				EventTypes[event_details.GetEvent()],
+				*DumpJSON(event_details.GetExecutionState()),
+				*DumpJSON(event_details.GetEventData())
+				);
+		});
+
 	}
 
 	void Uninstall()
@@ -284,7 +323,7 @@ public:
 		};
 
 		auto process = [&](const FString& content) {
-			//UE_LOG(Javascript, Log, TEXT("Received: %s"), *content);
+			UE_LOG(Javascript, Log, TEXT("Received: %s"), *content);
 			command(content);
 			return content.Find(TEXT("\"type\":\"request\",\"command\":\"disconnect\"}")) == INDEX_NONE;
 		};
@@ -327,7 +366,36 @@ public:
 				if (!Socket.Receive(reinterpret_cast<uint8*>(buffer), content_length)) break;
 
 				buffer[content_length] = '\0';
-				if (!process(UTF8_TO_TCHAR(buffer))) return ReportError("failed to process");				
+				FString Buffer = buffer;
+
+				// UGLY hack
+				if (Buffer.Contains(TEXT("setbreakpoint")))
+				{
+					int32 Index = Buffer.Find(TEXT("script\",\"target"));
+
+					auto lex = [&](int32 search) {
+						return Buffer.Find(TEXT("\""), ESearchCase::IgnoreCase, ESearchDir::FromStart, search);
+					};
+
+					if (Index > 0)
+					{
+						int32 ClosingQuote = lex(Index + 14);
+						if (ClosingQuote > 0)
+						{
+							int32 StartQuote = lex(ClosingQuote + 1);
+							if (StartQuote > 0)
+							{
+								int32 EndQuote = lex(StartQuote + 1);
+								if (EndQuote > 0)
+								{
+									auto Name = Buffer.Mid(StartQuote + 1,1).ToUpper() + Buffer.Mid(StartQuote + 2, EndQuote - StartQuote - 2);
+									Buffer = Buffer.Left(StartQuote + 1) + Name + Buffer.Mid(EndQuote);
+								}
+							}
+						}
+					}
+				}
+				if (!process(Buffer)) return ReportError("failed to process");				
 			}			
 		}
 
