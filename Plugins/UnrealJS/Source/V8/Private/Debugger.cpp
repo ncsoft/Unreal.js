@@ -14,6 +14,8 @@
 #include "HideWindowsPlatformTypes.h"
 #endif
 
+#define DEBUG_V8_DEBUGGER 0
+
 #include "Translator.h"
 
 using namespace v8;
@@ -48,7 +50,9 @@ namespace
 		send("\r\n");
 		send(msg);
 
+#if DEBUG_V8_DEBUGGER
 		UE_LOG(Javascript, Log, TEXT("Reply : %s"), UTF8_TO_TCHAR(msg));
+#endif
 	}
 
 	void Broadcast(const char* msg)
@@ -57,8 +61,9 @@ namespace
 		{
 			SendTo(MainSocket,msg);
 		}
-
+#if DEBUG_V8_DEBUGGER
 		UE_LOG(Javascript, Log, TEXT("Broadcast : %s"), UTF8_TO_TCHAR(msg));
+#endif
 	}
 }
 
@@ -172,6 +177,7 @@ public:
 			}
 		});
 
+#if DEBUG_V8_DEBUGGER
 		Debug::SetDebugEventListener([](const v8::Debug::EventDetails& event_details) {
 			static const TCHAR* EventTypes[] = { 
 				TEXT("Break"), 
@@ -189,7 +195,7 @@ public:
 				*DumpJSON(event_details.GetEventData())
 				);
 		});
-
+#endif
 	}
 
 	void Uninstall()
@@ -323,7 +329,9 @@ public:
 		};
 
 		auto process = [&](const FString& content) {
+#if DEBUG_V8_DEBUGGER
 			UE_LOG(Javascript, Log, TEXT("Received: %s"), *content);
+#endif
 			command(content);
 			return content.Find(TEXT("\"type\":\"request\",\"command\":\"disconnect\"}")) == INDEX_NONE;
 		};
@@ -366,36 +374,7 @@ public:
 				if (!Socket.Receive(reinterpret_cast<uint8*>(buffer), content_length)) break;
 
 				buffer[content_length] = '\0';
-				FString Buffer = buffer;
-
-				// UGLY hack
-				if (Buffer.Contains(TEXT("setbreakpoint")))
-				{
-					int32 Index = Buffer.Find(TEXT("script\",\"target"));
-
-					auto lex = [&](int32 search) {
-						return Buffer.Find(TEXT("\""), ESearchCase::IgnoreCase, ESearchDir::FromStart, search);
-					};
-
-					if (Index > 0)
-					{
-						int32 ClosingQuote = lex(Index + 14);
-						if (ClosingQuote > 0)
-						{
-							int32 StartQuote = lex(ClosingQuote + 1);
-							if (StartQuote > 0)
-							{
-								int32 EndQuote = lex(StartQuote + 1);
-								if (EndQuote > 0)
-								{
-									auto Name = Buffer.Mid(StartQuote + 1,1).ToUpper() + Buffer.Mid(StartQuote + 2, EndQuote - StartQuote - 2);
-									Buffer = Buffer.Left(StartQuote + 1) + Name + Buffer.Mid(EndQuote);
-								}
-							}
-						}
-					}
-				}
-				if (!process(Buffer)) return ReportError("failed to process");				
+				if (!process(buffer)) return ReportError("failed to process");				
 			}			
 		}
 

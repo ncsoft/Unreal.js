@@ -1195,6 +1195,13 @@ public:
 		try_catch.SetVerbose(true);
 
 		auto Path = Filename;
+#if PLATFORM_WINDOWS
+		// HACK for Visual Studio Code
+		if (Path[1] == ':')
+		{
+			Path = Path.Mid(0, 1).ToLower() + Path.Mid(1);
+		}
+#endif
 		auto source = V8_String(isolate(), Script);
 		auto path = V8_String(isolate(), Path);
 		ScriptOrigin origin(path, Integer::New(isolate(), -line_offset));
