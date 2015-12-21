@@ -123,6 +123,7 @@ public:
 		context_.Reset(isolate_,context);
 
 		StopRequested.Reset();
+		StopAck.Reset();
 
 		Install();
 
@@ -222,8 +223,20 @@ public:
 	{
 		StopRequested.Set(true);
 
+		if (WorkingOn)
+		{
+			WorkingOn->Close();
+		}
+
+		while (!StopAck.GetValue())
+		{
+			Debug::ProcessDebugMessages();
+		}
+
 		thread.join();
 	}	
+
+	FSocket* WorkingOn{ nullptr };
 	
 	bool Main(int32 Port)
 	{
@@ -266,7 +279,11 @@ public:
 
 				UE_LOG(Javascript, Log, TEXT("V8 Debugger session start"));
 
+				WorkingOn = ClientSocket;
+
 				Logic(ClientSocket);
+
+				WorkingOn = nullptr;
 
 				UE_LOG(Javascript, Log, TEXT("V8 Debugger session stop"));
 
@@ -287,6 +304,8 @@ public:
 		}
 
 		Cleanup_Socket();		
+
+		StopAck.Set(true);
 
 		return true;
 	}
@@ -352,7 +371,7 @@ public:
 		FString json_text;
 		int32 content_length = -1;
 
-		for (;;)
+		while (!StopRequested.GetValue())
 		{
 			FString line, left, right;
 			if (!read_line(line)) break;			
@@ -398,6 +417,7 @@ public:
 		return ReportError(Error);
 	}
 
+	FThreadSafeCounter StopAck;
 	FThreadSafeCounter StopRequested;	
 	FThreadSafeCounter Busy;
 };
