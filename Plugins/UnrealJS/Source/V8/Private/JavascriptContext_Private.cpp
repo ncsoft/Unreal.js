@@ -42,6 +42,23 @@ static TArray<FString> StringArrayFromV8(Handle<Value> InArray)
 	return OutArray;
 };
 
+#if WITH_EDITOR
+template <typename Type>
+static void SetMetaData(Type* Object, const FString& Key, const FString& Value)
+{
+	if (Key.Compare(TEXT("None"), ESearchCase::IgnoreCase) == 0 || Key.Len() == 0) return;
+
+	if (Value.Len() == 0)
+	{
+		Object->SetMetaData(*Key, TEXT("true"));
+	}
+	else
+	{
+		Object->SetMetaData(*Key, *Value);
+	}	
+}
+#endif
+
 static void SetFunctionFlags(UFunction* Function, const TArray<FString>& Flags)
 {
 	static struct FKeyword {
@@ -52,6 +69,9 @@ static void SetFunctionFlags(UFunction* Function, const TArray<FString>& Flags)
 		{ TEXT("Server"), FUNC_Net | FUNC_NetServer },
 		{ TEXT("Client"), FUNC_Net | FUNC_NetClient },
 		{ TEXT("NetMulticast"), FUNC_Net | FUNC_NetMulticast },
+		{ TEXT("Event"), FUNC_Event },
+		{ TEXT("Delegate"), FUNC_Delegate },
+		{ TEXT("MulticastDelegate"), FUNC_MulticastDelegate | FUNC_Delegate },
 		{ TEXT("Reliable"), FUNC_NetReliable },
 		{ TEXT("Unreliable"), FUNC_NetResponse }
 	};
@@ -64,13 +84,23 @@ static void SetFunctionFlags(UFunction* Function, const TArray<FString>& Flags)
 			Left = Flag;
 		}
 
+		bool bHasMatch = false;
 		for (const auto& Keyword : Keywords)
 		{
 			if (Left.Compare(Keyword.Keyword, ESearchCase::IgnoreCase) == 0)
 			{
 				Function->FunctionFlags |= Keyword.Flags;
+				bHasMatch = true;
+				break;
 			}
 		}
+
+#if WITH_EDITOR
+		if (!bHasMatch)
+		{			
+			SetMetaData(Function, Left, Right);
+		}
+#endif
 	}
 }
 
@@ -100,30 +130,31 @@ static void SetClassFlags(UClass* Class, const TArray<FString>& Flags)
 		if (!Flag.Split(TEXT(":"), &Left, &Right))
 		{
 			Left = Flag;
-		}
+		}		
 
-#if WITH_EDITOR
-		if (Left.Compare(TEXT("BlueprintType"), ESearchCase::IgnoreCase) == 0)
-		{
-			Class->SetMetaData(TEXT("BlueprintType"), TEXT("true"));
-		}
-		else if (Left.Compare(TEXT("BlueprintSpawnableComponent"), ESearchCase::IgnoreCase) == 0)
-		{
-			Class->SetMetaData(TEXT("BlueprintSpawnableComponent"), TEXT("true"));
-		}
-#endif
-
+		bool bHasMatch{ false };
 		for (const auto& Keyword : Keywords)
 		{
 			if (Left.Compare(Keyword.Keyword, ESearchCase::IgnoreCase) == 0)
 			{
 				Class->ClassFlags |= Keyword.Flags;
+				bHasMatch = true;
+				break;
 			}
 			else if (Left.StartsWith(TEXT("Not")) && Left.Mid(3).Compare(Keyword.Keyword, ESearchCase::IgnoreCase) == 0)
 			{
 				Class->ClassFlags &= ~Keyword.Flags;
+				bHasMatch = true;
+				break;
 			}
 		}
+
+#if WITH_EDITOR
+		if (!bHasMatch)
+		{
+			SetMetaData(Class, Left, Right);			
+		}
+#endif
 	}
 }
 
@@ -145,13 +176,24 @@ static void SetStructFlags(UScriptStruct* Struct, const TArray<FString>& Flags)
 			Left = Flag;
 		}
 
+		bool bHasMatch{ false };
 		for (const auto& Keyword : Keywords)
 		{
 			if (Left.Compare(Keyword.Keyword, ESearchCase::IgnoreCase) == 0)
 			{
 				Struct->StructFlags = (EStructFlags)(Struct->StructFlags | Keyword.Flags);
+				bHasMatch = true;
+				break;
 			}			
 		}
+
+
+#if WITH_EDITOR
+		if (!bHasMatch)
+		{
+			SetMetaData(Struct, Left, Right);
+		}
+#endif
 	}
 }
 
@@ -184,12 +226,7 @@ static UProperty* CreateProperty(UObject* Outer, FName Name, const TArray<FStrin
 			{ TEXT("VisibleInstanceOnly"), CPF_Edit | CPF_EditConst | CPF_DisableEditOnTemplate },
 			{ TEXT("VisibleDefaultsOnly"), CPF_Edit | CPF_EditConst | CPF_DisableEditOnInstance },
 		};
-
-		static const TCHAR* MetaDataFields[] = { 
-			TEXT("Category"), 
-			TEXT("DisplayName")
-		};
-
+		
 		for (const auto& Flag : Decorators)
 		{
 			FString Left, Right;
@@ -198,21 +235,8 @@ static UProperty* CreateProperty(UObject* Outer, FName Name, const TArray<FStrin
 				Left = Flag;
 			}
 
-#if WITH_EDITOR
-			bool bWasMeta = false;
-			auto len = ARRAY_COUNT(MetaDataFields);
-			for (decltype(len) Index = 0; Index < len; ++Index)
-			{
-				const auto MetaDataField = MetaDataFields[Index];
-				if (Left.Compare(MetaDataField, ESearchCase::IgnoreCase) == 0)
-				{
-					NewProperty->SetMetaData(MetaDataField, *Right);
-					bWasMeta = true;
-					break;
-				}
-			}
-			if (bWasMeta) continue;
-#endif			
+
+			bool bHasMatch{ false };
 			
 			for (const auto& Keyword : Keywords)
 			{
@@ -224,8 +248,18 @@ static UProperty* CreateProperty(UObject* Outer, FName Name, const TArray<FStrin
 					{
 						NewProperty->RepNotifyFunc = FName(*Right);
 					}
+
+					bHasMatch = true;
+					break;
 				}
 			}
+
+#if WITH_EDITOR
+			if (!bHasMatch)
+			{
+				SetMetaData(NewProperty, Left, Right);
+			}
+#endif
 		}
 
 		return NewProperty;
@@ -1082,9 +1116,12 @@ public:
 #endif
 			if (!inner2(current_script_path))
 			{
-				for (const auto& path : Self->Paths)
+				if (!inner2("."))
 				{
-					if (inner2(path)) break;
+					for (const auto& path : Self->Paths)
+					{
+						if (inner2(path)) break;
+					}
 				}
 			}
 
