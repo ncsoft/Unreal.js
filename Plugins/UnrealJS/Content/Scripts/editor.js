@@ -6,12 +6,13 @@
 	if (has_module) {		
 		let _ = require('lodash')
 		let extensions = []
+        let root_path = Root.GetDir('GameContent') + 'Scripts'
 		
 		function read_dir(dir) {
 			let out = Root.ReadDirectory(dir)
 			if (out.$) {				
 				let items = _.filter(out.OutItems,(item) => !item.bIsDirectory && /extension[^\.]*\.js$/.test(item.Name))
-				extensions = extensions.concat(items.map((item) => item.Name))
+				extensions = extensions.concat(items.map((item) => item.Name.substr(root_path.length+1)))
 				out.OutItems.forEach((item) => {
 					if (item.bIsDirectory) {
 						read_dir(item.Name)
@@ -20,7 +21,7 @@
 			}
 		} 
 	
-		read_dir(Root.GetDir('GameContent') + 'Scripts')
+		read_dir(root_path)
 		
 		function spawn(what) {
 			try {
