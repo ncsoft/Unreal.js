@@ -850,7 +850,7 @@ public:
 					Function->ReturnValueOffset = MAX_uint16;
 					Function->FirstPropertyToInit = NULL;
 
-					Function->Script.Add(EX_Nothing);
+					Function->Script.Add(EX_EndFunctionParms);
 				};
 
 				// Overridden function should have its parent function
