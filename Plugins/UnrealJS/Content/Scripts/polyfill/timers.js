@@ -27,6 +27,7 @@
     }
 
     target.process = {
+        pid: JavascriptLibrary.GetCurrentProcessId(),
         nextTick: function (fn) {
             nextTicks.push(fn)
         },
