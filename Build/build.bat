@@ -8,6 +8,8 @@ call "%UE4PATH%\Engine\Build\BatchFiles\RocketGenerateProjectFiles.bat" %~dp0\Bu
 call "%VS140COMNTOOLS%"\vsvars32.bat
 xcopy ..\Plugins .\Plugins /s /d /k /r /y /i
 msbuild build.sln /p:Configuration="Development Editor" /p:Platform=Win64
+msbuild build.sln /p:Configuration="Shipping" /p:Platform=Win64
+REM goto exit
 xcopy Plugins\UnrealJS\Binaries\*.dll ..\Plugins\UnrealJS\Binaries /s /d /k /y /i
 
 rd /s/q Staging
@@ -19,3 +21,4 @@ copy Plugins\UnrealJS\* Staging\Plugins\UnrealJS
 del Release.zip
 powershell.exe -nologo -noprofile -command "& { Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::CreateFromDirectory('Staging', 'Release.zip') }"
 rd /s/q Staging
+:exit
