@@ -33,7 +33,7 @@ public class V8 : ModuleRules
             "Core", "CoreUObject", "Engine"
         });
 
-        if ((Target.Platform == UnrealTargetPlatform.Win64) || (Target.Platform == UnrealTargetPlatform.Win32))
+        if (UEBuildConfiguration.bBuildEditor)
         {
             PublicDependencyModuleNames.AddRange(new string[]
             {
