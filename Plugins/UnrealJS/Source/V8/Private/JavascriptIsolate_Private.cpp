@@ -10,6 +10,7 @@
 #include "JavascriptContext.h"
 #include "Helpers.h"
 #include "JavascriptGeneratedClass.h"
+#include "JavascriptGeneratedClass_Native.h"
 #include "StructMemoryInstance.h"
 #include "JavascriptMemoryObject.h"
 
@@ -1435,66 +1436,55 @@ public:
 
 			// Called by user (via 'new' operator)
 			if (!Associated)
-			{
+			{				
+				const bool bIsJavascriptClass = 
+					ClassToExport->GetClass()->IsChildOf(UJavascriptGeneratedClass::StaticClass()) ||
+					ClassToExport->GetClass()->IsChildOf(UJavascriptGeneratedClass_Native::StaticClass());
+
+				auto PreCreate = [&]() {
+					if (bIsJavascriptClass)
+					{
+						GetSelf(isolate)->ObjectUnderConstructionStack.Push(FPendingClassConstruction(self, ClassToExport));
+					}
+				};
+
 				// Custom constructors
 				if (ClassToExport->IsChildOf(AActor::StaticClass()))
 				{
-					if (info.Length() > 0)
+					if (info.Length() == 0)
 					{
-						auto World = Cast<UWorld>(UObjectFromV8(info[0]));
-						if (!World)
-						{
-							I.Throw(TEXT("Missing world to spawn"));
-							return;
-						}						
+						I.Throw(TEXT("Missing world to spawn"));
+						return;
+					}
+
+					auto World = Cast<UWorld>(UObjectFromV8(info[0]));
+					if (!World)
+					{
+						I.Throw(TEXT("Missing world to spawn"));
+						return;
+					}
 						
-						FVector Location(ForceInitToZero);
-						FRotator Rotation(ForceInitToZero);
+					FVector Location(ForceInitToZero);
+					FRotator Rotation(ForceInitToZero);
 						
-						UPackage* CoreUObjectPackage = UObject::StaticClass()->GetOutermost();
-						static UScriptStruct* VectorStruct = FindObjectChecked<UScriptStruct>(CoreUObjectPackage, TEXT("Vector"));
-						static UScriptStruct* RotatorStruct = FindObjectChecked<UScriptStruct>(CoreUObjectPackage, TEXT("Rotator"));
-						static TStructReader<FVector> VectorReader(VectorStruct);
-						static TStructReader<FRotator> RotatorReader(RotatorStruct);
+					UPackage* CoreUObjectPackage = UObject::StaticClass()->GetOutermost();
+					static UScriptStruct* VectorStruct = FindObjectChecked<UScriptStruct>(CoreUObjectPackage, TEXT("Vector"));
+					static UScriptStruct* RotatorStruct = FindObjectChecked<UScriptStruct>(CoreUObjectPackage, TEXT("Rotator"));
+					static TStructReader<FVector> VectorReader(VectorStruct);
+					static TStructReader<FRotator> RotatorReader(RotatorStruct);
 
-						if (info.Length() > 1)
+					if (info.Length() > 1)
+					{
+						if (!VectorReader.Read(isolate, info[1], Location)) return;							
+
+						if (info.Length() > 2)
 						{
-							if (!VectorReader.Read(isolate, info[1], Location)) return;							
-
-							if (info.Length() > 2)
-							{
-								if (!RotatorReader.Read(isolate, info[2], Rotation)) return;								
-							}
+							if (!RotatorReader.Read(isolate, info[2], Rotation)) return;								
 						}
+					}
 
-						const bool bIsJavascriptClass = ClassToExport->GetClass()->IsChildOf(UJavascriptGeneratedClass::StaticClass());
-						if (bIsJavascriptClass)
-						{
-							GetSelf(isolate)->ObjectUnderConstructionStack.Push(FPendingClassConstruction(self, ClassToExport));
-						}
-						
-						Associated = World->SpawnActor(ClassToExport, &Location, &Rotation);
-
-						if (bIsJavascriptClass)
-						{
-							const auto& Last = GetSelf(isolate)->ObjectUnderConstructionStack.Last();
-
-							bool bSafeToQuit = Last.bCatched;							
-
-							GetSelf(isolate)->ObjectUnderConstructionStack.Pop();
-
-							if (bSafeToQuit)
-							{
-								return;
-							}
-						}
-
-						if (!Associated)
-						{
-							I.Throw(TEXT("Failed to spawn"));
-							return;
-						}						
-					}					
+					PreCreate();
+					Associated = World->SpawnActor(ClassToExport, &Location, &Rotation);
 				}
 				else
 				{
@@ -1509,14 +1499,32 @@ public:
 						}
 					}
 
-					Associated = NewObject<UObject>(Outer, ClassToExport, Name);
+					PreCreate();
+					Associated = NewObject<UObject>(Outer, ClassToExport, Name);					
 				}				
-			}			
 
-			if (Associated)
-			{
-				FPendingClassConstruction(self, ClassToExport).Finalize(GetSelf(isolate), Associated);				
-			}			
+				if (bIsJavascriptClass)
+				{
+					const auto& Last = GetSelf(isolate)->ObjectUnderConstructionStack.Last();
+
+					bool bSafeToQuit = Last.bCatched;
+
+					GetSelf(isolate)->ObjectUnderConstructionStack.Pop();
+
+					if (bSafeToQuit)
+					{
+						return;
+					}
+				}
+
+				if (!Associated)
+				{
+					I.Throw(TEXT("Failed to spawn"));
+					return;
+				}
+			}	
+
+			FPendingClassConstruction(self, ClassToExport).Finalize(GetSelf(isolate), Associated);				
 		};
 		
 		auto Template = I.FunctionTemplate(ConstructorBody, ClassToExport);
