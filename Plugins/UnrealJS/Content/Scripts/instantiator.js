@@ -260,6 +260,8 @@
 
   var next_id = 0
 
+  let Outer = Root.GetEngine ? Root.GetEngine().GetEditorWorld() : GWorld
+
   function instantiate(design,scope) {
     if (!design || !design.type) {
       throw 'failed to instantiate no design!'
@@ -268,7 +270,7 @@
     scope = scope || function () { return {} }
     var bindings = [];
     var custom_bindings = [];
-    var instance = new design.type();
+    var instance = new design.type(Outer);
     if (!instance) {
        throw 'failed to instantiate' + design.type
     }
