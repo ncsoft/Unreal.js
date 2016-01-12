@@ -6,12 +6,14 @@
         actor.TextRender.SetHorizontalAlignment('EHTA_Center')
         actor.TextRender.SetText('Hello Rest')
 
-        let request = require('request')
-        request("POST","http://localhost:3000",{data:{json:'hello'}}).then((json) => {
-            actor.TextRender.SetText(JSON.stringify(json))
-        }).catch((error) => {
-            actor.TextRender.SetText(error)
-        })
+        let fetch = require('fetch');
+        fetch('https://api.github.com/repos/ncsoft/Unreal.js')
+            .then((res) => res.json())
+            .then((json) => {
+                actor.TextRender.SetText(JSON.stringify(json, null, 2))
+            }).catch((error) => {
+                actor.TextRender.SetText(error)
+            })
 
         return function () {
             actor.DestroyActor()
