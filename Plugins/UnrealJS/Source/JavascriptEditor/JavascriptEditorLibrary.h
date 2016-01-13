@@ -32,16 +32,7 @@ class JAVASCRIPTEDITOR_API UJavascriptEditorLibrary : public UBlueprintFunctionL
 
 	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
 	static bool GetLandscapeExtent(ULandscapeInfo* LandscapeInfo, int32& MinX, int32& MinY, int32& MaxX, int32& MaxY);
-
-	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
-	static UWorld* GetEditorWorld(UEngine* Engine);
-
-	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
-	static UWorld* GetPIEWorld(UEngine* Engine);
-
-	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
-	static void RedrawAllViewports(UEditorEngine* Engine, bool bInvalidateHitProxies);
-
+		
 	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
 	static void OpenPopupWindow(UWidget* Widget, const FVector2D& PopupDesiredSize, const FText& HeadingText);
 
@@ -70,32 +61,24 @@ class JAVASCRIPTEDITOR_API UJavascriptEditorLibrary : public UBlueprintFunctionL
 	static void SetIsTemporarilyHiddenInEditor(AActor* Actor, bool bIsHidden);
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
-	static bool Exec(UEditorEngine* Engine, UWorld* InWorld, const FString& Command, FString& Out);
-
-	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
 	static ABrush* GetDefaultBrush(UWorld* World);
-
-	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
-	static UBrushBuilder* FindBrushBuilder(UEditorEngine* Engine, UClass* BrushBuilderClass);
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
 	static bool Build(UBrushBuilder* Builder, UWorld* InWorld, ABrush* InBrush = nullptr);
 
-	// Selection.
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
-	static void SelectActor(UEditorEngine* Engine, AActor* Actor, bool bInSelected, bool bNotify, bool bSelectEvenIfHidden = false, bool bForceRefresh = false);
+	static void Select(USelection* Selection, UObject* InObject);
+	
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static void Deselect(USelection* Selection, UObject* InObject);
+	
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static void ToggleSelect(USelection* Selection, UObject* InObject);
+	
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static void DeselectAll(USelection* Selection, UClass* InClass = NULL);
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
-	static bool CanSelectActor(UEditorEngine* Engine, AActor* Actor, bool bInSelected, bool bSelectEvenIfHidden = false, bool bWarnIfLevelLocked = false);
-
-	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
-	static void SelectGroup(UEditorEngine* Engine, class AGroupActor* InGroupActor, bool bForceSelection = false, bool bInSelected = true, bool bNotify = true);
-
-	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
-	static void SelectComponent(UEditorEngine* Engine, class UActorComponent* Component, bool bInSelected, bool bNotify, bool bSelectEvenIfHidden = false);
-
-	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
-	static void SelectNone(UEditorEngine* Engine, bool bNoteSelectionChange, bool bDeselectBSPSurfs, bool WarnAboutManyActors = true);
-
+	static int32 GetSelectedObjects(USelection* Selection, TArray<UObject*>& Out);
 #endif
 };

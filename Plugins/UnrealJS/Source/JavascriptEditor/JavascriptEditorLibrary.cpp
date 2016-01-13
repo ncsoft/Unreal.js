@@ -102,40 +102,6 @@ ULandscapeLayerInfoObject* UJavascriptEditorLibrary::GetLayerInfoByName(ULandsca
 	return LandscapeInfo ? LandscapeInfo->GetLayerInfoByName(LayerName, Owner) : nullptr;
 }
 
-UWorld* UJavascriptEditorLibrary::GetEditorWorld(UEngine* Engine)
-{
-	for (const FWorldContext& Context : GEngine->GetWorldContexts())
-	{
-		if (Context.WorldType == EWorldType::Editor)
-		{
-			return Context.World();
-		}
-	}
-
-	return nullptr;
-}
-
-UWorld* UJavascriptEditorLibrary::GetPIEWorld(UEngine* Engine)
-{
-	for (const FWorldContext& Context : GEngine->GetWorldContexts())
-	{
-		if (Context.WorldType == EWorldType::PIE)
-		{
-			return Context.World();
-		}
-	}
-
-	return nullptr;
-}
-
-void UJavascriptEditorLibrary::RedrawAllViewports(UEditorEngine* Engine, bool bInvalidateHitProxies)
-{
-	if (Engine)
-	{
-		Engine->RedrawAllViewports(bInvalidateHitProxies);
-	}	
-}
-
 void UJavascriptEditorLibrary::OpenPopupWindow(UWidget* Widget, const FVector2D& PopupDesiredSize, const FText& HeadingText)
 {
 	// Create the contents of the popup
@@ -219,22 +185,9 @@ void UJavascriptEditorLibrary::SetIsTemporarilyHiddenInEditor(AActor* Actor, boo
 	Actor->SetIsTemporarilyHiddenInEditor(bIsHidden);
 }
 
-bool UJavascriptEditorLibrary::Exec(UEditorEngine* Engine, UWorld* InWorld, const FString& Command, FString& Out)
-{
-	FStringOutputDevice StringOutputDevice;
-	bool bResult = Engine->Exec(InWorld, *Command, StringOutputDevice);
-	Out = *StringOutputDevice;
-	return bResult;
-}
-
 ABrush* UJavascriptEditorLibrary::GetDefaultBrush(UWorld* World) const
 {
 	return World->GetDefaultBrush();
-}
-
-UBrushBuilder* UJavascriptEditorLibrary::FindBrushBuilder(UEditorEngine* Engine, UClass* BrushBuilderClass)
-{
-	return Engine->FindBrushBuilder(BrushBuilderClass);
 }
 
 bool UJavascriptEditorLibrary::Build(UBrushBuilder* Builder, UWorld* InWorld, ABrush* InBrush)
@@ -242,28 +195,27 @@ bool UJavascriptEditorLibrary::Build(UBrushBuilder* Builder, UWorld* InWorld, AB
 	return Builder->Build(InWorld, InBrush);
 }
 
-// Selection.
-void UJavascriptEditorLibrary::SelectActor(UEditorEngine* Engine, AActor* Actor, bool bInSelected, bool bNotify, bool bSelectEvenIfHidden, bool bForceRefresh)
+void UJavascriptEditorLibrary::Select(USelection* Selection, UObject* InObject)
 {
-	Engine->SelectActor(Actor, bInSelected, bNotify, bSelectEvenIfHidden, bForceRefresh);
+	Selection->Select(InObject);
 }
 
-bool UJavascriptEditorLibrary::CanSelectActor(UEditorEngine* Engine, AActor* Actor, bool bInSelected, bool bSelectEvenIfHidden, bool bWarnIfLevelLocked )
+void UJavascriptEditorLibrary::Deselect(USelection* Selection, UObject* InObject)
 {
-	return Engine->CanSelectActor(Actor, bInSelected, bSelectEvenIfHidden, bWarnIfLevelLocked);
+	Selection->Deselect(InObject);
 }
 
-void UJavascriptEditorLibrary::SelectGroup(UEditorEngine* Engine, class AGroupActor* InGroupActor, bool bForceSelection, bool bInSelected, bool bNotify)
+void UJavascriptEditorLibrary::ToggleSelect(USelection* Selection, UObject* InObject)
 {
-	Engine->SelectGroup(InGroupActor, bForceSelection, bInSelected, bNotify);
+	Selection->ToggleSelect(InObject);
 }
 
-void UJavascriptEditorLibrary::SelectComponent(UEditorEngine* Engine, class UActorComponent* Component, bool bInSelected, bool bNotify, bool bSelectEvenIfHidden)
+void UJavascriptEditorLibrary::DeselectAll(USelection* Selection, UClass* InClass)
 {
-	Engine->SelectComponent(Component, bInSelected, bNotify, bSelectEvenIfHidden);
+	Selection->DeselectAll(InClass);
 }
 
-void UJavascriptEditorLibrary::SelectNone(UEditorEngine* Engine, bool bNoteSelectionChange, bool bDeselectBSPSurfs, bool WarnAboutManyActors)
+int32 UJavascriptEditorLibrary::GetSelectedObjects(USelection* Selection, TArray<UObject*>& Out)
 {
-	Engine->SelectNone(bNoteSelectionChange, bDeselectBSPSurfs, WarnAboutManyActors);
+	return Selection->GetSelectedObjects(Out);
 }
