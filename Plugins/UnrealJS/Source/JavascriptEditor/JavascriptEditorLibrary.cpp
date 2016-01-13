@@ -213,3 +213,44 @@ bool UJavascriptEditorLibrary::EditorDestroyActor(UWorld* World, AActor* Actor, 
 {
 	return World->EditorDestroyActor(Actor, bShouldModifyLevel);
 }
+
+void UJavascriptEditorLibrary::SetIsTemporarilyHiddenInEditor(AActor* Actor, bool bIsHidden)
+{
+	Actor->SetIsTemporarilyHiddenInEditor(bIsHidden);
+}
+
+bool UJavascriptEditorLibrary::Exec(UEditorEngine* Engine, UWorld* InWorld, const FString& Command)
+{
+	return Engine->Exec(InWorld, *Command);
+}
+
+ABrush* UJavascriptEditorLibrary::GetDefaultBrush(UWorld* World) const
+{
+	return World->GetDefaultBrush();
+}
+
+// Selection.
+void UJavascriptEditorLibrary::SelectActor(UEditorEngine* Engine, AActor* Actor, bool bInSelected, bool bNotify, bool bSelectEvenIfHidden, bool bForceRefresh)
+{
+	Engine->SelectActor(Actor, bInSelected, bNotify, bSelectEvenIfHidden, bForceRefresh);
+}
+
+bool UJavascriptEditorLibrary::CanSelectActor(UEditorEngine* Engine, AActor* Actor, bool bInSelected, bool bSelectEvenIfHidden, bool bWarnIfLevelLocked )
+{
+	return Engine->CanSelectActor(Actor, bInSelected, bSelectEvenIfHidden, bWarnIfLevelLocked);
+}
+
+void UJavascriptEditorLibrary::SelectGroup(UEditorEngine* Engine, class AGroupActor* InGroupActor, bool bForceSelection, bool bInSelected, bool bNotify)
+{
+	Engine->SelectGroup(InGroupActor, bForceSelection, bInSelected, bNotify);
+}
+
+void UJavascriptEditorLibrary::SelectComponent(UEditorEngine* Engine, class UActorComponent* Component, bool bInSelected, bool bNotify, bool bSelectEvenIfHidden)
+{
+	Engine->SelectComponent(Component, bInSelected, bNotify, bSelectEvenIfHidden);
+}
+
+void UJavascriptEditorLibrary::SelectNone(UEditorEngine* Engine, bool bNoteSelectionChange, bool bDeselectBSPSurfs, bool WarnAboutManyActors)
+{
+	Engine->SelectNone(bNoteSelectionChange, bDeselectBSPSurfs, WarnAboutManyActors);
+}

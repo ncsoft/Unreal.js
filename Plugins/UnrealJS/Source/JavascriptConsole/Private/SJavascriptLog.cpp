@@ -7,6 +7,7 @@
 #include "GameFramework/GameState.h"
 #include "IV8.h"
 #include "STextComboBox.h"
+#include "ScopedTransaction.h"
 
 #define LOCTEXT_NAMESPACE "JavascriptConsole"
 
@@ -358,6 +359,8 @@ void SJavascriptConsoleInputBox::OnTextCommitted( const FText& InText, ETextComm
 			
 			// Exec!
 			{
+				FScopedTransaction Transaction(NSLOCTEXT("UnrealEd", "UnrealJS", "Javascript action"));
+				FEditorScriptExecutionGuard ScriptGuard;
 				IV8::Get().Exec(TargetContext, *ExecString);
 			}
 		}

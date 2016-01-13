@@ -42,6 +42,9 @@ public:
 	static UObject* GetOutermost(UObject* Object);
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")
+	static UObject* Duplicate(UObject* Object, UObject* Outer, FName Name);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")
 	static bool HasAnyFlags(UObject* Object, int32 Flags);
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting|Javascript")

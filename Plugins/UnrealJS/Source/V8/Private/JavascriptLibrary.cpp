@@ -46,6 +46,11 @@ UObject* UJavascriptLibrary::GetOutermost(UObject* Object)
 	return Object ? Object->GetOutermost() : nullptr;
 }
 
+UObject* UJavascriptLibrary::Duplicate(UObject* Object, UObject* Outer, FName Name)
+{
+	return DuplicateObject<UObject>(Object, Outer, *Name.ToString());
+}
+
 bool UJavascriptLibrary::HasAnyFlags(UObject* Object, int32 Flags)
 {
 	return Object && Object->HasAnyFlags((EObjectFlags)Flags);

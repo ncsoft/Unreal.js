@@ -65,5 +65,31 @@ class JAVASCRIPTEDITOR_API UJavascriptEditorLibrary : public UBlueprintFunctionL
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
 	static bool EditorDestroyActor(UWorld* World, AActor* Actor, bool bShouldModifyLevel);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static void SetIsTemporarilyHiddenInEditor(AActor* Actor, bool bIsHidden);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static bool Exec(UEditorEngine* Engine, UWorld* InWorld, const FString& Command);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static ABrush* GetDefaultBrush(UWorld* World);
+
+	// Selection.
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static void SelectActor(UEditorEngine* Engine, AActor* Actor, bool bInSelected, bool bNotify, bool bSelectEvenIfHidden = false, bool bForceRefresh = false);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static bool CanSelectActor(UEditorEngine* Engine, AActor* Actor, bool bInSelected, bool bSelectEvenIfHidden = false, bool bWarnIfLevelLocked = false);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static void SelectGroup(UEditorEngine* Engine, class AGroupActor* InGroupActor, bool bForceSelection = false, bool bInSelected = true, bool bNotify = true);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static void SelectComponent(UEditorEngine* Engine, class UActorComponent* Component, bool bInSelected, bool bNotify, bool bSelectEvenIfHidden = false);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static void SelectNone(UEditorEngine* Engine, bool bNoteSelectionChange, bool bDeselectBSPSurfs, bool WarnAboutManyActors = true);
+
 #endif
 };

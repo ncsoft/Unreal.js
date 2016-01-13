@@ -4,6 +4,7 @@
 #include "JavascriptContext.h"
 #include "JavascriptEditorTick.h"
 #include "IV8.h"
+#include "ScopedTransaction.h"
 
 class FJavascriptEditorModule : public IJavascriptEditorModule
 {
@@ -61,7 +62,13 @@ void FJavascriptEditorModule::StartupModule()
 	JavascriptContext->Expose(TEXT("Root"), Tick);
 	Tick->AddToRoot();
 
-	if(!IsRunningCommandlet())	Context->RunFile("editor.js");
+	if (!IsRunningCommandlet())
+	{
+		FScopedTransaction Transaction(NSLOCTEXT("UnrealEd", "UnrealJS", "Javascript action"));
+		FEditorScriptExecutionGuard ScriptGuard;
+
+		Context->RunFile("editor.js");
+	}
 
 	bRegistered = true;
 	
