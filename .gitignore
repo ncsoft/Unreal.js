@@ -1,0 +1,11 @@
+*/Plugins/**
+**/*.sdf
+**/*.sln
+**/*.opendb
+**/Binaries
+**/*.zip
+**/Saved
+**/.idea
+**/DerivedDataCache
+**/Intermediate
+**/ThirdParty/v8/lib

@@ -70,10 +70,16 @@ class JAVASCRIPTEDITOR_API UJavascriptEditorLibrary : public UBlueprintFunctionL
 	static void SetIsTemporarilyHiddenInEditor(AActor* Actor, bool bIsHidden);
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
-	static bool Exec(UEditorEngine* Engine, UWorld* InWorld, const FString& Command);
+	static bool Exec(UEditorEngine* Engine, UWorld* InWorld, const FString& Command, FString& Out);
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
 	static ABrush* GetDefaultBrush(UWorld* World);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static UBrushBuilder* FindBrushBuilder(UEditorEngine* Engine, UClass* BrushBuilderClass);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static bool Build(UBrushBuilder* Builder, UWorld* InWorld, ABrush* InBrush = nullptr);
 
 	// Selection.
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")

@@ -219,14 +219,27 @@ void UJavascriptEditorLibrary::SetIsTemporarilyHiddenInEditor(AActor* Actor, boo
 	Actor->SetIsTemporarilyHiddenInEditor(bIsHidden);
 }
 
-bool UJavascriptEditorLibrary::Exec(UEditorEngine* Engine, UWorld* InWorld, const FString& Command)
+bool UJavascriptEditorLibrary::Exec(UEditorEngine* Engine, UWorld* InWorld, const FString& Command, FString& Out)
 {
-	return Engine->Exec(InWorld, *Command);
+	FStringOutputDevice StringOutputDevice;
+	bool bResult = Engine->Exec(InWorld, *Command, StringOutputDevice);
+	Out = *StringOutputDevice;
+	return bResult;
 }
 
 ABrush* UJavascriptEditorLibrary::GetDefaultBrush(UWorld* World) const
 {
 	return World->GetDefaultBrush();
+}
+
+UBrushBuilder* UJavascriptEditorLibrary::FindBrushBuilder(UEditorEngine* Engine, UClass* BrushBuilderClass)
+{
+	return Engine->FindBrushBuilder(BrushBuilderClass);
+}
+
+bool UJavascriptEditorLibrary::Build(UBrushBuilder* Builder, UWorld* InWorld, ABrush* InBrush)
+{
+	return Builder->Build(InWorld, InBrush);
 }
 
 // Selection.
