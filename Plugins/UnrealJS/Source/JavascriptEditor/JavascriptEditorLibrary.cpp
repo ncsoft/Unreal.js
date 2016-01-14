@@ -2,6 +2,7 @@
 #include "JavascriptEditorLibrary.h"
 #include "Editor/LandscapeEditor/Private/LandscapeEdModeTools.h"
 #include "JavascriptContext.h"
+#include "BSPOps.h"
 
 ULandscapeInfo* UJavascriptEditorLibrary::GetLandscapeInfo(ALandscape* Landscape, bool bSpawnNewActor)
 {
@@ -218,4 +219,14 @@ void UJavascriptEditorLibrary::DeselectAll(USelection* Selection, UClass* InClas
 int32 UJavascriptEditorLibrary::GetSelectedObjects(USelection* Selection, TArray<UObject*>& Out)
 {
 	return Selection->GetSelectedObjects(Out);
+}
+
+ABrush* UJavascriptEditorLibrary::csgAdd(ABrush* DefaultBrush, int32 PolyFlags, EBrushType BrushType)
+{
+	return FBSPOps::csgAddOperation(DefaultBrush, PolyFlags, BrushType);
+}
+
+UModel* UJavascriptEditorLibrary::GetModel(UWorld* World)
+{
+	return World->GetModel();
 }
