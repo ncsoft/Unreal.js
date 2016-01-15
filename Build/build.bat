@@ -1,4 +1,4 @@
-powershell.exe -nologo -noprofile -command "& { $x = (Get-ItemProperty \"hklm:\Software\Classes\Unreal.ProjectFile\shell\open\command\").\"(default)\"; $y = $x.IndexOf(\"Launcher\"); if ($y -gt 0) { $x = $x.SubString(0,$y) + \"4.10\"; } else { $x = $x.SubString(0,$x.IndexOf(\"Binaries\")-1); }; if ($x[0] -eq '\"') { $x.SubString(1) } else { $x } }" > temp.txt
+powershell.exe -nologo -noprofile -command "& { $x = (Get-ItemProperty \"hklm:\Software\Classes\Unreal.ProjectFile\shell\open\command\").\"(default)\"; $y = $x.IndexOf(\"Launcher\"); if ($y -gt 0) { $x = $x.SubString(0,$y) + \"4.10\"; } else { $x = $x.SubString(0,$x.IndexOf(\"Binaries\")-1); }; if ($x[0] -eq '\"') { $x.SubString(1,$x.Length-8)  } else { $x } }" > temp.txt
 for /F "usebackq delims=", %%g in (`type temp.txt`) do set UE4PATH=%%g
 del temp.txt
 
