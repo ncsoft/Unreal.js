@@ -83,5 +83,14 @@ class JAVASCRIPTEDITOR_API UJavascriptEditorLibrary : public UBlueprintFunctionL
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
 	static ABrush* csgAdd(ABrush* DefaultBrush, int32 PolyFlags, EBrushType BrushType);
+	
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript", DisplayName = "Modify")
+	static void ModifyObject(UObject* Object, bool bAlwaysMarkDirty = false);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript", DisplayName = "Modify")
+	static void InvalidateModelGeometry(UWorld* World, ULevel* InLevel);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript", DisplayName = "Modify")
+	static void UpdateModelComponents(ULevel* Level);	
 #endif
 };

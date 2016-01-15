@@ -95,3 +95,38 @@ void UJavascriptEditorEngineLibrary::RebuildLevel(UEditorEngine* Engine, ULevel*
 {
 	Engine->RebuildLevel(*Level);
 }
+
+int32 UJavascriptEditorEngineLibrary::bspBrushCSG(UEditorEngine* Engine, ABrush* Actor, UModel* Model, int32 PolyFlags, EBrushType BrushType, ECsgOper CSGOper, bool bBuildBounds, bool bMergePolys, bool bReplaceNULLMaterialRefs, bool bShowProgressBar)
+{
+	return Engine->bspBrushCSG(Actor, Model, PolyFlags, BrushType, CSGOper, bBuildBounds, bMergePolys, bReplaceNULLMaterialRefs, bShowProgressBar);
+}
+
+void UJavascriptEditorEngineLibrary::RebuildStaticNavigableGeometry(UEditorEngine* Engine, ULevel* Level)
+{
+	return Engine->RebuildStaticNavigableGeometry(Level);
+}
+
+void UJavascriptEditorEngineLibrary::SetMaterial(UEditorEngine* Engine, UModel* Model, UMaterialInterface* Material, const TArray<int32>& Surfaces)
+{
+	for (auto SurfaceIndex : Surfaces)
+	{	
+		Model->Surfs[SurfaceIndex].Material = Material;
+		const bool bUpdateTexCoords = false;
+		const bool bOnlyRefreshSurfaceMaterials = true;
+		Engine->polyUpdateMaster(Model, SurfaceIndex, bUpdateTexCoords, bOnlyRefreshSurfaceMaterials);		
+	}
+	Model->MarkPackageDirty();
+}
+
+void UJavascriptEditorEngineLibrary::GetSurfaces(ABrush* Brush, TArray<int32>& Surfaces)
+{
+	auto Model = Brush->GetWorld()->GetModel();
+	for (auto Index = 0; Index < Model->Surfs.Num(); ++Index)
+	{
+		const auto& Surf = Model->Surfs[Index];
+		if (Surf.Actor == Brush)
+		{
+			Surfaces.Add(Index);
+		}
+	}
+}

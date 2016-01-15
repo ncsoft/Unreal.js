@@ -225,3 +225,18 @@ ABrush* UJavascriptEditorLibrary::csgAdd(ABrush* DefaultBrush, int32 PolyFlags, 
 {
 	return FBSPOps::csgAddOperation(DefaultBrush, PolyFlags, BrushType);
 }
+
+void UJavascriptEditorLibrary::ModifyObject(UObject* Object, bool bAlwaysMarkDirty)
+{
+	Object->Modify(bAlwaysMarkDirty);
+}
+
+void UJavascriptEditorLibrary::InvalidateModelGeometry(UWorld* World, ULevel* InLevel)
+{
+	World->InvalidateModelGeometry(InLevel);
+}
+
+void UJavascriptEditorLibrary::UpdateModelComponents(ULevel* Level)
+{
+	Level->UpdateModelComponents();
+}

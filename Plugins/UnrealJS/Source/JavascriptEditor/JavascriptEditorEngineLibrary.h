@@ -54,5 +54,17 @@ class JAVASCRIPTEDITOR_API UJavascriptEditorEngineLibrary : public UBlueprintFun
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
 	static void RebuildLevel(UEditorEngine* Engine, ULevel* Level);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static int32 bspBrushCSG(UEditorEngine* Engine, ABrush* Actor, UModel* Model, int32 PolyFlags, EBrushType BrushType, ECsgOper CSGOper, bool bBuildBounds, bool bMergePolys, bool bReplaceNULLMaterialRefs, bool bShowProgressBar = true);
+	
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static void RebuildStaticNavigableGeometry(UEditorEngine* Engine, ULevel* Level);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static void SetMaterial(UEditorEngine* Engine, UModel* InModel, UMaterialInterface* Material, const TArray<int32>& Surfaces);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static void GetSurfaces(ABrush* Brush, TArray<int32>& Surfaces);
 #endif
 };
