@@ -91,7 +91,7 @@ class USelection* UJavascriptEditorEngineLibrary::GetSelectedSet(UEditorEngine* 
 	return Engine->GetSelectedSet(Class);
 }
 
-void UJavascriptEditorEngineLibrary::RebuildModelFromBrushes(UEditorEngine* Engine, UModel* Model, bool bSelectedBrushesOnly)
+void UJavascriptEditorEngineLibrary::RebuildLevel(UEditorEngine* Engine, ULevel* Level)
 {
-	Engine->RebuildModelFromBrushes(Model, bSelectedBrushesOnly);
+	Engine->RebuildLevel(*Level);
 }

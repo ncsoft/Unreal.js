@@ -115,4 +115,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
 	static int32 GetCurrentProcessId();
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static UModel* GetModel(UWorld* World);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static ULevel* GetLevel(AActor* Actor);
 };

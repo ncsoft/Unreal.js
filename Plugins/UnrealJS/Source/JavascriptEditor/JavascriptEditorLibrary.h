@@ -83,8 +83,5 @@ class JAVASCRIPTEDITOR_API UJavascriptEditorLibrary : public UBlueprintFunctionL
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
 	static ABrush* csgAdd(ABrush* DefaultBrush, int32 PolyFlags, EBrushType BrushType);
-
-	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
-	static UModel* GetModel(UWorld* World);
 #endif
 };

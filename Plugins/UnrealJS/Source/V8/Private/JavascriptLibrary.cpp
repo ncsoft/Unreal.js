@@ -290,3 +290,13 @@ int32 UJavascriptLibrary::GetCurrentProcessId()
 {
 	return FPlatformProcess::GetCurrentProcessId();
 }
+
+UModel* UJavascriptLibrary::GetModel(UWorld* World)
+{
+	return World ? World->GetModel() : nullptr;
+}
+
+ULevel* UJavascriptLibrary::GetLevel(AActor* Actor)
+{
+	return Actor ? Actor->GetLevel() : nullptr;
+}

@@ -225,8 +225,3 @@ ABrush* UJavascriptEditorLibrary::csgAdd(ABrush* DefaultBrush, int32 PolyFlags, 
 {
 	return FBSPOps::csgAddOperation(DefaultBrush, PolyFlags, BrushType);
 }
-
-UModel* UJavascriptEditorLibrary::GetModel(UWorld* World)
-{
-	return World->GetModel();
-}

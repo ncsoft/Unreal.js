@@ -53,6 +53,6 @@ class JAVASCRIPTEDITOR_API UJavascriptEditorEngineLibrary : public UBlueprintFun
 	static class USelection* GetSelectedSet(UEditorEngine* Engine, const UClass* Class);	
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
-	static void RebuildModelFromBrushes(UEditorEngine* Engine, UModel* Model, bool bSelectedBrushesOnly);
+	static void RebuildLevel(UEditorEngine* Engine, ULevel* Level);
 #endif
 };
