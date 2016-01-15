@@ -24,6 +24,33 @@
         function ParseInputChord(string) {
             let a = (string || '').split('+')
             let key = a.pop()
+            
+            key = {
+                '1': 'One',                
+                '2': 'Two',                
+                '3': 'Three',                
+                '4': 'Four',                
+                '5': 'Five',                
+                '6': 'Six',                
+                '7': 'Seven',                
+                '8': 'Eight',                
+                '9': 'Nine',                
+                '0': 'Zero',
+                'NumPad1': 'NumPadOne',   
+                'NumPad2': 'NumPadTwo',   
+                'NumPad3': 'NumPadThree',   
+                'NumPad4': 'NumPadFour',   
+                'NumPad5': 'NumPadFive',   
+                'NumPad6': 'NumPadSix',   
+                'NumPad7': 'NumPadSeven',   
+                'NumPad8': 'NumPadEight',   
+                'NumPad9': 'NumPadNine',   
+                'NumPad0': 'NumPadZero',   
+                '*': 'Multiply',   
+                '+': 'Add',   
+                '-': 'Subtract',   
+                '/': 'Divide'
+            }[key] || key;
 
             let out = {
                 Key : { KeyName : key }
@@ -51,11 +78,13 @@
             if (!splits) throw "Invalid class definition"
 
             let orgClassName = splits[1]
+            
+            // get a classname
             let className
             for (let index=0;;++index) {
                 className = `${orgClassName}_C${index}`
                 if (!UObject.Find(null,className)) break
-            }
+            }            
             let parentClass = Object.getPrototypeOf(template.prototype).constructor
             if (parentClass == Object) {
                 parentClass = null
