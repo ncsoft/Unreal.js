@@ -297,6 +297,10 @@ public:
 
 				Context::Scope context_sopce(context);
 
+#if WITH_EDITOR
+				FEditorScriptExecutionGuard ScriptGuard;
+#endif
+
 				CallJavascriptFunction(context, context->Global(), GetSignatureFunction(), func, Parms);
 			}
 		}
