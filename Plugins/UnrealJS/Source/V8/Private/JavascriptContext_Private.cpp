@@ -21,6 +21,8 @@
 #include "JavascriptGeneratedFunction.h"
 #include "StructMemoryInstance.h"
 
+PRAGMA_DISABLE_OPTIMIZATION
+
 using namespace v8;
 
 static const int kContextEmbedderDataIndex = 1;
@@ -1201,7 +1203,7 @@ public:
 				return false;
 			};
 
-			auto inner_package = [&](const FString& script_path)
+			auto inner_package_json = [&](const FString& script_path)
 			{
 				FString Text;
 				if (FFileHelper::LoadFileToString(Text, *(script_path / TEXT("package.json"))))
@@ -1225,6 +1227,32 @@ public:
 				return false;
 			};
 
+			auto inner_json = [&](const FString& script_path)
+			{
+				FString Text;
+				if (FFileHelper::LoadFileToString(Text, *script_path))
+				{
+					Text = FString::Printf(TEXT("(function (json) {return json;})(%s);"), *Text);
+					auto full_path = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*script_path);
+#if PLATFORM_WINDOWS
+					full_path = full_path.Replace(TEXT("/"), TEXT("\\"));
+#endif
+					auto exports = Self->RunScript(full_path, Text, 0);
+					if (exports.IsEmpty() || !exports->IsObject())
+					{
+						return false;
+					}
+					else
+					{
+						info.GetReturnValue().Set(exports);
+						found = true;
+						return true;
+					}
+				}
+
+				return false;
+			};
+
 			auto inner2 = [&](FString base_path)
 			{
 				for (;;)
@@ -1234,10 +1262,18 @@ public:
 					auto script_path = base_path / required_module;
 					if (!script_path.EndsWith(TEXT(".js")))
 					{
-						if (inner(script_path + TEXT(".js"))) return true;
-						if (inner(script_path / TEXT("index.js"))) return true;
+						if (script_path.EndsWith(TEXT(".json")))
+						{
+							if (inner_json(script_path)) return true;
+						}
+						else
+						{
+							if (inner(script_path + TEXT(".js"))) return true;
+							if (inner_json(script_path + TEXT(".json"))) return true;
+							if (inner(script_path / TEXT("index.js"))) return true;
 
-						if (inner_package(script_path)) return true;
+							if (inner_package_json(script_path)) return true;
+						}						
 					}
 					else
 					{
