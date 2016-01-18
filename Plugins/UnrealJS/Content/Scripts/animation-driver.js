@@ -11,7 +11,7 @@
         let animations = []
         function applyAnim(target, meta, anim) {
             let duration = meta.duration || 0.25
-            let loop = meta.loop || 0
+            let loop = meta.loop || 1
             let started = currentTime()
             let tracks = []
             for (var k in anim) {
