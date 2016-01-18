@@ -87,7 +87,7 @@ let kick = () => {
 kick();
 ```
 
-#### GameUI-dev like web-dev
+#### Web-dev like
 ```jade
 div
 	span.full
@@ -108,39 +108,4 @@ div
 		HorizontalBox.small
 			text.full {{item.key}}
 			text.full {{item.value}}
-```
-
-#### Write your own extension
-Just add some static function into your `UBlueprintFunctionLibrary`.
-```c++
-UCLASS()
-class UMyBlueprintFunctionLibrary : public UBlueprintFunctionLibrary
-{
-    GENERATED_BODY();
-public:
-    UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
-    static bool MySuperFunction(UMySuperActor* SuperActor, FString SuperPath, FVector* OutVector);
-};
-```
-
-```js
-let result = MySuperActor.MySuperFunction("SuperPath")
-console.log(`return value:${result.$} vector:${result.OutVector}`)
-```
-
-#### Direct access to raw memory
-```js
-let ab = new ArrayBuffer(32*1024); // 32K bytes buffer
-let u8 = new Uint8Array(ab); // typed array
-memory.bind(ab);
-GWorld.MySuperMemoryFunction();
-memory.unbind(ab);
-```
-
-```c++
-void UMyBlueprintFunctionLibrary::MySuperMemoryFunction(UWorld* World)
-{
-    auto size = FArrayBufferAccessor::GetSize();
-    auto buffer = FArrayBufferAccessor::GetData();
-}
 ```
