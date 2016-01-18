@@ -87,7 +87,7 @@ let kick = () => {
 kick();
 ```
 
-#### GameUI-dev like web-dev
+#### Web-dev like Game UI 
 ```jade
 div
 	span.full
