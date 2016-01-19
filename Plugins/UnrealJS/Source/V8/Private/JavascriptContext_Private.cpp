@@ -21,8 +21,6 @@
 #include "JavascriptGeneratedFunction.h"
 #include "StructMemoryInstance.h"
 
-PRAGMA_DISABLE_OPTIMIZATION
-
 using namespace v8;
 
 static const int kContextEmbedderDataIndex = 1;
