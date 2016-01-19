@@ -297,6 +297,103 @@ struct TypingGenerator : TypingGeneratorBase
 			w.push(";\n");
 		}
 
+		auto write_function = [&](UFunction* Function, bool is_thunk) {
+			w.tooltip("\t", Function);
+
+			w.push("\t");
+			if (!is_thunk && (Function->FunctionFlags & FUNC_Static))
+			{
+				w.push("static ");
+			}
+			w.push(FV8Config::GetAlias(Function, true));
+			w.push("(");
+
+			bool has_out_ref = false;
+			bool is_optional = false;
+
+			TArray<FString> Arguments;
+			for (TFieldIterator<UProperty> ParamIt(Function); ParamIt && (ParamIt->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == CPF_Parm; ++ParamIt)
+			{
+				TokenWriter w2(*this);
+
+				if ((ParamIt->PropertyFlags & (CPF_ConstParm | CPF_OutParm)) == CPF_OutParm)
+				{
+					has_out_ref = true;
+					is_optional = true;
+				}
+
+				auto Property = *ParamIt;
+				auto PropertyName = FV8Config::Safeify(Property->GetName());
+
+				w2.push(PropertyName);
+				if (is_optional)
+				{
+					w2.push("?");
+				}
+				w2.push(": ");
+				w2.push(Property);
+
+				Arguments.Add(*w2);
+			}
+
+			if (is_thunk)
+			{
+				Arguments.RemoveAt(0);
+			}
+
+			w.push(FString::Join(Arguments, TEXT(",")));
+			w.push("): ");
+
+			if (has_out_ref)
+			{
+				TArray<FString> Arguments;
+				for (TFieldIterator<UProperty> ParamIt(Function); ParamIt; ++ParamIt)
+				{
+					TokenWriter w2(*this);
+
+					if ((ParamIt->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == (CPF_Parm | CPF_ReturnParm))
+					{
+						w2.push("$: ");
+						w2.push(*ParamIt);
+
+						Arguments.Add(*w2);
+					}
+					else if ((ParamIt->PropertyFlags & (CPF_ConstParm | CPF_OutParm)) == CPF_OutParm)
+					{
+						w2.push(ParamIt->GetName());
+						w2.push(": ");
+						w2.push(*ParamIt);
+
+						Arguments.Add(*w2);
+					}
+				}
+				w.push("{");
+				w.push(FString::Join(Arguments, TEXT(", ")));
+				w.push("}");
+			}
+			else
+			{
+				bool has_return = false;
+				for (TFieldIterator<UProperty> ParamIt(Function); ParamIt; ++ParamIt)
+				{
+					if ((ParamIt->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == (CPF_Parm | CPF_ReturnParm))
+					{
+						w.push(*ParamIt);
+						has_return = true;
+						break;
+					}
+				}
+
+				if (!has_return)
+				{
+					w.push("void");
+				}
+			}
+
+
+			w.push(";\n");
+		};
+
 		if (auto klass = Cast<UClass>(source))
 		{
 			if (klass->IsChildOf(AActor::StaticClass()))
@@ -330,115 +427,6 @@ struct TypingGenerator : TypingGeneratorBase
 			w.push(name);
 			w.push(";\n");
 
-			w.push("\tstatic C(Other: UObject): ");
-			w.push(name);
-			w.push(";\n");
-
-			auto write_function = [&](UFunction* Function, bool is_thunk) {
-				w.tooltip("\t", Function);
-
-				w.push("\t");
-				if (!is_thunk && (Function->FunctionFlags & FUNC_Static))
-				{
-					w.push("static ");
-				}
-				w.push(FV8Config::GetAlias(Function, true));
-				w.push("(");
-
-				bool has_out_ref = false;
-				bool is_optional = false;
-
-				TArray<FString> Arguments;
-				for (TFieldIterator<UProperty> ParamIt(Function); ParamIt && (ParamIt->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == CPF_Parm; ++ParamIt)
-				{
-					TokenWriter w2(*this);
-
-					if ((ParamIt->PropertyFlags & (CPF_ConstParm | CPF_OutParm)) == CPF_OutParm)
-					{
-						has_out_ref = true;
-						is_optional = true;
-					}
-
-					auto Property = *ParamIt;
-					auto PropertyName = FV8Config::Safeify(Property->GetName());
-
-					w2.push(PropertyName);
-					if (is_optional)
-					{
-						w2.push("?");
-					}
-					w2.push(": ");
-					w2.push(Property);
-
-					Arguments.Add(*w2);
-				}
-
-				if (is_thunk)
-				{
-					Arguments.RemoveAt(0);
-				}
-
-				w.push(FString::Join(Arguments, TEXT(",")));
-				w.push("): ");
-
-				if (has_out_ref)
-				{
-					TArray<FString> Arguments;
-					for (TFieldIterator<UProperty> ParamIt(Function); ParamIt; ++ParamIt)
-					{
-						TokenWriter w2(*this);
-
-						if ((ParamIt->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == (CPF_Parm | CPF_ReturnParm))
-						{
-							w2.push("$: ");
-							w2.push(*ParamIt);
-
-							Arguments.Add(*w2);
-						}
-						else if ((ParamIt->PropertyFlags & (CPF_ConstParm | CPF_OutParm)) == CPF_OutParm)
-						{
-							w2.push(ParamIt->GetName());
-							w2.push(": ");
-							w2.push(*ParamIt);
-
-							Arguments.Add(*w2);
-						}
-					}
-					w.push("{");
-					w.push(FString::Join(Arguments, TEXT(", ")));
-					w.push("}");
-				}
-				else
-				{
-					bool has_return = false;
-					for (TFieldIterator<UProperty> ParamIt(Function); ParamIt; ++ParamIt)
-					{
-						if ((ParamIt->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == (CPF_Parm | CPF_ReturnParm))
-						{
-							w.push(*ParamIt);
-							has_return = true;
-							break;
-						}
-					}
-
-					if (!has_return)
-					{
-						w.push("void");
-					}
-				}
-
-
-				w.push(";\n");
-			};
-
-			TArray<UFunction*> Functions;
-			Environment.BlueprintFunctionLibraryMapping.MultiFind(klass, Functions);
-
-			for (auto Function : Functions)
-			{
-				write_function(Function, true);
-			}
-
 			for (TFieldIterator<UFunction> FuncIt(klass, EFieldIteratorFlags::ExcludeSuper); FuncIt; ++FuncIt)
 			{
 				UFunction* Function = *FuncIt;
@@ -446,6 +434,26 @@ struct TypingGenerator : TypingGeneratorBase
 				if (!FV8Config::CanExportFunction(klass, Function)) continue;
 
 				write_function(Function,false);
+			}
+		}
+		else
+		{
+			w.push("\tclone() : ");
+			w.push(name);
+			w.push(";\n");
+		}
+
+		{
+			w.push("\tstatic C(Other: UObject): ");
+			w.push(name);
+			w.push(";\n");
+
+			TArray<UFunction*> Functions;
+			Environment.BlueprintFunctionLibraryMapping.MultiFind(source, Functions);
+
+			for (auto Function : Functions)
+			{
+				write_function(Function, true);
 			}
 		}
 

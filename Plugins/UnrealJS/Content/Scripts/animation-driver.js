@@ -11,7 +11,7 @@
         let animations = []
         function applyAnim(target, meta, anim) {
             let duration = meta.duration || 0.25
-            let loop = meta.loop || 0
+            let loop = meta.loop || 1
             let started = currentTime()
             let tracks = []
             for (var k in anim) {
@@ -33,7 +33,7 @@
             let instance = t => {
                 let alpha = (t - started) / duration
                 let lap = Math.floor(alpha)
-                let shouldQuit = (loop != 0 && lap > loop)
+                let shouldQuit = (loop != 0 && lap >= loop)
                 if (shouldQuit) {
                     alpha = 1
                 } else {
@@ -80,12 +80,12 @@
 
         function stop() {
             running = false
-            alive = false
         }
 
         return {
             apply: applyAnim,
             destroy: _ => {
+                alive = false
                 animations.length = 0
                 stop()
             }
