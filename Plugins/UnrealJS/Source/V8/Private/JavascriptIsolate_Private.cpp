@@ -379,6 +379,10 @@ public:
 
 							BlueprintFunctionLibraryMapping.Add(TargetClass, Function);
 						}
+						else if (auto p = Cast<UStructProperty>(*It))
+						{
+							BlueprintFunctionLibraryMapping.Add(p->Struct, Function);
+						}
 					}
 				}
 			}
@@ -1127,7 +1131,7 @@ public:
 			);
 	}
 
-	void ExportHelperFunctions(UClass* ClassToExport, Local<FunctionTemplate> Template)
+	void ExportHelperFunctions(UStruct* ClassToExport, Local<FunctionTemplate> Template)
 	{
 		// Bind blue print library!
 		TArray<UFunction*> Functions;
@@ -1651,6 +1655,8 @@ public:
 			{
 				Template->Inherit(ExportStruct(SuperStruct));
 			}				
+
+			ExportHelperFunctions(ScriptStruct, Template);
 
 			RegisterStruct(ScriptStructToFunctionTemplateMap, ScriptStruct, Template);
 

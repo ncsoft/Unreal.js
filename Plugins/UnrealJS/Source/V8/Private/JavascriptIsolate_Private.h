@@ -27,7 +27,7 @@ public:
 	TMap< UScriptStruct*, v8::UniquePersistent<v8::FunctionTemplate> > ScriptStructToFunctionTemplateMap;	
 
 	/** BlueprintFunctionLibrary function mapping */
-	TMultiMap< const UClass*, UFunction*> BlueprintFunctionLibraryMapping;
+	TMultiMap< const UStruct*, UFunction*> BlueprintFunctionLibraryMapping;
 
 	TArray<FPendingClassConstruction> ObjectUnderConstructionStack;
 
