@@ -2,6 +2,8 @@
 
 Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4. 
 
+- [Update notes](https://github.com/ncsoft/Unreal.js/wiki/Update-notes)
+
 ### Features
 - Powered by latest V8 (ES6)
 - CommonJS modules
