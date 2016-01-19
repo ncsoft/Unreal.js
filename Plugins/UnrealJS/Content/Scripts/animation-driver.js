@@ -80,12 +80,12 @@
 
         function stop() {
             running = false
-            alive = false
         }
 
         return {
             apply: applyAnim,
             destroy: _ => {
+                alive = false
                 animations.length = 0
                 stop()
             }
