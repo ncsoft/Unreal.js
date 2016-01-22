@@ -88,7 +88,8 @@
                 alive = false
                 animations.length = 0
                 stop()
-            }
+            },
+            is_alive: _ => alive
         }
     }
 
