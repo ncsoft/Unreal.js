@@ -28,7 +28,7 @@ UJavascriptEditorMenu::UJavascriptEditorMenu(const FObjectInitializer& ObjectIni
 {	
 }
 
-#define LOCTEXT_NAMESPACE "SDeviceManager"
+#define LOCTEXT_NAMESPACE "UMG"
 
 #if WITH_EDITOR	
 namespace 
@@ -121,4 +121,10 @@ void UJavascriptEditorMenu::Check(SVerticalBox* LastOne)
 		RemoveFromRoot();
 	}
 }
+
+const FText UJavascriptEditorMenu::GetPaletteCategory()
+{
+	return LOCTEXT("Experimental", "Experimental");
+}
+
 #endif

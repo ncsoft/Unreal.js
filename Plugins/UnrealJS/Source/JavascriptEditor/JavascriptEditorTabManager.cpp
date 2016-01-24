@@ -1,7 +1,7 @@
 #include "JavascriptEditor.h"
 #include "JavascriptEditorTabManager.h"
 
-#define LOCTEXT_NAMESPACE "JavascriptTabManager"
+#define LOCTEXT_NAMESPACE "UMG"
 
 class JAVASCRIPTEDITOR_API SPrimaryDockingArea : public SVerticalBox
 {
@@ -117,4 +117,10 @@ void UJavascriptEditorTabManager::Check(SVerticalBox* LastOne)
 		RemoveFromRoot();
 	}
 }
+
+const FText UJavascriptEditorTabManager::GetPaletteCategory()
+{
+	return LOCTEXT("Experimental", "Experimental");
+}
+
 #endif

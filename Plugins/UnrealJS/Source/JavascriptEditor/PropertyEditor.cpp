@@ -63,4 +63,10 @@ void UPropertyEditor::OnFinishedChangingProperties(const FPropertyChangedEvent& 
 		OnChange.Broadcast(PropertyChangedEvent.Property->GetFName());
 	}
 }
+
+const FText UPropertyEditor::GetPaletteCategory()
+{
+	return LOCTEXT("Experimental", "Experimental");
+}
+
 #endif
