@@ -27,7 +27,6 @@
     }
 
     target.process = {
-        pid: JavascriptLibrary.GetCurrentProcessId(),
         nextTick: function (fn) {
             nextTicks.push(fn)
         },
@@ -35,7 +34,11 @@
             var prev = nextTicks
             nextTicks = []
             prev.forEach(invoke_next)
-        }
+        },
+        argv: [],
+        argc: 0,
+        platform: 'UnrealJS',
+        env: {}
     }
 
     Root.OnTick.Add(root)
