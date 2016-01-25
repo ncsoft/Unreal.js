@@ -13,16 +13,23 @@
             let duration = meta.duration || 0.25
             let loop = meta.loop || 1
             let started = currentTime()
+
+            let $default_access = (target, key) => {
+                let h = target["Set" + k]
+                if (typeof h == 'function') return h.bind(target)
+            }
+            let $access = meta.$access || $default_access
+
             let tracks = []
             for (var k in anim) {
-                let fn = anim[k]
-                let h = target["Set" + k]
+                let fn = anim[k]                
+                let h = $access(target,k)
 
                 if (typeof h == 'function') {
                     tracks.push(t => {
                         let value = fn(t)
                         if (value != undefined) {
-                            h.call(target, value)
+                            h.call(null,value)
                         }
                     })
                 } else {
