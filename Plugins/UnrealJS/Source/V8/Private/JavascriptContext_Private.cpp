@@ -1201,6 +1201,18 @@ public:
 				return false;
 			};
 
+			auto inner_maybejs = [&](const FString& script_path)
+			{
+				if (!script_path.EndsWith(TEXT(".js")))
+				{
+					return inner(script_path + TEXT(".js"));
+				}
+				else
+				{
+					return inner(script_path);
+				}
+			};
+
 			auto inner_package_json = [&](const FString& script_path)
 			{
 				FString Text;
@@ -1218,7 +1230,7 @@ public:
 					}
 					else
 					{
-						return inner(script_path / StringFromV8(exports));
+						return inner_maybejs(script_path / StringFromV8(exports));
 					}
 				}
 
