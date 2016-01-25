@@ -56,6 +56,10 @@
                 if (added) return
                 added = true
                 animations.push(instance)
+
+                if (meta.warm) {
+                    instance(0)
+                }
             }
             function remove() {
                 if (!added) return
