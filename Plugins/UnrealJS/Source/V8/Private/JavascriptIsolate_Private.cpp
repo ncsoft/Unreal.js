@@ -324,6 +324,8 @@ public:
 		ExportConsole(ObjectTemplate);
 
 		ExportMemory(ObjectTemplate);
+
+		ExportMisc(ObjectTemplate);		
 	}		
 
 	~FJavascriptIsolateImplementation()
@@ -754,6 +756,28 @@ public:
 			// Do not modify!
 			ReadOnly);
 	}	
+
+	void ExportMisc(Local<ObjectTemplate> global_templ)
+	{
+		FIsolateHelper I(isolate_);
+
+#if WITH_EDITOR
+		auto exec_editor = [](const FunctionCallbackInfo<Value>& info) 
+		{
+			FEditorScriptExecutionGuard Guard;
+
+			if (info.Length() == 1)
+			{
+				auto function = info[0].As<Function>();
+				if (!function.IsEmpty())
+				{
+					function->Call(info.This(), 0, nullptr);
+				}				
+			}
+		};
+		global_templ->Set(I.Keyword("$execEditor"), I.FunctionTemplate(exec_editor));
+#endif
+	}
 
 	void ExportMemory(Local<ObjectTemplate> global_templ)
 	{
