@@ -63,7 +63,7 @@ namespace v8
 		if (bHasAnyOutParams)
 		{
 			FIsolateHelper I(isolate);
-			if (!value->IsObject())
+			if (value.IsEmpty() || !value->IsObject())
 			{
 				I.Throw(TEXT("..."));
 				return;

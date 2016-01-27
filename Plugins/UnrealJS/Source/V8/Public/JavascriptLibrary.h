@@ -120,5 +120,5 @@ public:
 	static UModel* GetModel(UWorld* World);
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
-	static ULevel* GetLevel(AActor* Actor);
+	static ULevel* GetLevel(AActor* Actor);	
 };
