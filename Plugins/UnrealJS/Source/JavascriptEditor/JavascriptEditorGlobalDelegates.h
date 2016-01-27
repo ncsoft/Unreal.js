@@ -248,6 +248,26 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Scripting | Javascript")
 	void OnFileLoadProgressUpdated(int32 NumAssetsDiscovered, int32 TotalAssets);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Scripting | Javascript")
+	void OnBlueprintPreCompile(UBlueprint* Blueprint);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Scripting | Javascript")
+	void OnBlueprintCompiled();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Scripting | Javascript")
+	void OnBlueprintReinstanced();
+	
+	//OnObjectsReplaced
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Scripting | Javascript")
+	void OnClassPackageLoadedOrUnloaded();
+	
+	UFUNCTION(BlueprintImplementableEvent, Category = "Scripting | Javascript")
+	void OnObjectReimported(UObject* Object);
+
+		//GetActorRecordingState
+	
 #endif
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")

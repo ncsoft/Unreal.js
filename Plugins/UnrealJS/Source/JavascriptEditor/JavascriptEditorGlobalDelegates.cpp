@@ -65,6 +65,13 @@ OP_REFLECT_ASSETREGISTRY(OnInMemoryAssetDeleted)\
 OP_REFLECT_ASSETREGISTRY(OnFilesLoaded)\
 OP_REFLECT_ASSETREGISTRY(OnFileLoadProgressUpdated)
 
+#define DO_REFLECT_EDITORENGINE() \
+OP_REFLECT_EDITORENGINE(OnBlueprintPreCompile)\
+OP_REFLECT_EDITORENGINE(OnBlueprintCompiled)\
+OP_REFLECT_EDITORENGINE(OnBlueprintReinstanced)\
+OP_REFLECT_EDITORENGINE(OnClassPackageLoadedOrUnloaded)\
+OP_REFLECT_EDITORENGINE(OnObjectReimported);
+
 #if WITH_EDITOR
 FJavascriptAssetData::FJavascriptAssetData(const FAssetData& Source)
 	: ObjectPath(Source.ObjectPath), PackageName(Source.PackageName), PackagePath(Source.PackagePath), GroupNames(Source.GroupNames), AssetName(Source.AssetName), AssetClass(Source.AssetClass), ChunkIDs(Source.ChunkIDs), PackageFlags((int32)Source.PackageFlags), SourceAssetData(Source)
@@ -80,9 +87,11 @@ void UJavascriptEditorGlobalDelegates::Bind(FString Key)
 	auto& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry")).Get();
 #define OP_REFLECT(x) else if (Key == #x) { Handle = FEditorDelegates::x.AddUObject(this, &UJavascriptEditorGlobalDelegates::x); }
 #define OP_REFLECT_ASSETREGISTRY(x) else if (Key == #x) { Handle = AssetRegistry.x().AddUObject(this, &UJavascriptEditorGlobalDelegates::x); }
+#define OP_REFLECT_EDITORENGINE(x) else if (Key == #x) { Handle = Cast<UEditorEngine>(GEngine)->x().AddUObject(this, &UJavascriptEditorGlobalDelegates::x); }
 	if (false) {}
 	DO_REFLECT()
 	DO_REFLECT_ASSETREGISTRY()
+	DO_REFLECT_EDITORENGINE()
 #endif
 
 	if (Handle.IsValid())
@@ -107,9 +116,11 @@ void UJavascriptEditorGlobalDelegates::Unbind(FString Key)
 	auto& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry")).Get();
 #define OP_REFLECT(x) else if (Key == #x) { FEditorDelegates::x.Remove(Handle); }
 #define OP_REFLECT_ASSETREGISTRY(x) else if (Key == #x) { AssetRegistry.x().Remove(Handle); }
+#define OP_REFLECT_EDITORENGINE(x) else if (Key == #x) { Cast<UEditorEngine>(GEngine)->x().Remove(Handle); }
 	if (false) {}
 	DO_REFLECT()	
 	DO_REFLECT_ASSETREGISTRY()
+	DO_REFLECT_EDITORENGINE()
 #endif
 
 	Handles.Remove(Key);
