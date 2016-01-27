@@ -953,23 +953,11 @@ public:
 			}
 		}
 
-		FFrame Stack(Object, Function, Buffer, nullptr, Function->Children);
-
-		int32 FunctionCallspace = Object->GetFunctionCallspace(Function, Buffer, &Stack);
-
-		if (FunctionCallspace & FunctionCallspace::Remote)
-		{
-			Object->CallRemoteFunction(Function, Buffer, Stack.OutParms, &Stack);
-		}
-		
-		if (FunctionCallspace & FunctionCallspace::Local)
-		{
-			// Call regular native function.
-			FScopeCycleCounterUObject ContextScope(Object);
-			FScopeCycleCounterUObject FunctionScope(Function);
+		// Call regular native function.
+		FScopeCycleCounterUObject ContextScope(Object);
+		FScopeCycleCounterUObject FunctionScope(Function);
 			
-			Object->ProcessEvent(Function, Buffer);
-		}
+		Object->ProcessEvent(Function, Buffer);
 
 		// In case of 'out ref'
 		if (bHasAnyOutParams)
