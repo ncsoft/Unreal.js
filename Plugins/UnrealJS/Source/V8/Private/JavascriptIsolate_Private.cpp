@@ -13,6 +13,9 @@
 #include "JavascriptGeneratedClass_Native.h"
 #include "StructMemoryInstance.h"
 #include "JavascriptMemoryObject.h"
+#if WITH_EDITOR
+#include "ScopedTransaction.h"
+#endif
 
 DECLARE_STATS_GROUP(TEXT("Javascript"), STATGROUP_Javascript, STATCAT_Advanced);
 
@@ -776,6 +779,22 @@ public:
 			}
 		};
 		global_templ->Set(I.Keyword("$execEditor"), I.FunctionTemplate(exec_editor));
+
+		auto exec_transaction = [](const FunctionCallbackInfo<Value>& info)
+		{
+			if (info.Length() == 0)
+			{
+				auto String = StringFromV8(info[0]);
+				FScopedTransaction Transaction(FText::FromString(String));
+
+				auto function = info[1].As<Function>();
+				if (!function.IsEmpty())
+				{
+					function->Call(info.This(), 0, nullptr);
+				}
+			}
+		};
+		global_templ->Set(I.Keyword("$execTransaction"), I.FunctionTemplate(exec_transaction));
 #endif
 	}
 
