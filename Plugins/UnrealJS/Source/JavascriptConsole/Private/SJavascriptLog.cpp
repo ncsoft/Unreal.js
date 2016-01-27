@@ -359,7 +359,6 @@ void SJavascriptConsoleInputBox::OnTextCommitted( const FText& InText, ETextComm
 			
 			// Exec!
 			{
-				FScopedTransaction Transaction(NSLOCTEXT("UnrealEd", "UnrealJS", "Javascript action"));
 				FEditorScriptExecutionGuard ScriptGuard;
 				IV8::Get().Exec(TargetContext, *ExecString);
 			}

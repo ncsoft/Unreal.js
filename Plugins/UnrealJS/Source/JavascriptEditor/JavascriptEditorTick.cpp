@@ -14,7 +14,6 @@ public:
 
 	virtual void Tick(float DeltaTime) override
 	{
-		FScopedTransaction Transaction(NSLOCTEXT("UnrealEd", "UnrealJS", "Javascript action"));
 		FEditorScriptExecutionGuard ScriptGuard;
 
 		Object->OnTick.ExecuteIfBound(DeltaTime);

@@ -32,7 +32,10 @@ protected:
 		if (bIsReentrant) return;
 
 		TGuardValue<bool> ReentrantGuard(bIsReentrant, true);
-		OutputDevice->OnMessage(V, (ELogVerbosity_JS)Verbosity, Category);
+		if (!OutputDevice->HasAnyFlags(RF_Unreachable)) 
+		{
+			OutputDevice->OnMessage(V, (ELogVerbosity_JS)Verbosity, Category);
+		}		
 	}
 };
 
