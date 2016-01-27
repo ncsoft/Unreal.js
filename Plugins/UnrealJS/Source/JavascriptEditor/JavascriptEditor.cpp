@@ -64,7 +64,6 @@ void FJavascriptEditorModule::StartupModule()
 
 	if (!IsRunningCommandlet())
 	{
-		FScopedTransaction Transaction(NSLOCTEXT("UnrealEd", "UnrealJS", "Javascript action"));
 		FEditorScriptExecutionGuard ScriptGuard;
 
 		Context->RunFile("editor.js");
