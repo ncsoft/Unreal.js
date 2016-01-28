@@ -170,7 +170,7 @@
   let Outer = Root.GetEngine ? Root.GetEngine().GetEditorWorld() : GWorld
 
   function instantiate(design, scope) {
-    if (!design || !design.type) {
+      if (!design || !design.type) {
       throw 'failed to instantiate no design!'
     }
 
@@ -238,10 +238,11 @@
 
     bindings = set_attrs(instance, attrs, scope)
 
-    var children = design.children || []
+    var children = _.compact(design.children) || []
 
     function add_child(child, scope, no_directop) {
-      var c = instantiate(child, scope);
+        var c = instantiate(child, scope);
+        if (!c) return
       var slot, child_bindings;
       if (!no_directop) {
         slot = instance.AddChild(c);
@@ -277,7 +278,7 @@
         }
         instance.children.splice(instance.children.indexOf(child), 1)
       } else {
-        console.error('couldnot find child')
+        console.error('couldnot find child', child_instance)
       }
       if (!no_directop) {
         child_instance.RemoveFromParent();
@@ -286,6 +287,29 @@
 
     instance.add_child = add_child;
     instance.remove_child = remove_child;
+
+    function expand(children) {
+        let dirty = false
+        children = _.flatten(_.compact(children.map(child => {
+            if (typeof child == 'Array') {
+                dirty = true
+                return child
+            }
+            else if (typeof child == 'function') {
+                dirty = true
+                return child(scope)
+            } else {
+                return child
+            }
+        })))
+        if (dirty) {
+            return expand(children)
+        } else {
+            return children
+        }
+    }
+    
+    children = expand(children)
 
     children.forEach(function (child) {
       add_child(child, scope);
