@@ -1,5 +1,6 @@
 #include "V8PCH.h"
 #include "JavascriptOutputDevice.h"
+#include "UObjectThreadContext.h"
 
 /** This class is to capture all log output even if the log window is closed */
 class FJavascriptOutputDevice : public FOutputDevice
@@ -32,7 +33,7 @@ protected:
 		if (bIsReentrant) return;
 
 		TGuardValue<bool> ReentrantGuard(bIsReentrant, true);
-		if (!OutputDevice->HasAnyFlags(RF_Unreachable)) 
+		if (!OutputDevice->HasAnyFlags(RF_Unreachable) && !FUObjectThreadContext::Get().IsRoutingPostLoad)
 		{
 			OutputDevice->OnMessage(V, (ELogVerbosity_JS)Verbosity, Category);
 		}		
