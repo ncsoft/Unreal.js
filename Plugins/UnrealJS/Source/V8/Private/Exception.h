@@ -20,6 +20,8 @@ struct FV8Exception
 			auto linenum = message->GetLineNumber();
 			auto line = StringFromV8(message->GetSourceLine());			
 
+			UE_LOG(Javascript, Error, TEXT("%s:%d: %s"), *filename, linenum, *exception);
+
 			auto stack_trace = StringFromV8(try_catch.StackTrace());
 			if (stack_trace.Len() > 0)
 			{

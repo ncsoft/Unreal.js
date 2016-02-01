@@ -1427,16 +1427,23 @@ public:
 		auto path = V8_String(isolate(), Path);
 		ScriptOrigin origin(path, Integer::New(isolate(), -line_offset));
 		auto script = Script::Compile(source, &origin);
-
-		auto result = script->Run();
-		if (try_catch.HasCaught())
+		if (script.IsEmpty())
 		{
 			FV8Exception::Report(try_catch);
 			return Local<Value>();
 		}
 		else
 		{
-			return result;
+			auto result = script->Run();
+			if (try_catch.HasCaught())
+			{
+				FV8Exception::Report(try_catch);
+				return Local<Value>();
+			}
+			else
+			{
+				return result;
+			}
 		}
 	}
 
