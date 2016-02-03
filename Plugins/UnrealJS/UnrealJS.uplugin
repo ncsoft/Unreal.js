@@ -15,7 +15,7 @@
       "Name": "V8",
       "Type": "Runtime",
       "LoadingPhase": "PreDefault",
-      "WhitelistPlatforms": [ "Win64", "Win32", "Android" ]
+      "WhitelistPlatforms": [ "Win64", "Win32" ]
     },
     {
       "Name": "JavascriptUMG",
@@ -24,6 +24,11 @@
     },
     {
       "Name": "JavascriptHttp",
+      "Type": "Runtime",
+      "LoadingPhase": "PreDefault"
+    },
+    {
+      "Name": "JavascriptWebSocket",
       "Type": "Runtime",
       "LoadingPhase": "PreDefault"
     },
