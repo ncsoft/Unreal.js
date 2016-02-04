@@ -26,6 +26,7 @@
 
 #if !PLATFORM_HTML5
 #include "libwebsockets.h"
+#define LWS_EXTERN extern
 #include "private-libwebsockets.h"
 #endif 
 

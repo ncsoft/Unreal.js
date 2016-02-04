@@ -3,6 +3,7 @@
 #include "WebSocket.h"
 #include "WebSocketServer.h"
 #include "JavascriptWebSocketServer.h"
+#include "JavascriptWebSocket.h"
 
 UJavascriptWebSocketServer* UJavascriptWebSocketServer::Create(int32 Port)
 {	
