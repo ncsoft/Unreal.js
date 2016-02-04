@@ -827,9 +827,32 @@ public:
 			I.Throw(TEXT("memory.fork requires JavascriptMemoryObject"));
 		});
 
+		add_fn("exec", [](const FunctionCallbackInfo<Value>& info)
+		{
+			FIsolateHelper I(info.GetIsolate());
+
+			if (info.Length() == 2 && info[0]->IsArrayBuffer() && info[1]->IsFunction())
+			{
+				auto arr = info[0].As<ArrayBuffer>();
+				auto function = info[1].As<Function>();				
+
+				GCurrentContents = arr->Externalize();
+				function->Call(info.This(), 0, nullptr);
+				arr->Neuter();
+				GCurrentContents = v8::ArrayBuffer::Contents();
+			}
+			else
+			{
+				GCurrentContents = v8::ArrayBuffer::Contents();
+			}
+
+			info.GetReturnValue().Set(info.Holder());
+		});
+
 		// memory.bind
 		add_fn("bind", [](const FunctionCallbackInfo<Value>& info)
 		{
+			UE_LOG(Javascript, Warning, TEXT("memory.bind is deprecated. use memory.exec(ab,fn) instead."));
 			FIsolateHelper I(info.GetIsolate());
 
 			if (info.Length() == 1 && info[0]->IsArrayBuffer())
