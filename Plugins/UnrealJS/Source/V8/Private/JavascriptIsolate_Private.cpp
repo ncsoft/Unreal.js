@@ -837,7 +837,10 @@ public:
 				auto function = info[1].As<Function>();				
 
 				GCurrentContents = arr->Externalize();
-				function->Call(info.This(), 0, nullptr);
+
+				Handle<Value> argv[1];
+				argv[0] = arr;
+				function->Call(info.This(), 1, argv);
 				arr->Neuter();
 				GCurrentContents = v8::ArrayBuffer::Contents();
 			}
