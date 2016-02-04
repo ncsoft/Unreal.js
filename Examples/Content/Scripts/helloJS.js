@@ -4,6 +4,56 @@
     const UMG = require('UMG')
     const _ = require('lodash')
     const uclass = require('uclass')().bind(this,global)
+    
+    function tutorial_WebSocket() {
+        // borrowed from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
+        function ab2str(buf) {
+            return String.fromCharCode.apply(null, new Uint16Array(buf));
+        }
+        function str2ab(str) {
+            var buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
+            var bufView = new Uint16Array(buf);
+            for (var i = 0, strLen = str.length; i < strLen; i++) {
+                bufView[i] = str.charCodeAt(i);
+            }
+            return buf;
+        }
+        
+        let server = JavascriptWebSocketServer.Create(8080)
+        server.OnConnected = (conn) => {
+            console.log('client joined')
+            conn.OnReceived = _ => {
+                let ab = new ArrayBuffer(1024)            
+                memory.exec(ab,_ => {
+                    conn.CopyBuffer()
+                    console.log('received',ab2str(ab))
+                })                
+            }
+        }
+        let client = JavascriptWebSocket.Connect("127.0.0.1:8080")
+        client.OnConnected = _ => {
+            console.log('connected to server')
+            memory.exec(str2ab("Hello Websocket."),ab => {
+                client.SendMemory(ab.byteLength)    
+            })            
+        }
+        let alive = true
+        
+        function tick() {
+            if (!alive) return
+            server.Tick()
+            client.Tick()
+            process.nextTick(tick)
+        }
+        
+        tick()
+        
+        return __ => {
+            server.Dispose()
+            client.Dispose()
+            alive = false
+        }
+    }
 
     function tutorial_StaticMeshActor() {
         console.log('creating a static mesh actor')
@@ -23,7 +73,8 @@
     }
 
     let tutorials = {
-        'Static mesh actor' : tutorial_StaticMeshActor
+        'Static mesh actor' : tutorial_StaticMeshActor,
+        'Web socket' : tutorial_WebSocket
     }
 
     function Logger() {
