@@ -32,6 +32,19 @@ DECLARE_MEMORY_STAT(TEXT("LoSpace"), STAT_LoSpace, STATGROUP_Javascript);
 
 using namespace v8;
 
+// HACK FOR ACCESS PRIVATE MEMBERS
+class hack_private_key {};
+static UClass* PlaceholderUClass;
+
+template<>
+FObjectInitializer const& FObjectInitializer::SetDefaultSubobjectClass<hack_private_key>(TCHAR const*SubobjectName) const
+{
+	AssertIfSubobjectSetupIsNotAllowed(SubobjectName);
+	ComponentOverrides.Add(SubobjectName, PlaceholderUClass, *this);
+	return *this;
+}
+// END OF HACKING
+
 template <typename CppType>
 struct TStructReader
 {	
@@ -1215,6 +1228,49 @@ public:
 		Template->Set(I.Keyword("GetClassObject"), I.FunctionTemplate(fn, ClassToExport));
 	}	
 
+	void AddMemberFunction_Class_SetDefaultSubobjectClass(Local<FunctionTemplate> Template, UStruct* ClassToExport)
+	{
+		FIsolateHelper I(isolate_);
+
+		auto fn = [](const FunctionCallbackInfo<Value>& info) {
+			auto isolate = info.GetIsolate();
+			HandleScope scope(isolate);
+
+			FIsolateHelper I(isolate);
+
+			auto ClassToExport = reinterpret_cast<UClass*>((Local<External>::Cast(info.Data()))->Value());
+
+			auto ObjectInitializer = GetSelf(isolate)->GetContext()->GetObjectInitializer();
+
+			if (!ObjectInitializer)
+			{
+				I.Throw(TEXT("SetDefaultSubobjectClass must be called within ctor"));
+				return;
+			}
+
+			if (info.Length() < 1)
+			{
+				I.Throw(TEXT("Missing arg"));
+				return;
+			}
+
+			auto Class = static_cast<UJavascriptGeneratedClass*>(ObjectInitializer->GetClass());
+			if (!Class->JavascriptContext.IsValid())
+			{
+				I.Throw(TEXT("Fatal"));
+				return;
+			}
+
+			auto Context = Class->JavascriptContext.Pin();
+			auto Name = StringFromV8(info[0]);			
+			PlaceholderUClass = ClassToExport;
+			ObjectInitializer->SetDefaultSubobjectClass<hack_private_key>(*Name);
+			PlaceholderUClass = nullptr;
+		};
+
+		Template->Set(I.Keyword("SetDefaultSubobjectClass"), I.FunctionTemplate(fn, ClassToExport));
+	}
+
 	void AddMemberFunction_Class_CreateDefaultSubobject(Local<FunctionTemplate> Template, UStruct* ClassToExport)
 	{
 		FIsolateHelper I(isolate_);
@@ -1602,6 +1658,7 @@ public:
 
 		AddMemberFunction_Class_GetClassObject(Template, ClassToExport);
 		AddMemberFunction_Class_CreateDefaultSubobject(Template, ClassToExport);
+		AddMemberFunction_Class_SetDefaultSubobjectClass(Template, ClassToExport);
 
 		AddMemberFunction_Class_GetDefaultObject(Template, ClassToExport);
 		AddMemberFunction_Class_GetDefaultSubobjectByName(Template, ClassToExport);

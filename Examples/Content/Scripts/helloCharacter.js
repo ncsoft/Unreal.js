@@ -7,12 +7,27 @@
     function GetPC() {
         return PlayerController.C(GWorld.GetAllActorsOfClass(PlayerController).OutActors[0])
     }
+    
+    function compile(source) {
+        return require('uclass')()(global,source)
+    }
 
     function main() {
         let PC = GetPC()
+        
+        // For movement component replacement demonstration 
+        class MyCMC extends CharacterMovementComponent {
+            properties() {
+                this.Dummy/*EditAnywhere+Vector*/;
+            }
+        }
+        let MyCMC_C = compile(MyCMC)
 
         // declare a new character class
         class MyCharacter extends Character {
+            prector() {
+                MyCMC_C.SetDefaultSubobjectClass("CharMoveComp")
+            }
             // strange? ctor, not constructor...
             ctor() {
                 let movement = this.GetMovementComponent()
@@ -29,7 +44,7 @@
             }
         }
 
-        let MyCharacter_C = require('uclass')()(global,MyCharacter)
+        let MyCharacter_C = compile(MyCharacter)
 
         function randomPoint() {
             return GWorld.GetRandomPoint(GWorld.NavigationSystem.MainNavData)
