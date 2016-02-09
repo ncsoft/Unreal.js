@@ -10,9 +10,12 @@
 #endif
 
 #if !PLATFORM_HTML5
+#ifndef LWS_INCLUDED
 #include "libwebsockets.h"
+#define LWS_INCLUDED
 #define LWS_EXTERN extern
 #include "private-libwebsockets.h"
+#endif
 #endif 
 
 #if PLATFORM_WINDOWS
