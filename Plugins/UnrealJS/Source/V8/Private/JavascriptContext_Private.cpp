@@ -1313,11 +1313,14 @@ public:
 #endif
 			if (!(required_module[0] == '.' && inner2(current_script_path)))
 			{
-				for (const auto& path : Self->Paths)
+				if (!inner2(current_script_path / TEXT("node_modules")))
 				{
-					if (inner2(path)) break;
+					for (const auto& path : Self->Paths)
+					{
+						if (inner2(path)) break;
 
-					if (inner2(path / TEXT("node_modules"))) break;
+						if (inner2(path / TEXT("node_modules"))) break;
+					}
 				}
 			}
 
