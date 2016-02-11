@@ -39,13 +39,13 @@
 
 
 #if !PLATFORM_HTML5
-uint8 PREPADDING[LWS_SEND_BUFFER_PRE_PADDING];
-uint8 POSTPADDING[LWS_SEND_BUFFER_POST_PADDING];
+uint8 PREPADDING_JS[LWS_SEND_BUFFER_PRE_PADDING];
+uint8 POSTPADDING_JS[LWS_SEND_BUFFER_POST_PADDING];
 #endif 
 
 
 #if !PLATFORM_HTML5
-static void libwebsocket_debugLogS(int level, const char *line)
+static void libwebsocket_debugLogS_JS(int level, const char *line)
 {
 	UE_LOG(LogWebsocket, Log, TEXT("client: %s"), ANSI_TO_TCHAR(line));
 }
@@ -60,7 +60,7 @@ FJavascriptWebSocket::FJavascriptWebSocket(
 #if !PLATFORM_HTML5_BROWSER
 
 #if !UE_BUILD_SHIPPING
-	lws_set_log_level(LLL_ERR | LLL_WARN | LLL_NOTICE | LLL_DEBUG | LLL_INFO, libwebsocket_debugLogS);
+	lws_set_log_level(LLL_ERR | LLL_WARN | LLL_NOTICE | LLL_DEBUG | LLL_INFO, libwebsocket_debugLogS_JS);
 #endif 
 
 	Protocols = new libwebsocket_protocols[3];
@@ -147,14 +147,14 @@ bool FJavascriptWebSocket::Send(uint8* Data, uint32 Size)
 	// insert size. 
 
 #if !PLATFORM_HTML5
-	Buffer.Append((uint8*)&PREPADDING, sizeof(PREPADDING));
+	Buffer.Append((uint8*)&PREPADDING_JS, sizeof(PREPADDING_JS));
 #endif 
 
 	//Buffer.Append((uint8*)&Size, sizeof (uint32));
 	Buffer.Append((uint8*)Data, Size);
 
 #if !PLATFORM_HTML5
-	Buffer.Append((uint8*)&POSTPADDING, sizeof(POSTPADDING));
+	Buffer.Append((uint8*)&POSTPADDING_JS, sizeof(POSTPADDING_JS));
 #endif 
 
 	OutgoingBuffer.Add(Buffer);
