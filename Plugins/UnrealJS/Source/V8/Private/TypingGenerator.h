@@ -422,7 +422,7 @@ struct TypingGenerator : TypingGeneratorBase
 			w.push(";\n");
 
 			w.push("\tstatic GetDefaultSubobjectByName(Name: string): UObject;\n");
-
+			w.push("\tstatic SetDefaultSubobjectClass(Name: string): void;\n");
 			w.push("\tstatic CreateDefaultSubobject(Name: string, Transient?: boolean, Required?: boolean, Abstract?: boolean): ");
 			w.push(name);
 			w.push(";\n");

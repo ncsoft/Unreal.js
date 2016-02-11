@@ -770,8 +770,7 @@ public:
 
 			auto ClassConstructor = [](const FObjectInitializer& ObjectInitializer){
 				auto Class = static_cast<UBlueprintGeneratedClass*>(ObjectInitializer.GetClass());
-				Class->GetSuperClass()->ClassConstructor(ObjectInitializer);
-
+				
 				FJavascriptContextImplementation* Context = nullptr;
 
 				if (auto Klass = Cast<UJavascriptGeneratedClass_Native>(Class)) 
@@ -788,7 +787,6 @@ public:
 						Context = static_cast<FJavascriptContextImplementation*>(Klass->JavascriptContext.Pin().Get());
 					}
 				}
-
 
 				if (Context)
 				{
@@ -810,20 +808,38 @@ public:
 						I.Throw(TEXT("Invalid proxy : construct class"));
 						return;
 					}
-					auto func = proxy->ToObject()->Get(I.Keyword("ctor"));					
-
+					
 					Context->ObjectInitializer = &ObjectInitializer;
 
 					auto This = Context->ExportObject(Object);
 
 					auto context = Context->context();
 
-					if (func->IsFunction())
 					{
-						CallJavascriptFunction(context, This, nullptr, Local<Function>::Cast(func), nullptr);
+						auto func = proxy->ToObject()->Get(I.Keyword("prector"));
+
+						if (func->IsFunction())
+						{
+							CallJavascriptFunction(context, This, nullptr, Local<Function>::Cast(func), nullptr);
+						}
+					}
+
+					Class->GetSuperClass()->ClassConstructor(ObjectInitializer);
+
+					{
+						auto func = proxy->ToObject()->Get(I.Keyword("ctor"));
+
+						if (func->IsFunction())
+						{
+							CallJavascriptFunction(context, This, nullptr, Local<Function>::Cast(func), nullptr);
+						}
 					}
 
 					Context->ObjectInitializer = nullptr;
+				}
+				else
+				{
+					Class->GetSuperClass()->ClassConstructor(ObjectInitializer);
 				}
 			};
 
@@ -1040,7 +1056,7 @@ public:
 
 					if (!Function->IsFunction()) continue;
 
-					if (UName != TEXT("ctor") && UName != TEXT("constructor"))
+					if (UName != TEXT("prector") && UName != TEXT("ctor") && UName != TEXT("constructor"))
 					{
 						if (!AddFunction(*UName, Function))
 						{						
