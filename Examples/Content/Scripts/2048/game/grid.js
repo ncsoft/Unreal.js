@@ -1,4 +1,4 @@
-var Tile = require('game/tile')
+var Tile = require('./game/tile')
 
 function Grid(size, previousState) {
   this.size = size;

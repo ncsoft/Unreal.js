@@ -45,7 +45,7 @@
                 game()
             }
             try {
-                game = require('game/application')(widget, page, data)
+                game = require('./game/application')(widget, page, data)
             }
             catch (e) {
                 console.error("EXCEPTION",String(e),e.stack)

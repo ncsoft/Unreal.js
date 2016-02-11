@@ -1171,7 +1171,8 @@ public:
 
 			auto inner = [&](const FString& script_path)
 			{				
-				auto it = Self->Modules.Find(script_path);
+				auto full_path = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*script_path);
+				auto it = Self->Modules.Find(full_path);
 				if (it)
 				{
 					info.GetReturnValue().Set(Local<Value>::New(isolate, *it));
@@ -1182,8 +1183,7 @@ public:
 				FString Text;
 				if (FFileHelper::LoadFileToString(Text, *script_path))
 				{
-					Text = FString::Printf(TEXT("(function (__dirname) {\nvar module = { exports : {}, filename : __dirname }, exports = module.exports;\n%s\n;return module.exports;}('%s'));"), *Text, *script_path);
-					auto full_path = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*script_path);
+					Text = FString::Printf(TEXT("(function (__dirname) {\nvar module = { exports : {}, filename : __dirname }, exports = module.exports;\n%s\n;return module.exports;}('%s'));"), *Text, *script_path);					
 #if PLATFORM_WINDOWS
 					full_path = full_path.Replace(TEXT("/"), TEXT("\\"));
 #endif
@@ -1192,7 +1192,7 @@ public:
 					{
 						UE_LOG(Javascript, Log, TEXT("Invalid script for require"));
 					}
-					Self->Modules.Add(script_path, UniquePersistent<Value>(isolate, exports));
+					Self->Modules.Add(full_path, UniquePersistent<Value>(isolate, exports));
 					info.GetReturnValue().Set(exports);
 					found = true;
 					return true;
@@ -1265,47 +1265,43 @@ public:
 
 			auto inner2 = [&](FString base_path)
 			{
-				for (;;)
+				if (!FPaths::DirectoryExists(base_path)) return false;
+
+				auto script_path = base_path / required_module;
+				if (script_path.EndsWith(TEXT(".js")))
 				{
-					if (!FPaths::DirectoryExists(base_path)) return false;
-
-					auto script_path = base_path / required_module;
-					if (!script_path.EndsWith(TEXT(".js")))
-					{
-						if (script_path.EndsWith(TEXT(".json")))
-						{
-							if (inner_json(script_path)) return true;
-						}
-						else
-						{
-							if (inner(script_path + TEXT(".js"))) return true;
-							if (inner_json(script_path + TEXT(".json"))) return true;
-							if (inner(script_path / TEXT("index.js"))) return true;
-
-							if (inner_package_json(script_path)) return true;
-						}						
-					}
-					else
-					{
-						if (inner(script_path)) return true;
-					}
-
-					base_path = base_path / TEXT("node_modules");
+					if (inner(script_path)) return true;
 				}
+				else
+				{
+					if (inner(script_path + TEXT(".js"))) return true;
+				}
+				if (script_path.EndsWith(TEXT(".json")))
+				{
+					if (inner_json(script_path)) return true;
+				}
+				else
+				{
+					if (inner_json(script_path + TEXT(".json"))) return true;
+				}				
+				
+				if (inner(script_path / TEXT("index.js"))) return true;
+				if (inner_package_json(script_path)) return true;					
+
+				return false;
 			};
 
 			auto current_script_path = FPaths::GetPath(StringFromV8(StackTrace::CurrentStackTrace(isolate, 1, StackTrace::kScriptName)->GetFrame(0)->GetScriptName()));
 #if PLATFORM_WINDOWS
 			current_script_path = current_script_path.Replace(TEXT("\\"), TEXT("/"));
 #endif
-			if (!inner2(current_script_path))
+			if (!(required_module[0] == '.' && inner2(current_script_path)))
 			{
-				if (!inner2("."))
+				for (const auto& path : Self->Paths)
 				{
-					for (const auto& path : Self->Paths)
-					{
-						if (inner2(path)) break;
-					}
+					if (inner2(path)) break;
+
+					if (inner2(path / TEXT("node_modules"))) break;
 				}
 			}
 

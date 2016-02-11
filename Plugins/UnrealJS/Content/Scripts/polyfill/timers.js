@@ -1,5 +1,5 @@
 (function (target) {
-    var makeWindowTimer = require('windowTimers')
+    var makeWindowTimer = require('./windowTimers')
     if (Root == undefined || Root.OnTick == undefined) return
     
     var timerLoop = makeWindowTimer(target);
