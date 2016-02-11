@@ -4,15 +4,15 @@
 // This uses https://libwebsockets.org/trac/libwebsockets 
 #pragma  once
 
-class FWebSocketServer
+class FJavascriptWebSocketServer
 {
 public:
 
-	FWebSocketServer(); 
-	~FWebSocketServer();
+	FJavascriptWebSocketServer(); 
+	~FJavascriptWebSocketServer();
 
 	/** Create a web socket server*/
-	bool Init(uint32 Port, FWebsocketClientConnectedCallBack);
+	bool Init(uint32 Port, FJavascriptWebSocketClientConnectedCallBack);
 
 	/** Service libwebsocket */
 	bool Tick();
@@ -23,7 +23,7 @@ public:
 private: 
 
 	/** Callback for a new websocket connection to the server */
-	FWebsocketClientConnectedCallBack  ConnectedCallBack;
+	FJavascriptWebSocketClientConnectedCallBack  ConnectedCallBack;
 
 	/** Internal libwebsocket context */
 	WebSocketInternalContext* Context;
@@ -31,7 +31,7 @@ private:
 	/** Protocols serviced by this implementation */
 	WebSocketInternalProtocol* Protocols;
 
-	friend class FWebSocket;
+	friend class FJavascriptWebSocket;
 };
 
 

@@ -3,7 +3,7 @@
 #include "JavascriptWebSocket.h"
 #include "JavascriptWebSocketServer.h"
 #include "JavascriptContext.h"
-#include "WebSocket.h"
+#include "JSWebSocket.h"
 
 UJavascriptWebSocket* UJavascriptWebSocket::Connect(const FString& EndpointString)
 {
@@ -15,28 +15,28 @@ UJavascriptWebSocket* UJavascriptWebSocket::Connect(const FString& EndpointStrin
 	}
 	
 	auto addr = Endpoint.ToInternetAddr();
-	return CreateFrom(new FWebSocket(*addr), GetTransientPackage());
+	return CreateFrom(new FJavascriptWebSocket(*addr), GetTransientPackage());
 }
 
-UJavascriptWebSocket* UJavascriptWebSocket::CreateFrom(FWebSocket* WebSocket, UObject* Outer)
+UJavascriptWebSocket* UJavascriptWebSocket::CreateFrom(FJavascriptWebSocket* WebSocket, UObject* Outer)
 {
 	auto instance = NewObject<UJavascriptWebSocket>(Outer);
-	instance->WebSocket = MakeShareable<FWebSocket>(WebSocket);
+	instance->WebSocket = MakeShareable<FJavascriptWebSocket>(WebSocket);
 
 	{
-		FWebsocketPacketRecievedCallBack callback;
+		FJavascriptWebSocketPacketRecievedCallBack callback;
 		callback.BindUObject(instance, &UJavascriptWebSocket::OnReceivedCallback);
 		instance->WebSocket->SetRecieveCallBack(callback);
 	}
 
 	{
-		FWebsocketInfoCallBack callback;
+		FJavascriptWebSocketInfoCallBack callback;
 		callback.BindUObject(instance, &UJavascriptWebSocket::OnErrorCallback);
 		instance->WebSocket->SetErrorCallBack(callback);
 	}
 
 	{
-		FWebsocketInfoCallBack callback;
+		FJavascriptWebSocketInfoCallBack callback;
 		callback.BindUObject(instance, &UJavascriptWebSocket::OnConnectedCallback);
 		instance->WebSocket->SetConnectedCallBack(callback);
 	}

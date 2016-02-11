@@ -22,7 +22,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
 	static UJavascriptWebSocket* Connect(const FString& Endpoint);
 
-	static UJavascriptWebSocket* CreateFrom(FWebSocket*, UObject* Outer);
+	static UJavascriptWebSocket* CreateFrom(FJavascriptWebSocket*, UObject* Outer);
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
 	void SendMemory(int32 NumBytes);
@@ -49,7 +49,7 @@ public:
 	void Dispose();
 
 private:
-	TSharedPtr<FWebSocket> WebSocket;
+	TSharedPtr<FJavascriptWebSocket> WebSocket;
 	int32 Size{ 0 };
 	void* Buffer{ nullptr };
 

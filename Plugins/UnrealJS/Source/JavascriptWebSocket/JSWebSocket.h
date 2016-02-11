@@ -4,26 +4,28 @@
 //
 #pragma  once
 
-class FWebSocket
+DECLARE_DELEGATE(FJavascriptWebSocketInfoCallBack);
+
+class FJavascriptWebSocket
 {
 
 public: 
 
 	// Initialize as client side socket. 
-	FWebSocket(const FInternetAddr& ServerAddress);
+	FJavascriptWebSocket(const FInternetAddr& ServerAddress);
 
 	// Initialize as server side socket. 
-	FWebSocket(WebSocketInternalContext* InContext, WebSocketInternal* Wsi);
+	FJavascriptWebSocket(WebSocketInternalContext* InContext, WebSocketInternal* Wsi);
 
 	// clean up. 
-	~FWebSocket();
+	~FJavascriptWebSocket();
 
 	/************************************************************************/
 	/* Set various callbacks for Socket Events                              */           
 	/************************************************************************/
-	void SetConnectedCallBack(FWebsocketInfoCallBack CallBack);
-	void SetErrorCallBack(FWebsocketInfoCallBack CallBack);
-	void SetRecieveCallBack(FWebsocketPacketRecievedCallBack CallBack);
+	void SetConnectedCallBack(FJavascriptWebSocketInfoCallBack CallBack);
+	void SetErrorCallBack(FJavascriptWebSocketInfoCallBack CallBack);
+	void SetRecieveCallBack(FJavascriptWebSocketPacketRecievedCallBack CallBack);
 
 	/** Send raw data to remote end point. */ 
 	bool Send(uint8* Data, uint32 Size);
@@ -46,9 +48,9 @@ private:
 	/************************************************************************/
 	/*	Various Socket callbacks											*/                                                                 
 	/************************************************************************/ 
-	FWebsocketPacketRecievedCallBack  RecievedCallBack; 
-	FWebsocketInfoCallBack ConnectedCallBack;
-	FWebsocketInfoCallBack ErrorCallBack;
+	FJavascriptWebSocketPacketRecievedCallBack  RecievedCallBack; 
+	FJavascriptWebSocketInfoCallBack ConnectedCallBack;
+	FJavascriptWebSocketInfoCallBack ErrorCallBack;
 
 	/**  Recv and Send Buffers, serviced during the Tick */
 	TArray<uint8> RecievedBuffer;
@@ -72,7 +74,7 @@ private:
 	static int unreal_networking_client(struct libwebsocket_context *, struct libwebsocket *wsi, enum libwebsocket_callback_reasons reason, void *user, void *in, size_t len);
 #endif 
 
-	friend class FWebSocketServer;
+	friend class FJavascriptWebSocketServer;
 	int SockFd;
 };
 

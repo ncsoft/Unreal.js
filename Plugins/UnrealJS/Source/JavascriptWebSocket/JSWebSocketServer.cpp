@@ -2,8 +2,8 @@
 
 #include "JavascriptWebSocketModule.h"
 
-#include "WebSocketServer.h"
-#include "WebSocket.h"
+#include "JSWebSocketServer.h"
+#include "JSWebSocket.h"
 
 #if PLATFORM_WINDOWS
 #include "AllowWindowsPlatformTypes.h"
@@ -25,7 +25,7 @@
 // a object of this type is associated by libwebsocket to every connected session. 
 struct PerSessionDataServer
 {
-	FWebSocket *Socket; // each session is actually a socket to a client
+	FJavascriptWebSocket *Socket; // each session is actually a socket to a client
 };
 
 
@@ -49,7 +49,7 @@ static int unreal_networking_server(
 #endif 
 #endif 
 
-bool FWebSocketServer::Init(uint32 Port, FWebsocketClientConnectedCallBack CallBack)
+bool FJavascriptWebSocketServer::Init(uint32 Port, FJavascriptWebSocketClientConnectedCallBack CallBack)
 {
 #if !PLATFORM_HTML5
 	// setup log level.
@@ -61,7 +61,7 @@ bool FWebSocketServer::Init(uint32 Port, FWebsocketClientConnectedCallBack CallB
 	FMemory::Memzero(Protocols, sizeof(libwebsocket_protocols) * 3);
 
 	Protocols[0].name = "binary";
-	Protocols[0].callback = FWebSocket::unreal_networking_server;
+	Protocols[0].callback = FJavascriptWebSocket::unreal_networking_server;
 	Protocols[0].per_session_data_size = sizeof(PerSessionDataServer);
 	Protocols[0].rx_buffer_size = 10 * 1024 * 1024;
 
@@ -100,7 +100,7 @@ bool FWebSocketServer::Init(uint32 Port, FWebsocketClientConnectedCallBack CallB
 	return true; 
 }
 
-bool FWebSocketServer::Tick()
+bool FJavascriptWebSocketServer::Tick()
 {
 #if !PLATFORM_HTML5
 	{
@@ -111,10 +111,10 @@ bool FWebSocketServer::Tick()
 	return true;
 }
 
-FWebSocketServer::FWebSocketServer()
+FJavascriptWebSocketServer::FJavascriptWebSocketServer()
 {}
 
-FWebSocketServer::~FWebSocketServer()
+FJavascriptWebSocketServer::~FJavascriptWebSocketServer()
 {
 #if !PLATFORM_HTML5
 	if (Context)
@@ -129,7 +129,7 @@ FWebSocketServer::~FWebSocketServer()
 #endif 		
 }
 
-FString FWebSocketServer::Info()
+FString FJavascriptWebSocketServer::Info()
 {
 
 #if !PLATFORM_HTML5
@@ -142,7 +142,7 @@ FString FWebSocketServer::Info()
 
 // callback. 
 #if !PLATFORM_HTML5
-int FWebSocket::unreal_networking_server
+int FJavascriptWebSocket::unreal_networking_server
 	(
 		struct libwebsocket_context *Context, 
 		struct libwebsocket *Wsi, 
@@ -153,13 +153,13 @@ int FWebSocket::unreal_networking_server
 	)
 {
 	PerSessionDataServer* BufferInfo = (PerSessionDataServer*)User;
-	FWebSocketServer* Server = (FWebSocketServer*)libwebsocket_context_user(Context);
+	FJavascriptWebSocketServer* Server = (FJavascriptWebSocketServer*)libwebsocket_context_user(Context);
 
 	switch (Reason)
 	{
 		case LWS_CALLBACK_ESTABLISHED: 
 			{
-				BufferInfo->Socket = new FWebSocket(Context, Wsi);
+				BufferInfo->Socket = new FJavascriptWebSocket(Context, Wsi);
 				Server->ConnectedCallBack.ExecuteIfBound(BufferInfo->Socket);
 				libwebsocket_set_timeout(Wsi, NO_PENDING_TIMEOUT, 0);
 			}

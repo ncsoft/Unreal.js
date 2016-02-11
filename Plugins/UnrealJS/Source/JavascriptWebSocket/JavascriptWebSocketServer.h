@@ -2,7 +2,7 @@
 
 #include "JavascriptWebSocketServer.generated.h"
 
-class FWebSocketServer;
+class FJavascriptWebSocketServer;
 class UJavascriptWebSocket;
 
 UCLASS()
@@ -34,7 +34,7 @@ public:
 	void OnConnectionLost(UJavascriptWebSocket* Connection);
 
 private:
-	TSharedPtr<FWebSocketServer> WebSocketServer;
+	TSharedPtr<FJavascriptWebSocketServer> WebSocketServer;
 
-	void OnConnectedCallback(FWebSocket*);
+	void OnConnectedCallback(FJavascriptWebSocket*);
 };

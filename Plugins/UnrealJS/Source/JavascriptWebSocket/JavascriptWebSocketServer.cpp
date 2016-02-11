@@ -1,15 +1,15 @@
 // Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
 #include "JavascriptWebSocketModule.h"
-#include "WebSocket.h"
-#include "WebSocketServer.h"
+#include "JSWebSocket.h"
+#include "JSWebSocketServer.h"
 #include "JavascriptWebSocketServer.h"
 #include "JavascriptWebSocket.h"
 
 UJavascriptWebSocketServer* UJavascriptWebSocketServer::Create(int32 Port)
 {	
 	auto instance = NewObject<UJavascriptWebSocketServer>();
-	auto server = instance->WebSocketServer = MakeShareable<FWebSocketServer>(new FWebSocketServer);
-	FWebsocketClientConnectedCallBack callback;
+	auto server = instance->WebSocketServer = MakeShareable<FJavascriptWebSocketServer>(new FJavascriptWebSocketServer);
+	FJavascriptWebSocketClientConnectedCallBack callback;
 	callback.BindUObject(instance, &UJavascriptWebSocketServer::OnConnectedCallback);
 	if (!server->Init(Port, callback))
 	{
@@ -25,7 +25,7 @@ FString UJavascriptWebSocketServer::Info()
 	return WebSocketServer->Info();
 }
 
-void UJavascriptWebSocketServer::OnConnectedCallback(FWebSocket* WebSocket)
+void UJavascriptWebSocketServer::OnConnectedCallback(FJavascriptWebSocket* WebSocket)
 {
 	auto instance = UJavascriptWebSocket::CreateFrom(WebSocket, this);
 	Connections.Add(instance);

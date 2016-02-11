@@ -1,7 +1,7 @@
 // Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
 #include "JavascriptWebSocketModule.h"
 
-#include "WebSocket.h"
+#include "JSWebSocket.h"
 
 #if PLATFORM_HTML5
 #include <errno.h>
@@ -51,7 +51,7 @@ static void libwebsocket_debugLogS(int level, const char *line)
 }
 #endif 
 
-FWebSocket::FWebSocket(
+FJavascriptWebSocket::FJavascriptWebSocket(
 		const FInternetAddr& ServerAddress
 )
 :IsServerSide(false)
@@ -67,7 +67,7 @@ FWebSocket::FWebSocket(
 	FMemory::Memzero(Protocols, sizeof(libwebsocket_protocols) * 3);
 
 	Protocols[0].name = "binary";
-	Protocols[0].callback = FWebSocket::unreal_networking_client;
+	Protocols[0].callback = FJavascriptWebSocket::unreal_networking_client;
 	Protocols[0].per_session_data_size = 0;
 	Protocols[0].rx_buffer_size = 10 * 1024 * 1024;
 
@@ -132,7 +132,7 @@ FWebSocket::FWebSocket(
 #endif 
 }
 
-FWebSocket::FWebSocket(WebSocketInternalContext* InContext, WebSocketInternal* InWsi)
+FJavascriptWebSocket::FJavascriptWebSocket(WebSocketInternalContext* InContext, WebSocketInternal* InWsi)
 	: Context(InContext)
 	, Wsi(InWsi)
 	, IsServerSide(true)
@@ -141,7 +141,7 @@ FWebSocket::FWebSocket(WebSocketInternalContext* InContext, WebSocketInternal* I
 }
 
 
-bool FWebSocket::Send(uint8* Data, uint32 Size)
+bool FJavascriptWebSocket::Send(uint8* Data, uint32 Size)
 {
 	TArray<uint8> Buffer;
 	// insert size. 
@@ -162,12 +162,12 @@ bool FWebSocket::Send(uint8* Data, uint32 Size)
 	return true;
 }
 
-void FWebSocket::SetRecieveCallBack(FWebsocketPacketRecievedCallBack CallBack)
+void FJavascriptWebSocket::SetRecieveCallBack(FJavascriptWebSocketPacketRecievedCallBack CallBack)
 {
 	RecievedCallBack = CallBack; 
 }
 
-FString FWebSocket::RemoteEndPoint()
+FString FJavascriptWebSocket::RemoteEndPoint()
 {
 #if !PLATFORM_HTML5
 	ANSICHAR Peer_Name[128];
@@ -182,7 +182,7 @@ FString FWebSocket::RemoteEndPoint()
 }
 
 
-FString FWebSocket::LocalEndPoint()
+FString FJavascriptWebSocket::LocalEndPoint()
 {
 #if !PLATFORM_HTML5
 	return FString(ANSI_TO_TCHAR(libwebsocket_canonical_hostname(Context)));
@@ -194,12 +194,12 @@ FString FWebSocket::LocalEndPoint()
 
 }
 
-void FWebSocket::Tick()
+void FJavascriptWebSocket::Tick()
 {
 	HandlePacket();
 }
 
-void FWebSocket::HandlePacket()
+void FJavascriptWebSocket::HandlePacket()
 {
 #if !PLATFORM_HTML5
 	{
@@ -239,7 +239,7 @@ void FWebSocket::HandlePacket()
 #endif 
 }
 
-void FWebSocket::Flush()
+void FJavascriptWebSocket::Flush()
 {
 	auto PendingMesssages = OutgoingBuffer.Num();
 	while (OutgoingBuffer.Num() > 0 && !IsServerSide)
@@ -253,23 +253,23 @@ void FWebSocket::Flush()
 		HandlePacket();
 		if (PendingMesssages >= OutgoingBuffer.Num()) 
 		{
-			UE_LOG(LogWebsocket, Warning, TEXT("Unable to flush all of OutgoingBuffer in FWebSocket."));
+			UE_LOG(LogWebsocket, Warning, TEXT("Unable to flush all of OutgoingBuffer in FJavascriptWebSocket."));
 			break;
 		}
 	};
 }
 
-void FWebSocket::SetConnectedCallBack(FWebsocketInfoCallBack CallBack)
+void FJavascriptWebSocket::SetConnectedCallBack(FJavascriptWebSocketInfoCallBack CallBack)
 {
 	ConnectedCallBack = CallBack; 
 }
 
-void FWebSocket::SetErrorCallBack(FWebsocketInfoCallBack CallBack)
+void FJavascriptWebSocket::SetErrorCallBack(FJavascriptWebSocketInfoCallBack CallBack)
 {
 	ErrorCallBack = CallBack; 
 }
 
-void FWebSocket::OnRawRecieve(void* Data, uint32 Size)
+void FJavascriptWebSocket::OnRawRecieve(void* Data, uint32 Size)
 {
 #if !PLATFORM_HTML5
 	RecievedCallBack.ExecuteIfBound(Data, Size);
@@ -343,7 +343,7 @@ void FWebSocket::OnRawRecieve(void* Data, uint32 Size)
 
 }
 
-void FWebSocket::OnRawWebSocketWritable(WebSocketInternal* wsi)
+void FJavascriptWebSocket::OnRawWebSocketWritable(WebSocketInternal* wsi)
 {
 	if (OutgoingBuffer.Num() == 0)
 		return;
@@ -399,7 +399,7 @@ void FWebSocket::OnRawWebSocketWritable(WebSocketInternal* wsi)
 
 }
 
-FWebSocket::~FWebSocket()
+FJavascriptWebSocket::~FJavascriptWebSocket()
 {
 	RecievedCallBack.Unbind();
 	Flush();
@@ -421,7 +421,7 @@ FWebSocket::~FWebSocket()
 }
 
 #if !PLATFORM_HTML5
-int FWebSocket::unreal_networking_client(
+int FJavascriptWebSocket::unreal_networking_client(
 		struct libwebsocket_context *Context, 
 		struct libwebsocket *Wsi, 
 		enum libwebsocket_callback_reasons Reason, 
@@ -429,7 +429,7 @@ int FWebSocket::unreal_networking_client(
 		void *In, 
 		size_t Len)
 {
-	FWebSocket* Socket = (FWebSocket*)libwebsocket_context_user(Context);;
+	FJavascriptWebSocket* Socket = (FJavascriptWebSocket*)libwebsocket_context_user(Context);;
 	switch (Reason)
 	{
 	case LWS_CALLBACK_CLIENT_ESTABLISHED:
