@@ -35,5 +35,7 @@ protected:
 	// End of UWidget interface
 
 	void OnFinishedChangingProperties(const FPropertyChangedEvent& PropertyChangedEvent);
+	virtual const FText GetPaletteCategory() override;
+
 #endif	
 };

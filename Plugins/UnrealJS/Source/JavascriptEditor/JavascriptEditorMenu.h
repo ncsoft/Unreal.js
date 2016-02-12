@@ -31,5 +31,7 @@ public:
 	void Check(SVerticalBox* LastOne);
 
 	virtual TSharedRef<SWidget> RebuildWidget();
+	virtual const FText GetPaletteCategory() override;
+
 #endif
 };
