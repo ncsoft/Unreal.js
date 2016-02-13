@@ -1,5 +1,5 @@
 var _ = require('lodash');
-var fs = require('fs');
+var fs = require('./fs');
 var lex = require('jade-lexer');
 var stripComments = require('jade-strip-comments');
 var parse = require('jade-parser');
