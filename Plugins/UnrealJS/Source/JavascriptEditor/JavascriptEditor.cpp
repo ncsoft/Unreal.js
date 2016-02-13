@@ -102,9 +102,12 @@ void FJavascriptEditorModule::StartupModule()
 
 	if (!IsRunningCommandlet())
 	{
-		FEditorScriptExecutionGuard ScriptGuard;
+		if (GEngine && GEngine->GetWorldContexts().Num() > 0)
+		{
+			FEditorScriptExecutionGuard ScriptGuard;
 
-		Context->RunFile("editor.js");
+			Context->RunFile("editor.js");
+		}
 	}
 
 	bRegistered = true;
