@@ -849,12 +849,12 @@ public:
 				auto arr = info[0].As<ArrayBuffer>();
 				auto function = info[1].As<Function>();				
 
-				GCurrentContents = arr->Externalize();
+				GCurrentContents = arr->GetContents();
 
 				Handle<Value> argv[1];
 				argv[0] = arr;
 				function->Call(info.This(), 1, argv);
-				arr->Neuter();
+
 				GCurrentContents = v8::ArrayBuffer::Contents();
 			}
 			else
