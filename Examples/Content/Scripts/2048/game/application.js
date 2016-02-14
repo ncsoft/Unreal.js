@@ -2,7 +2,7 @@
     "use strict"
 
     module.exports = function (widget, container, data) {
-        require('animframe_polyfill')
+        require('./animframe_polyfill')
         var Actuator = require('./actuator')(container, data)
         var LocalStorageManager = require('./local_storage_manager')
         var KeyboardInputManager = require('./keyboard_input_manager')(widget, container)
