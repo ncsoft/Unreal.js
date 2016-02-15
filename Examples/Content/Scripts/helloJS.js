@@ -119,9 +119,11 @@
             }
             Drop(event) {
                 sprite.SetVisibility('Hidden')
+                console.log('ok')
             }
             DragCancelled(event) {
                 sprite.SetVisibility('Hidden')
+                console.log('cancel')
             }
         }
         let DragOp_C = uclass(DragOp)
@@ -137,7 +139,7 @@
                 let op = WidgetBlueprintLibrary.CreateDragDropOperation(DragOp_C)
                 sprite.SetVisibility('Visible')
                 return {
-                    $: WidgetBlueprintLibrary.Handled(),
+                    $: EventReply.Handled(),
                     Operation: op   
                 } 
             }
@@ -156,7 +158,7 @@
             }
             OnDrop(x) {
                 console.log('dropped',x)
-                return WidgetBlueprintLibrary.Handled()
+                return EventReply.Handled()
             }
         }
         let MyDraggable_C = uclass(MyDraggable)
@@ -171,7 +173,10 @@
                         UMG(Border,{BrushColor:{R:1,A:0.5}},"Drop target")
                     )
                 ),
-                UMG(CanvasPanel,{'Slot.HorizontalAlignment':'HAlign_Fill','Slot.VerticalAlignment':'VAlign_Fill'},
+                UMG(CanvasPanel,{
+                    'Visibility':'HitTestInvisible',
+                    'Slot.HorizontalAlignment':'HAlign_Fill','Slot.VerticalAlignment':'VAlign_Fill'
+                    },
                     UMG(Border,{Visibility:'Hidden',$link:elem => sprite = elem})
                 )
             )

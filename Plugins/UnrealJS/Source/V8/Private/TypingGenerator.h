@@ -297,7 +297,7 @@ struct TypingGenerator : TypingGeneratorBase
 			w.push(";\n");
 		}
 
-		auto write_function = [&](UFunction* Function, bool is_thunk) {
+		auto write_function = [&](UFunction* Function, bool is_thunk, bool is_factory = false) {
 			w.tooltip("\t", Function);
 
 			w.push("\t");
@@ -454,6 +454,12 @@ struct TypingGenerator : TypingGeneratorBase
 			for (auto Function : Functions)
 			{
 				write_function(Function, true);
+			}
+
+			Environment.BlueprintFunctionLibraryFactoryMapping.MultiFind(source, Functions);
+			for (auto Function : Functions)
+			{
+				write_function(Function, false, true);
 			}
 		}
 

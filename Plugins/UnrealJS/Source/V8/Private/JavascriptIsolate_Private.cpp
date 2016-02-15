@@ -402,6 +402,13 @@ public:
 							BlueprintFunctionLibraryMapping.Add(p->Struct, Function);
 						}
 					}
+					else if ((Function->FunctionFlags & FUNC_Static) && It && (It->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == (CPF_Parm | CPF_ReturnParm))
+					{
+						if (auto p = Cast<UStructProperty>(*It))
+						{
+							BlueprintFunctionLibraryFactoryMapping.Add(p->Struct, Function);
+						}
+					}
 				}
 			}
 		}
@@ -1162,7 +1169,48 @@ public:
 		
 		// Register the function to prototype template
 		Template->PrototypeTemplate()->Set(function_name, function);		
-	}	
+	}
+
+	void ExportBlueprintLibraryFactoryFunction(Handle<FunctionTemplate> Template, UFunction* FunctionToExport)
+	{
+		FIsolateHelper I(isolate_);
+
+		// Exposed function body (it doesn't capture anything)
+		auto FunctionBody = [](const FunctionCallbackInfo<Value>& info)
+		{
+			auto isolate = info.GetIsolate();
+
+			auto self = info.Holder();
+
+			// Retrieve "FUNCTION"
+			auto Function = reinterpret_cast<UFunction*>((Local<External>::Cast(info.Data()))->Value());
+
+			// 'this' should be CDO of owner class
+			auto Object = Function->GetOwnerClass()->ClassDefaultObject;
+
+			info.GetReturnValue().Set(
+				// Call unreal engine function!
+				CallFunction(isolate, self, Function, Object, [&](int ArgIndex) -> Local<Value> {
+					// pass an argument if we have
+					if (ArgIndex < info.Length())
+					{
+						return info[ArgIndex];
+					}
+					// Otherwise, just return undefined.
+					else
+					{
+						return Undefined(isolate);
+					}
+				})
+			);
+		};
+
+		auto function_name = I.Keyword(FV8Config::Safeify(FunctionToExport->GetName()));
+		auto function = I.FunctionTemplate(FunctionBody, FunctionToExport);
+
+		// Register the function to prototype template
+		Template->Set(function_name, function);
+	}
 	
 	template <typename PropertyAccessors>
 	void ExportProperty(Handle<FunctionTemplate> Template, UProperty* PropertyToExport, int32 PropertyIndex) 
@@ -1210,6 +1258,12 @@ public:
 		for (auto Function : Functions)
 		{
 			ExportBlueprintLibraryFunction(Template, Function);			
+		}
+
+		BlueprintFunctionLibraryFactoryMapping.MultiFind(ClassToExport, Functions);
+		for (auto Function : Functions)
+		{
+			ExportBlueprintLibraryFactoryFunction(Template, Function);
 		}
 	}
 
