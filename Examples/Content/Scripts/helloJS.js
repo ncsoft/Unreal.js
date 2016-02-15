@@ -109,6 +109,22 @@
     }
     
     function tutorial_Draggable(root) {
+        let sprite
+        let mygeom
+        class DragOp extends DragDropOperation {
+            Dragged(event) {
+                let pos = UPointerEvent.C(event).GetScreenSpacePosition()
+                pos = Geometry.C(mygeom).AbsoluteToLocal(pos)
+                sprite.Slot.SetPosition(pos)
+            }
+            Drop(event) {
+                sprite.SetVisibility('Hidden')
+            }
+            DragCancelled(event) {
+                sprite.SetVisibility('Hidden')
+            }
+        }
+        let DragOp_C = uclass(DragOp)
         class MyDraggable extends JavascriptWidget {
             AddChild(x) {
                 this.SetRootWidget(x)
@@ -117,19 +133,17 @@
             RemoveChild(x) {
                 this.SetRootWidget(null)
             }
-            OnDragOver(geom,event,op) {
-                let abs = KismetInputLibrary.GetScreenSpacePosition(event)
-                let local = SlateBlueprintLibrary.AbsoluteToLocal(geom,abs)
-                return WidgetBlueprintLibrary.Handled() 
-            }
             OnDragDetected() {
+                let op = WidgetBlueprintLibrary.CreateDragDropOperation(DragOp_C)
+                sprite.SetVisibility('Visible')
                 return {
                     $: WidgetBlueprintLibrary.Handled(),
-                    Operation: WidgetBlueprintLibrary.CreateDragDropOperation(null)   
+                    Operation: op   
                 } 
             }
             OnMouseButtonDown(geom,event) {
-                return WidgetBlueprintLibrary.DetectDragIfPressed(event,this,{KeyName:'LeftMouseButton'})
+                mygeom = geom
+                return event.DetectDragIfPressed(this,{KeyName:'LeftMouseButton'})
             }
         }
         class MyDropTarget extends JavascriptWidget {
@@ -142,19 +156,25 @@
             }
             OnDrop(x) {
                 console.log('dropped',x)
+                return WidgetBlueprintLibrary.Handled()
             }
         }
         let MyDraggable_C = uclass(MyDraggable)
         let MyDropTarget_C = uclass(MyDropTarget)
         let widget = root.add_child(
-            UMG.div({},
-                UMG(MyDraggable_C,{},
-                    UMG(Border,{BrushColor:{A:0.5}},"X")
+            UMG(Overlay,{'Slot.Size.Rule':'Fill','VerticalAlignment':'VAlign_Fill'},
+                UMG.div({'Slot.HorizontalAlignment':'HAlign_Fill'},
+                    UMG(MyDraggable_C,{},
+                        UMG(Border,{BrushColor:{A:0.5}},"X")
+                    ),
+                    UMG(MyDropTarget_C,{},
+                        UMG(Border,{BrushColor:{R:1,A:0.5}},"Drop target")
+                    )
                 ),
-                UMG(MyDropTarget_C,{},
-                    UMG(Border,{BrushColor:{R:1,A:0.5}},"Drop target")
+                UMG(CanvasPanel,{'Slot.HorizontalAlignment':'HAlign_Fill','Slot.VerticalAlignment':'VAlign_Fill'},
+                    UMG(Border,{Visibility:'Hidden',$link:elem => sprite = elem})
                 )
-            )            
+            )
         )
         return _ => {
             root.remove_child(widget)
@@ -179,13 +199,15 @@
                     cur = v(root)
                 }},UMG.text({},k)
             )),
-            UMG.div({$link:elem => root = elem}),
-            UMG(Border,{
-                'Slot.Size.Rule':'Fill',
-                'Slot.VerticalAlignment':'VAlign_Bottom',
-                'BrushColor':{A:0.5}
-                },                
-                logger.window()
+            UMG(Overlay,{'Slot.Size.Rule':'Fill'},
+                UMG.div({'Slot.HorizontalAlignment':'HAlign_Fill','Slot.VerticalAlignment':'VAlign_Fill',$link:elem => root = elem}),
+                UMG(Border,{
+                    'Slot.HorizontalAlignment':'HAlign_Fill',
+                    'Slot.VerticalAlignment':'VAlign_Bottom',
+                    'BrushColor':{A:0.5}
+                    },                
+                    logger.window()
+                )
             )
         )
     }
