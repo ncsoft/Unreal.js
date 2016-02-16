@@ -413,7 +413,9 @@ public:
 		// All classes
 		for (auto It = ClassToFunctionTemplateMap.CreateIterator(); It; ++It)
 		{
-			Collector.AddReferencedObject(It.Key(), InThis);
+			UClass* Class = It.Key();
+			//UE_LOG(Javascript, Log, TEXT("JavascriptIsolate referencing %s / %s %s (gen by %s %s)"), *(Class->GetOuter()->GetName()), *(Class->GetClass()->GetName()), *(Class->GetName()), Class->ClassGeneratedBy ? *(Class->ClassGeneratedBy->GetClass()->GetName()) : TEXT("none"), Class->ClassGeneratedBy ? *(Class->ClassGeneratedBy->GetName()) : TEXT("none"));
+			Collector.AddReferencedObject(Class, InThis);
 		}
 
 		// All structs
@@ -1918,7 +1920,13 @@ public:
 			}
 			else
 			{
-				auto v8_class = ExportClass(Object->GetClass());
+				auto Class = Object->GetClass();
+				if (Class->ClassGeneratedBy && Cast<ULevel>(Class->ClassGeneratedBy->GetOuter()))
+				{
+					return Undefined(isolate_);
+				}
+
+				auto v8_class = ExportClass(Class);
 				auto arg = I.External(Object);
 				Handle<Value> args[] = { arg };
 

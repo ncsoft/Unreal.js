@@ -1199,11 +1199,11 @@ public:
 				FString Text;
 				if (FFileHelper::LoadFileToString(Text, *script_path))
 				{
-					Text = FString::Printf(TEXT("(function (__dirname) {\nvar module = { exports : {}, filename : __dirname }, exports = module.exports;\n%s\n;return module.exports;}('%s'));"), *Text, *script_path);					
+					Text = FString::Printf(TEXT("(function (global,__dirname) {\nvar module = { exports : {}, filename : __dirname }, exports = module.exports;\n(function () { \n%s\n })()\n;return module.exports;}(this,'%s'));"), *Text, *script_path);					
 #if PLATFORM_WINDOWS
 					full_path = full_path.Replace(TEXT("/"), TEXT("\\"));
 #endif
-					auto exports = Self->RunScript(full_path, Text, 2);
+					auto exports = Self->RunScript(full_path, Text, 3);
 					if (exports.IsEmpty())
 					{
 						UE_LOG(Javascript, Log, TEXT("Invalid script for require"));
@@ -1397,7 +1397,11 @@ public:
 
 		auto Script = ReadScriptFile(Filename);
 
-		return RunScript(GetScriptFileFullPath(Filename), Script);
+		auto ScriptPath = GetScriptFileFullPath(Filename);
+
+		auto Text = FString::Printf(TEXT("(function (global,__dirname) {\n%s\n;}(this,'%s'));"), *Script, *ScriptPath);
+
+		return RunScript(ScriptPath, Text, 1);
 	}
 
 	void Public_RunFile(const FString& Filename)
@@ -1433,7 +1437,7 @@ public:
 		auto Path = Filename;
 #if PLATFORM_WINDOWS
 		// HACK for Visual Studio Code
-		if (Path[1] == ':')
+		if (Path.Len() && Path[1] == ':')
 		{
 			Path = Path.Mid(0, 1).ToLower() + Path.Mid(1);
 		}
@@ -1681,6 +1685,7 @@ inline void FJavascriptContextImplementation::AddReferencedObjects(UObject * InT
 	// All objects
 	for (auto It = ObjectToObjectMap.CreateIterator(); It; ++It)
 	{
+//		UE_LOG(Javascript, Log, TEXT("JavascriptContext referencing %s %s"), *(It.Key()->GetClass()->GetName()), *(It.Key()->GetName()));
 		Collector.AddReferencedObject(It.Key(), InThis);
 	}
 

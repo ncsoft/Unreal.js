@@ -1,5 +1,6 @@
 #include "JavascriptEditor.h"
 #include "AssetRegistryModule.h"
+#include "EditorSupportDelegates.h"
 #include "JavascriptEditorGlobalDelegates.h"
 
 void UJavascriptEditorGlobalDelegates::BeginDestroy()
@@ -70,7 +71,12 @@ OP_REFLECT_EDITORENGINE(OnBlueprintPreCompile)\
 OP_REFLECT_EDITORENGINE(OnBlueprintCompiled)\
 OP_REFLECT_EDITORENGINE(OnBlueprintReinstanced)\
 OP_REFLECT_EDITORENGINE(OnClassPackageLoadedOrUnloaded)\
-OP_REFLECT_EDITORENGINE(OnObjectReimported);
+OP_REFLECT_EDITORENGINE(OnObjectReimported)
+
+#define DO_REFLECT_SUPPORT() \
+OP_REFLECT_SUPPORT(RedrawAllViewports)\
+OP_REFLECT_SUPPORT(CleanseEditor)\
+OP_REFLECT_SUPPORT(WorldChange)
 
 #if WITH_EDITOR
 FJavascriptAssetData::FJavascriptAssetData(const FAssetData& Source)
@@ -88,10 +94,13 @@ void UJavascriptEditorGlobalDelegates::Bind(FString Key)
 #define OP_REFLECT(x) else if (Key == #x) { Handle = FEditorDelegates::x.AddUObject(this, &UJavascriptEditorGlobalDelegates::x); }
 #define OP_REFLECT_ASSETREGISTRY(x) else if (Key == #x) { Handle = AssetRegistry.x().AddUObject(this, &UJavascriptEditorGlobalDelegates::x); }
 #define OP_REFLECT_EDITORENGINE(x) else if (Key == #x) { Handle = Cast<UEditorEngine>(GEngine)->x().AddUObject(this, &UJavascriptEditorGlobalDelegates::x); }
+#define OP_REFLECT_SUPPORT(x) else if (Key == #x) { Handle = FEditorSupportDelegates::x.AddUObject(this, &UJavascriptEditorGlobalDelegates::x); }
 	if (false) {}
-	DO_REFLECT()
-	DO_REFLECT_ASSETREGISTRY()
-	DO_REFLECT_EDITORENGINE()
+		DO_REFLECT()
+		DO_REFLECT_ASSETREGISTRY()
+		DO_REFLECT_EDITORENGINE()
+		DO_REFLECT_SUPPORT()
+		;
 #endif
 
 	if (Handle.IsValid())
@@ -117,10 +126,13 @@ void UJavascriptEditorGlobalDelegates::Unbind(FString Key)
 #define OP_REFLECT(x) else if (Key == #x) { FEditorDelegates::x.Remove(Handle); }
 #define OP_REFLECT_ASSETREGISTRY(x) else if (Key == #x) { AssetRegistry.x().Remove(Handle); }
 #define OP_REFLECT_EDITORENGINE(x) else if (Key == #x) { Cast<UEditorEngine>(GEngine)->x().Remove(Handle); }
+#define OP_REFLECT_SUPPORT(x) else if (Key == #x) { FEditorSupportDelegates::x.Remove(Handle); }
 	if (false) {}
-	DO_REFLECT()	
-	DO_REFLECT_ASSETREGISTRY()
-	DO_REFLECT_EDITORENGINE()
+		DO_REFLECT()
+		DO_REFLECT_ASSETREGISTRY()
+		DO_REFLECT_EDITORENGINE()
+		DO_REFLECT_SUPPORT()
+		;
 #endif
 
 	Handles.Remove(Key);
