@@ -29,6 +29,8 @@ public:
 	/** BlueprintFunctionLibrary function mapping */
 	TMultiMap< const UStruct*, UFunction*> BlueprintFunctionLibraryMapping;
 
+	TMultiMap< const UStruct*, UFunction*> BlueprintFunctionLibraryFactoryMapping;
+
 	TArray<FPendingClassConstruction> ObjectUnderConstructionStack;
 
 	v8::Isolate* isolate_;

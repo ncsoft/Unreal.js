@@ -1564,6 +1564,36 @@ public:
 			}
 		}
 
+		for (auto it = Environment->ScriptStructToFunctionTemplateMap.CreateConstIterator(); it; ++it)
+		{
+			const UStruct* StructToExport = it.Key();
+
+			auto ClassName = FV8Config::Safeify(StructToExport->GetName());
+
+			TArray<UFunction*> Functions;
+			Environment->BlueprintFunctionLibraryMapping.MultiFind(StructToExport, Functions);
+
+			auto conditional_emit_alias = [&](UFunction* Function) {
+				auto Alias = FV8Config::GetAlias(Function);
+				if (Alias.Len() > 0)
+				{
+					w.push(ClassName);
+					w.push(".prototype.");
+					w.push(Alias);
+					w.push(" = ");
+					w.push(ClassName);
+					w.push(".prototype.");
+					w.push(FV8Config::Safeify(Function->GetName()));
+					w.push(";\n");
+				}
+			};
+
+			for (auto Function : Functions)
+			{
+				conditional_emit_alias(Function);
+			}
+		}
+
 		return FFileHelper::SaveStringToFile(*w, *Filename);
 #else
 		return false;
