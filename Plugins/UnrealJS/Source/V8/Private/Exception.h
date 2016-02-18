@@ -16,20 +16,23 @@ struct FV8Exception
 		}
 		else
 		{
-			auto filename = StringFromV8(message->GetScriptResourceName());
-			auto linenum = message->GetLineNumber();
-			auto line = StringFromV8(message->GetSourceLine());			
-
-			UE_LOG(Javascript, Error, TEXT("%s:%d: %s"), *filename, linenum, *exception);
-
-			auto stack_trace = StringFromV8(try_catch.StackTrace());
-			if (stack_trace.Len() > 0)
+			if (!exception.IsEmpty())
 			{
-				TArray<FString> Lines;
-				stack_trace.ParseIntoArrayLines(Lines);
-				for (const auto& line : Lines)
+				auto filename = StringFromV8(message->GetScriptResourceName());
+				auto linenum = message->GetLineNumber();
+				auto line = StringFromV8(message->GetSourceLine());
+
+				UE_LOG(Javascript, Error, TEXT("%s:%d: %s"), *filename, linenum, *exception);
+
+				auto stack_trace = StringFromV8(try_catch.StackTrace());
+				if (stack_trace.Len() > 0)
 				{
-					UE_LOG(Javascript, Error, TEXT("%s"), *line);
+					TArray<FString> Lines;
+					stack_trace.ParseIntoArrayLines(Lines);
+					for (const auto& line : Lines)
+					{
+						UE_LOG(Javascript, Error, TEXT("%s"), *line);
+					}
 				}
 			}
 		}

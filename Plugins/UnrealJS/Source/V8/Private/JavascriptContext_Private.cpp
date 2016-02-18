@@ -21,6 +21,8 @@
 #include "JavascriptGeneratedFunction.h"
 #include "StructMemoryInstance.h"
 
+#include "JavascriptStats.h"
+
 using namespace v8;
 
 static const int kContextEmbedderDataIndex = 1;
@@ -1664,6 +1666,8 @@ public:
 
 	bool CallProxyFunction(UObject* Holder, UObject* This, UFunction* FunctionToCall, void* Parms)
 	{
+		SCOPE_CYCLE_COUNTER(STAT_JavascriptProxy);
+
 		Isolate::Scope isolate_scope(isolate());
 		HandleScope handle_scope(isolate());
 

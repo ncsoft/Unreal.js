@@ -2,6 +2,25 @@
 #include <libplatform/libplatform.h>
 #include "JavascriptContext.h"
 #include "IV8.h"
+#include "JavascriptStats.h"
+
+DEFINE_STAT(STAT_JavascriptDelegate);
+DEFINE_STAT(STAT_JavascriptProxy);
+DEFINE_STAT(STAT_Scavenge);
+DEFINE_STAT(STAT_MarkSweepCompact);
+DEFINE_STAT(STAT_IncrementalMarking);
+DEFINE_STAT(STAT_ProcessWeakCallbacks);
+
+DEFINE_STAT(STAT_JavascriptPropertyGet);
+DEFINE_STAT(STAT_JavascriptPropertySet);
+DEFINE_STAT(STAT_JavascriptFunctionCall);
+DEFINE_STAT(STAT_JavascriptReadOffStruct);
+
+DEFINE_STAT(STAT_NewSpace);
+DEFINE_STAT(STAT_OldSpace);
+DEFINE_STAT(STAT_CodeSpace);
+DEFINE_STAT(STAT_MapSpace);
+DEFINE_STAT(STAT_LoSpace);
 
 using namespace v8;
 

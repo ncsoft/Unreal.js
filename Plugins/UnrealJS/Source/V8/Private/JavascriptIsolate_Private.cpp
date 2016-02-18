@@ -16,19 +16,7 @@
 #if WITH_EDITOR
 #include "ScopedTransaction.h"
 #endif
-
-DECLARE_STATS_GROUP(TEXT("Javascript"), STATGROUP_Javascript, STATCAT_Advanced);
-
-DECLARE_CYCLE_STAT(TEXT("Scavenge"), STAT_Scavenge, STATGROUP_Javascript);
-DECLARE_CYCLE_STAT(TEXT("MarkSweepCompact"), STAT_MarkSweepCompact, STATGROUP_Javascript);
-DECLARE_CYCLE_STAT(TEXT("IncrementalMarking"), STAT_IncrementalMarking, STATGROUP_Javascript);
-DECLARE_CYCLE_STAT(TEXT("ProcessWeakCallbacks"), STAT_ProcessWeakCallbacks, STATGROUP_Javascript);
-
-DECLARE_MEMORY_STAT(TEXT("NewSpace"), STAT_NewSpace, STATGROUP_Javascript);
-DECLARE_MEMORY_STAT(TEXT("OldSpace"), STAT_OldSpace, STATGROUP_Javascript);
-DECLARE_MEMORY_STAT(TEXT("CodeSpace"), STAT_CodeSpace, STATGROUP_Javascript);
-DECLARE_MEMORY_STAT(TEXT("MapSpace"), STAT_MapSpace, STATGROUP_Javascript);
-DECLARE_MEMORY_STAT(TEXT("LoSpace"), STAT_LoSpace, STATGROUP_Javascript);
+#include "JavascriptStats.h"
 
 using namespace v8;
 
@@ -98,6 +86,10 @@ public:
 
 			if (IsValid(Object))
 			{
+				FScopeCycleCounterUObject ContextScope(Object);
+				FScopeCycleCounterUObject PropertyScope(Property);				
+				SCOPE_CYCLE_COUNTER(STAT_JavascriptPropertyGet);
+
 				if (auto p = Cast<UMulticastDelegateProperty>(Property))
 				{
 					return GetSelf(isolate)->Delegates->GetProxy(self, Object, p);
@@ -168,6 +160,10 @@ public:
 
 			if (IsValid(Object))
 			{
+				FScopeCycleCounterUObject ContextScope(Object);
+				FScopeCycleCounterUObject PropertyScope(Property);
+				SCOPE_CYCLE_COUNTER(STAT_JavascriptPropertySet);
+
 				// Multicast delegate
 				if (auto p = Cast<UMulticastDelegateProperty>(Property))
 				{
@@ -342,6 +338,8 @@ public:
 		ExportMemory(ObjectTemplate);
 
 		ExportMisc(ObjectTemplate);		
+
+		ExportProfiler(ObjectTemplate);
 	}		
 
 	~FJavascriptIsolateImplementation()
@@ -555,7 +553,23 @@ public:
 
 	void ReadOffStruct(Local<Object> v8_obj, UStruct* Struct, uint8* struct_buffer)
 	{
+		SCOPE_CYCLE_COUNTER(STAT_JavascriptReadOffStruct);
+		FScopeCycleCounterUObject StructContext(Struct);
+
 		FIsolateHelper I(isolate_);
+
+		/*
+		MaybeLocal<Array> _arr = v8_obj->GetOwnPropertyNames();
+		if (_arr.IsEmpty()) return;
+
+		auto arr = _arr.ToLocalChecked();
+
+		auto len = arr->Length();
+
+		for (decltype(len) Index = 0; Index < len; ++Index)
+		{
+		}
+		*/
 
 		for (TFieldIterator<UProperty> PropertyIt(Struct, EFieldIteratorFlags::IncludeSuper); PropertyIt; ++PropertyIt)
 		{
@@ -782,6 +796,173 @@ public:
 			ReadOnly);
 	}	
 
+	static Local<Object> Visit(Isolate* isolate, const v8::CpuProfileNode* node) 
+	{
+		static TMap<const v8::CpuProfileNode*, Handle<Object>> Visited;
+
+		if (!isolate)
+		{
+			Visited.Empty();
+			return Local<Object>();
+		}
+		auto Existing = Visited.Find(node);
+		if (Existing) return *Existing;
+
+		FIsolateHelper I(isolate);
+
+		auto Out = Object::New(isolate);
+
+		Visited.Add(node, Out);
+
+		Out->Set(I.Keyword("ScriptResourceName"), node->GetScriptResourceName());
+		Out->Set(I.Keyword("FunctionName"), node->GetFunctionName());
+		Out->Set(I.Keyword("HitCount"), Integer::NewFromUnsigned(isolate,node->GetHitCount()));
+		Out->Set(I.Keyword("LineNumber"), Integer::New(isolate,node->GetLineNumber()));
+		Out->Set(I.Keyword("ColumnNumber"), Integer::New(isolate,node->GetColumnNumber()));
+		Out->Set(I.Keyword("ScriptId"), Integer::New(isolate, node->GetScriptId()));
+
+		{
+			uint32_t Num = node->GetHitLineCount();
+			TArray<v8::CpuProfileNode::LineTick> Buffer;
+			Buffer.AddDefaulted(Num);
+			node->GetLineTicks(Buffer.GetData(), Num);
+
+			auto Arr = Array::New(isolate, Num);
+			for (uint32_t Index = 0; Index < Num; ++Index)
+			{
+				const auto& info = Buffer[Index];
+				auto item = Object::New(isolate);
+				item->Set(I.Keyword("line"), Integer::New(isolate,info.line));
+				item->Set(I.Keyword("hit_count"), Integer::New(isolate, info.hit_count));
+				Arr->Set(Index, item);
+			}
+			Out->Set(I.Keyword("LineTicks"), Arr);
+		}
+
+		auto BailOutReason = node->GetBailoutReason();
+		if (BailOutReason)
+		{
+			Out->Set(I.Keyword("BailOutReason"), I.Keyword(BailOutReason));
+		}
+
+		{
+			const auto& deopt = node->GetDeoptInfos();
+			uint32_t Num = deopt.size();
+			if (Num)
+			{
+				auto Arr = Array::New(isolate, deopt.size());
+				for (uint32_t Index = 0; Index < Num; ++Index)
+				{
+					const auto& info = deopt[Index];
+					FString out;
+					for (const auto& frame : info.stack)
+					{
+						out.Append(FString::Printf(TEXT("%d:%d "), (int)frame.script_id, (int)frame.position));
+					}
+					auto item = Object::New(isolate);
+					item->Set(I.Keyword("reason"), I.Keyword(deopt[Index].deopt_reason));
+					item->Set(I.Keyword("stack"), I.String(out));
+					Arr->Set(Index, item);
+				}
+				Out->Set(I.Keyword("DeoptInfos"), Arr);
+			}
+		}
+		
+		uint32_t Num = node->GetChildrenCount();
+		if (Num)
+		{
+			auto Arr = Array::New(isolate, Num);
+			for (uint32_t Index = 0; Index < Num; ++Index)
+			{
+				Arr->Set(Index, Visit(isolate, node->GetChild(Index)));
+			}
+			Out->Set(I.Keyword("Children"), Arr);
+		}
+		return Out;
+	};
+
+	void ExportProfiler(Local<ObjectTemplate> global_templ)
+	{
+		FIsolateHelper I(isolate_);
+
+		Local<FunctionTemplate> Template = I.FunctionTemplate();
+
+		auto add_fn = [&](const char* name, FunctionCallback fn) {
+			Template->PrototypeTemplate()->Set(I.Keyword(name), I.FunctionTemplate(fn));
+		};		
+
+		add_fn("SetSamplingInterval", [](const FunctionCallbackInfo<Value>& info)
+		{
+			FIsolateHelper I(info.GetIsolate());
+
+			auto profiler = info.GetIsolate()->GetCpuProfiler();
+
+			if (info.Length() == 1)
+			{
+				profiler->SetSamplingInterval(info[0]->IntegerValue());
+			}
+		});
+
+		add_fn("StartProfiling", [](const FunctionCallbackInfo<Value>& info)
+		{
+			FIsolateHelper I(info.GetIsolate());
+
+			auto profiler = info.GetIsolate()->GetCpuProfiler();
+
+			if (info.Length() == 2)
+			{
+				profiler->StartProfiling(info[0].As<String>(), info[1]->BooleanValue());
+				info.GetReturnValue().Set(true);
+			}			
+		});
+
+		add_fn("StopProfiling", [](const FunctionCallbackInfo<Value>& info)
+		{
+			auto isolate = info.GetIsolate();
+			FIsolateHelper I(isolate);
+
+			auto profiler = isolate->GetCpuProfiler();
+
+			if (info.Length() == 1)
+			{				
+				auto Profile = profiler->StopProfiling(info[0].As<String>());
+				if (!Profile) return;
+
+				auto Out = Object::New(isolate);
+				Out->Set(I.Keyword("Root"), Visit(isolate, Profile->GetTopDownRoot()));
+				Out->Set(I.Keyword("Title"), Profile->GetTitle());
+
+				{
+					uint32_t Num = Profile->GetSamplesCount();
+					if (Num)
+					{
+						auto Arr = Array::New(isolate, Num);
+						for (uint32_t Index = 0; Index < Num; ++Index)
+						{
+							Arr->Set(Index, Visit(isolate, Profile->GetSample(Index)));
+						}
+						Out->Set(I.Keyword("Samples"), Arr);
+					}
+				}
+				
+
+				// cleanup
+				Visit(nullptr, nullptr);
+				
+				info.GetReturnValue().Set(Out);
+
+				Profile->Delete();
+			}
+		});
+
+		global_templ->Set(
+			I.Keyword("v8"),
+			// Create an instance
+			Template->GetFunction()->NewInstance(),
+			// Do not modify!
+			ReadOnly);
+	}
+
 	void ExportMisc(Local<ObjectTemplate> global_templ)
 	{
 		FIsolateHelper I(isolate_);
@@ -961,6 +1142,8 @@ public:
 	template <typename Fn>
 	static Local<Value> CallFunction(Isolate* isolate, Local<Value> self, UFunction* Function, UObject* Object, Fn&& GetArg) 
 	{
+		SCOPE_CYCLE_COUNTER(STAT_JavascriptFunctionCall);
+
 		FIsolateHelper I(isolate);
 
 		EscapableHandleScope handle_scope(isolate);
