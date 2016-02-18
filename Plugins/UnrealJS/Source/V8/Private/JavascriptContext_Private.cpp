@@ -1188,6 +1188,9 @@ public:
 			auto inner = [&](const FString& script_path)
 			{				
 				auto full_path = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*script_path);
+#if PLATFORM_WINDOWS
+				full_path = full_path.Replace(TEXT("/"), TEXT("\\"));
+#endif
 				auto it = Self->Modules.Find(full_path);
 				if (it)
 				{
@@ -1200,9 +1203,6 @@ public:
 				if (FFileHelper::LoadFileToString(Text, *script_path))
 				{
 					Text = FString::Printf(TEXT("(function (global,__dirname) {\nvar module = { exports : {}, filename : __dirname }, exports = module.exports;\n(function () { \n%s\n })()\n;return module.exports;}(this,'%s'));"), *Text, *script_path);					
-#if PLATFORM_WINDOWS
-					full_path = full_path.Replace(TEXT("/"), TEXT("\\"));
-#endif
 					auto exports = Self->RunScript(full_path, Text, 3);
 					if (exports.IsEmpty())
 					{
