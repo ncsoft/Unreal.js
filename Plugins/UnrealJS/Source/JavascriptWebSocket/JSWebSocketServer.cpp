@@ -42,7 +42,7 @@ static int unreal_networking_server(
 );
 
 #if !UE_BUILD_SHIPPING
-	void libwebsocket_debugLog(int level, const char *line)
+	void libwebsocket_debugLog_JS(int level, const char *line)
 	{ 
 		UE_LOG(LogWebsocket, Log, TEXT("websocket server: %s"), ANSI_TO_TCHAR(line));
 	}
@@ -54,7 +54,7 @@ bool FJavascriptWebSocketServer::Init(uint32 Port, FJavascriptWebSocketClientCon
 #if !PLATFORM_HTML5
 	// setup log level.
 #if !UE_BUILD_SHIPPING
-	lws_set_log_level(LLL_ERR | LLL_WARN | LLL_NOTICE | LLL_DEBUG | LLL_INFO, libwebsocket_debugLog);
+	lws_set_log_level(LLL_ERR | LLL_WARN | LLL_NOTICE | LLL_DEBUG | LLL_INFO, libwebsocket_debugLog_JS);
 #endif 
 
 	Protocols = new libwebsocket_protocols[3];

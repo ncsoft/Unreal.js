@@ -267,6 +267,17 @@ public:
 	void OnObjectReimported(UObject* Object);
 
 		//GetActorRecordingState
+
+	// FEditorSupportDelegates
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Scripting | Javascript")
+	void RedrawAllViewports();
+	
+	UFUNCTION(BlueprintImplementableEvent, Category = "Scripting | Javascript")
+	void CleanseEditor();
+	
+	UFUNCTION(BlueprintImplementableEvent, Category = "Scripting | Javascript")
+	void WorldChange();
 	
 #endif
 
