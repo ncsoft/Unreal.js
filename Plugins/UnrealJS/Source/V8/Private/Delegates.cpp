@@ -2,6 +2,7 @@
 #include "JavascriptDelegate.h"
 #include "Translator.h"
 #include "Delegates.h"
+#include "JavascriptStats.h"
 
 using namespace v8;
 
@@ -282,6 +283,8 @@ public:
 
 	void Fire(void* Parms, UJavascriptDelegate* Delegate)
 	{
+		SCOPE_CYCLE_COUNTER(STAT_JavascriptDelegate);
+
 		auto Buffer = reinterpret_cast<uint8*>(Parms);
 
 		auto it = functions.Find(Delegate->UniqueId);

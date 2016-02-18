@@ -16,19 +16,7 @@
 #if WITH_EDITOR
 #include "ScopedTransaction.h"
 #endif
-
-DECLARE_STATS_GROUP(TEXT("Javascript"), STATGROUP_Javascript, STATCAT_Advanced);
-
-DECLARE_CYCLE_STAT(TEXT("Scavenge"), STAT_Scavenge, STATGROUP_Javascript);
-DECLARE_CYCLE_STAT(TEXT("MarkSweepCompact"), STAT_MarkSweepCompact, STATGROUP_Javascript);
-DECLARE_CYCLE_STAT(TEXT("IncrementalMarking"), STAT_IncrementalMarking, STATGROUP_Javascript);
-DECLARE_CYCLE_STAT(TEXT("ProcessWeakCallbacks"), STAT_ProcessWeakCallbacks, STATGROUP_Javascript);
-
-DECLARE_MEMORY_STAT(TEXT("NewSpace"), STAT_NewSpace, STATGROUP_Javascript);
-DECLARE_MEMORY_STAT(TEXT("OldSpace"), STAT_OldSpace, STATGROUP_Javascript);
-DECLARE_MEMORY_STAT(TEXT("CodeSpace"), STAT_CodeSpace, STATGROUP_Javascript);
-DECLARE_MEMORY_STAT(TEXT("MapSpace"), STAT_MapSpace, STATGROUP_Javascript);
-DECLARE_MEMORY_STAT(TEXT("LoSpace"), STAT_LoSpace, STATGROUP_Javascript);
+#include "JavascriptStats.h"
 
 using namespace v8;
 
