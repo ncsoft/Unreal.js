@@ -11,6 +11,11 @@ DEFINE_STAT(STAT_MarkSweepCompact);
 DEFINE_STAT(STAT_IncrementalMarking);
 DEFINE_STAT(STAT_ProcessWeakCallbacks);
 
+DEFINE_STAT(STAT_JavascriptPropertyGet);
+DEFINE_STAT(STAT_JavascriptPropertySet);
+DEFINE_STAT(STAT_JavascriptFunctionCall);
+DEFINE_STAT(STAT_JavascriptReadOffStruct);
+
 DEFINE_STAT(STAT_NewSpace);
 DEFINE_STAT(STAT_OldSpace);
 DEFINE_STAT(STAT_CodeSpace);

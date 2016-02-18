@@ -86,6 +86,10 @@ public:
 
 			if (IsValid(Object))
 			{
+				FScopeCycleCounterUObject ContextScope(Object);
+				FScopeCycleCounterUObject PropertyScope(Property);				
+				SCOPE_CYCLE_COUNTER(STAT_JavascriptPropertyGet);
+
 				if (auto p = Cast<UMulticastDelegateProperty>(Property))
 				{
 					return GetSelf(isolate)->Delegates->GetProxy(self, Object, p);
@@ -156,6 +160,10 @@ public:
 
 			if (IsValid(Object))
 			{
+				FScopeCycleCounterUObject ContextScope(Object);
+				FScopeCycleCounterUObject PropertyScope(Property);
+				SCOPE_CYCLE_COUNTER(STAT_JavascriptPropertySet);
+
 				// Multicast delegate
 				if (auto p = Cast<UMulticastDelegateProperty>(Property))
 				{
@@ -545,7 +553,23 @@ public:
 
 	void ReadOffStruct(Local<Object> v8_obj, UStruct* Struct, uint8* struct_buffer)
 	{
+		SCOPE_CYCLE_COUNTER(STAT_JavascriptReadOffStruct);
+		FScopeCycleCounterUObject StructContext(Struct);
+
 		FIsolateHelper I(isolate_);
+
+		/*
+		MaybeLocal<Array> _arr = v8_obj->GetOwnPropertyNames();
+		if (_arr.IsEmpty()) return;
+
+		auto arr = _arr.ToLocalChecked();
+
+		auto len = arr->Length();
+
+		for (decltype(len) Index = 0; Index < len; ++Index)
+		{
+		}
+		*/
 
 		for (TFieldIterator<UProperty> PropertyIt(Struct, EFieldIteratorFlags::IncludeSuper); PropertyIt; ++PropertyIt)
 		{
@@ -902,6 +926,7 @@ public:
 			if (info.Length() == 1)
 			{				
 				auto Profile = profiler->StopProfiling(info[0].As<String>());
+				if (!Profile) return;
 
 				auto Out = Object::New(isolate);
 				Out->Set(I.Keyword("Root"), Visit(isolate, Profile->GetTopDownRoot()));
@@ -1117,6 +1142,8 @@ public:
 	template <typename Fn>
 	static Local<Value> CallFunction(Isolate* isolate, Local<Value> self, UFunction* Function, UObject* Object, Fn&& GetArg) 
 	{
+		SCOPE_CYCLE_COUNTER(STAT_JavascriptFunctionCall);
+
 		FIsolateHelper I(isolate);
 
 		EscapableHandleScope handle_scope(isolate);
