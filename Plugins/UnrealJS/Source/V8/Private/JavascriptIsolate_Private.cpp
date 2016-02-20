@@ -1684,6 +1684,10 @@ public:
 						{
 							Outer = value;
 						}
+						if (info.Length() > 1)
+						{
+							Name = FName(*StringFromV8(info[1]));
+						}
 					}
 
 					PreCreate();
