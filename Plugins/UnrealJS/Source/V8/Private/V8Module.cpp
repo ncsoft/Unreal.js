@@ -3,6 +3,7 @@
 #include "JavascriptContext.h"
 #include "IV8.h"
 #include "JavascriptStats.h"
+#include "JavascriptSettings.h"
 
 DEFINE_STAT(STAT_JavascriptDelegate);
 DEFINE_STAT(STAT_JavascriptProxy);
@@ -22,6 +23,13 @@ DEFINE_STAT(STAT_CodeSpace);
 DEFINE_STAT(STAT_MapSpace);
 DEFINE_STAT(STAT_LoSpace);
 
+UJavascriptSettings::UJavascriptSettings(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	V8Flags = TEXT("--harmony --harmony-shipping --es-staging --expose-debug-as=v8debug --expose-gc --harmony_destructuring --harmony_simd --harmony_default_parameters");
+	// --prof --prof_cpp --log-timer-events
+}
+
 using namespace v8;
 
 class V8Module : public IV8
@@ -40,13 +48,13 @@ public:
 		Paths.Add(GetPluginScriptsDirectory3());
 		Paths.Add(GetPakPluginScriptsDirectory());
 
+		const UJavascriptSettings& Settings = *GetDefault<UJavascriptSettings>();
+		V8::SetFlagsFromString(TCHAR_TO_ANSI(*Settings.V8Flags), strlen(TCHAR_TO_ANSI(*Settings.V8Flags)));
+
 		V8::InitializeICU();
 		platform_ = platform::CreateDefaultPlatform();
 		V8::InitializePlatform(platform_);
 		V8::Initialize();
-
-		auto v8flags = "--harmony --harmony-shipping --es-staging --expose-debug-as=v8debug --expose-gc --harmony_destructuring --harmony_simd --harmony_default_parameters ";
-		V8::SetFlagsFromString(v8flags, strlen(v8flags));
 	}
 
 	virtual void ShutdownModule() override
