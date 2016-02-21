@@ -14,4 +14,6 @@ public:
 		ConsoleVariable = "unrealjs.v8flags", DisplayName = "V8 Flags",
 		ToolTip = "V8 Flags. Please refer to V8 documentation"))
 	FString V8Flags;	
+
+	void Apply() const;
 };
