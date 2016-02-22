@@ -11,7 +11,8 @@ DECLARE_CYCLE_STAT_EXTERN(TEXT("Delegate"), STAT_JavascriptDelegate, STATGROUP_J
 DECLARE_CYCLE_STAT_EXTERN(TEXT("Proxy"), STAT_JavascriptProxy, STATGROUP_Javascript, V8_API);
 DECLARE_CYCLE_STAT_EXTERN(TEXT("get"), STAT_JavascriptPropertyGet, STATGROUP_Javascript, V8_API);
 DECLARE_CYCLE_STAT_EXTERN(TEXT("set"), STAT_JavascriptPropertySet, STATGROUP_Javascript, V8_API);
-DECLARE_CYCLE_STAT_EXTERN(TEXT("call"), STAT_JavascriptFunctionCall, STATGROUP_Javascript, V8_API);
+DECLARE_CYCLE_STAT_EXTERN(TEXT("<ue>"), STAT_JavascriptFunctionCallToEngine, STATGROUP_Javascript, V8_API);
+DECLARE_CYCLE_STAT_EXTERN(TEXT("<js>"), STAT_JavascriptFunctionCallToJavascript, STATGROUP_Javascript, V8_API);
 
 DECLARE_CYCLE_STAT_EXTERN(TEXT("struct(naive)"), STAT_JavascriptReadOffStruct, STATGROUP_Javascript, V8_API);
 

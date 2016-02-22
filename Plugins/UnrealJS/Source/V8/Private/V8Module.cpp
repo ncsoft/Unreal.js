@@ -13,7 +13,8 @@ DEFINE_STAT(STAT_ProcessWeakCallbacks);
 
 DEFINE_STAT(STAT_JavascriptPropertyGet);
 DEFINE_STAT(STAT_JavascriptPropertySet);
-DEFINE_STAT(STAT_JavascriptFunctionCall);
+DEFINE_STAT(STAT_JavascriptFunctionCallToEngine);
+DEFINE_STAT(STAT_JavascriptFunctionCallToJavascript);
 DEFINE_STAT(STAT_JavascriptReadOffStruct);
 
 DEFINE_STAT(STAT_NewSpace);
@@ -45,7 +46,7 @@ public:
 		V8::InitializePlatform(platform_);
 		V8::Initialize();
 
-		auto v8flags = "--harmony --harmony-shipping --es-staging --expose-debug-as=v8debug --expose-gc --harmony_destructuring --harmony_simd --harmony_default_parameters ";
+		auto v8flags = "--harmony --harmony-shipping --es-staging --expose-debug-as=v8debug --expose-gc --harmony_destructuring --harmony_simd --harmony_default_parameters";// --trace_deopt --trace_opt --trace_opt_verbose --code_comments";
 		V8::SetFlagsFromString(v8flags, strlen(v8flags));
 	}
 

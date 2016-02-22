@@ -2,11 +2,14 @@
 #include "Translator.h"
 #include "Exception.h"
 #include "Helpers.h"
+#include "JavascriptStats.h"
 
 namespace v8
 {
 	void CallJavascriptFunction(Handle<Context> context, Handle<Value> This, UFunction* SignatureFunction, Handle<Function> func, void* Parms)
 	{
+		SCOPE_CYCLE_COUNTER(STAT_JavascriptFunctionCallToJavascript);
+
 		auto isolate = context->GetIsolate();
 
 		HandleScope handle_scope(isolate);

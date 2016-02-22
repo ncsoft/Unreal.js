@@ -1142,7 +1142,7 @@ public:
 	template <typename Fn>
 	static Local<Value> CallFunction(Isolate* isolate, Local<Value> self, UFunction* Function, UObject* Object, Fn&& GetArg) 
 	{
-		SCOPE_CYCLE_COUNTER(STAT_JavascriptFunctionCall);
+		SCOPE_CYCLE_COUNTER(STAT_JavascriptFunctionCallToEngine);
 
 		FIsolateHelper I(isolate);
 
