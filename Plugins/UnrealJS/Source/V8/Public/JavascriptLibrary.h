@@ -1,5 +1,6 @@
 #pragma once
 
+#include "JavascriptProfile.h"
 #include "JavascriptLibrary.generated.h"
 
 USTRUCT(BlueprintType)
@@ -121,4 +122,51 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
 	static ULevel* GetLevel(AActor* Actor);	
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static FString GetFunctionName(FJavascriptProfileNode Node);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static int32 GetScriptId(FJavascriptProfileNode Node);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static FString GetScriptResourceName(FJavascriptProfileNode Node);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static int32 GetLineNumber(FJavascriptProfileNode Node);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static int32 GetColumnNumber(FJavascriptProfileNode Node);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static int32 GetHitLineCount(FJavascriptProfileNode Node);
+
+
+	//static bool GetLineTicks(LineTick* entries, unsigned int length) const;
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static FString GetBailoutReason(FJavascriptProfileNode Node);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static int32 GetHitCount(FJavascriptProfileNode Node);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static int32 GetCallUid(FJavascriptProfileNode Node);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static int32 GetNodeId(FJavascriptProfileNode Node);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static int32 GetChildrenCount(FJavascriptProfileNode Node);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static FJavascriptProfileNode GetChild(FJavascriptProfileNode Node,int32 index);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static int32 GetDeoptInfosCount(FJavascriptProfileNode Node, int32 index);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static FString GetDeoptInfo_Reason(FJavascriptProfileNode Node, int32 index);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static FString GetDeoptInfo_Stack(FJavascriptProfileNode Node, int32 index);
 };

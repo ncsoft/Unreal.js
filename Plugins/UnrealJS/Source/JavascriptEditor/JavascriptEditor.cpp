@@ -6,8 +6,13 @@
 #include "IV8.h"
 #include "ScopedTransaction.h"
 #if WITH_EDITOR
+// Settings
+#include "JavascriptSettings.h"
+#include "ISettingsModule.h"
 #include "Settings/EditorLoadingSavingSettings.h"
 #endif
+
+#define LOCTEXT_NAMESPACE "UnrealJSEditor"
 
 class FJavascriptEditorModule : public IJavascriptEditorModule
 {
@@ -29,6 +34,25 @@ private:
 	bool bRegistered{ false };
 
 	void Unregister();
+
+	void RegisterSettings()
+	{
+		if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
+		{
+			SettingsModule->RegisterSettings("Project", "Plugins", "UnrealJS",
+				LOCTEXT("RuntimeSettingsName", "UnrealJS"),
+				LOCTEXT("RuntimeSettingsDescription", "Configure the UnrealJS plugin"),
+				GetMutableDefault<UJavascriptSettings>());
+		}
+	}
+
+	void UnregisterSettings()
+	{
+		if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
+		{
+			SettingsModule->UnregisterSettings("Project", "Plugins", "UnrealJS");
+		}
+	}
 #endif
 };
 
@@ -86,6 +110,8 @@ static void PatchReimportRule()
 void FJavascriptEditorModule::StartupModule()
 {
 #if WITH_EDITOR	
+	RegisterSettings();
+
 	PatchReimportRule();
 
 	auto Isolate = NewObject<UJavascriptIsolate>();
@@ -117,6 +143,11 @@ void FJavascriptEditorModule::ShutdownModule()
 {
 #if WITH_EDITOR	
 	Unregister();
+
+	if (UObjectInitialized())
+	{
+		UnregisterSettings();
+	}
 #endif
 }
 
