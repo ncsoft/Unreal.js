@@ -248,7 +248,7 @@ function proxy(base) {
             }
             
             for (var k in this.children) {
-                let o = this.children[k].find(id)
+                let o = this.children[k].instance.find(id)
                 if (o != undefined) return o
             }
         }
