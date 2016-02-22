@@ -24,14 +24,18 @@ DEFINE_STAT(STAT_CodeSpace);
 DEFINE_STAT(STAT_MapSpace);
 DEFINE_STAT(STAT_LoSpace);
 
+using namespace v8;
+
 UJavascriptSettings::UJavascriptSettings(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	V8Flags = TEXT("--harmony --harmony-shipping --es-staging --expose-debug-as=v8debug --expose-gc --harmony_destructuring --harmony_simd --harmony_default_parameters");
-	// --prof --prof_cpp --log-timer-events
 }
 
-using namespace v8;
+void UJavascriptSettings::Apply() const
+{
+	V8::SetFlagsFromString(TCHAR_TO_ANSI(*V8Flags), strlen(TCHAR_TO_ANSI(*V8Flags)));
+}
 
 class V8Module : public IV8
 {
@@ -50,7 +54,7 @@ public:
 		Paths.Add(GetPakPluginScriptsDirectory());
 
 		const UJavascriptSettings& Settings = *GetDefault<UJavascriptSettings>();
-		V8::SetFlagsFromString(TCHAR_TO_ANSI(*Settings.V8Flags), strlen(TCHAR_TO_ANSI(*Settings.V8Flags)));
+		Settings.Apply();
 
 		V8::InitializeICU();
 		platform_ = platform::CreateDefaultPlatform();

@@ -32,6 +32,7 @@ private:
 	UJavascriptContext* JavascriptContext{ nullptr };
 
 	bool bRegistered{ false };
+	FDelegateHandle OnPropertyChangedDelegateHandle;
 
 	void Unregister();
 
@@ -51,6 +52,15 @@ private:
 		if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
 		{
 			SettingsModule->UnregisterSettings("Project", "Plugins", "UnrealJS");
+		}
+	}
+
+	// Called when a property on the specified object is modified
+	void OnPropertyChanged(UObject* ObjectBeingModified, FPropertyChangedEvent& PropertyChangedEvent)
+	{
+		if (auto Settings = Cast<UJavascriptSettings>(ObjectBeingModified))
+		{
+			Settings->Apply();
 		}
 	}
 #endif
@@ -110,6 +120,9 @@ static void PatchReimportRule()
 void FJavascriptEditorModule::StartupModule()
 {
 #if WITH_EDITOR	
+	// Register to be notified when properties are edited
+	OnPropertyChangedDelegateHandle = FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw(this, &FJavascriptEditorModule::OnPropertyChanged);
+
 	RegisterSettings();
 
 	PatchReimportRule();
@@ -148,6 +161,9 @@ void FJavascriptEditorModule::ShutdownModule()
 	{
 		UnregisterSettings();
 	}
+
+	// Unregister the property modification handler
+	FCoreUObjectDelegates::OnObjectPropertyChanged.Remove(OnPropertyChangedDelegateHandle);
 #endif
 }
 

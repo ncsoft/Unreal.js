@@ -556,20 +556,14 @@ public:
 
 		FIsolateHelper I(isolate_);
 
-		/*
 		MaybeLocal<Array> _arr = v8_obj->GetOwnPropertyNames();
 		if (_arr.IsEmpty()) return;
 
 		auto arr = _arr.ToLocalChecked();
 
 		auto len = arr->Length();
-
-		for (decltype(len) Index = 0; Index < len; ++Index)
-		{
-		}
-		*/
-
-		for (TFieldIterator<UProperty> PropertyIt(Struct, EFieldIteratorFlags::IncludeSuper); PropertyIt; ++PropertyIt)
+		
+		for (TFieldIterator<UProperty> PropertyIt(Struct, EFieldIteratorFlags::IncludeSuper); PropertyIt && len; ++PropertyIt)
 		{
 			auto Property = *PropertyIt;
 			auto PropertyName = Property->GetFName();
@@ -579,6 +573,7 @@ public:
 
 			if (!value.IsEmpty() && !value->IsUndefined())
 			{
+				len--;
 				InternalWriteProperty(Property, struct_buffer, value);
 			}
 		}

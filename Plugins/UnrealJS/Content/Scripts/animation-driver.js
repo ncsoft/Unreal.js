@@ -1,85 +1,93 @@
-(function () {
+(function (global) {
     "use strict"
+    function currentTime() {
+        return global.$time
+    }
+    
+    function $default_access(target, key) {
+        var h = target["Set" + key]
+        if (typeof h == 'function') return h.bind(target)
+    }
 
-    function animationDriver() {
-        function currentTime() {
-            return new Date().getTime() / 1000
-        }
+    function animationDriver() {        
+        var alive = true
+        var running = false
+        var animations = []
+        
+        class Anim {
+            constructor(target,meta,anim) {
+                var $access = meta.$access || $default_access
+                var tracks = this.tracks = []
+                for (var k in anim) {
+                    var fn = anim[k]                
+                    var h = $access(target,k)
 
-        let alive = true
-        let running = false
-        let animations = []
-        function applyAnim(target, meta, anim) {
-            let duration = meta.duration || 0.25
-            let loop = meta.loop || 1
-            let started = currentTime()
-
-            let $default_access = (target, key) => {
-                let h = target["Set" + k]
-                if (typeof h == 'function') return h.bind(target)
-            }
-            let $access = meta.$access || $default_access
-
-            let tracks = []
-            for (var k in anim) {
-                let fn = anim[k]                
-                let h = $access(target,k)
-
-                if (typeof h == 'function') {
-                    tracks.push(t => {
-                        let value = fn(t)
-                        if (value != undefined) {
-                            h.call(null,value)
-                        }
-                    })
-                } else {
-                    console.error(`No such track{${k}}`)
+                    if (typeof h == 'function') {
+                        tracks.push([fn,h])
+                    } else {
+                        console.error(`No such track{${k}}`)
+                    }
                 }
+                this.duration = meta.duration || 0.25
+                this.loop = meta.loop || 1
+                this.started = currentTime()
+                this.tracks = tracks
+                this.added = false
+                this.warm = meta.warm
             }
-
-            let instance = t => {
-                let alpha = (t - started) / duration
-                let lap = Math.floor(alpha)
-                let shouldQuit = (loop != 0 && lap >= loop)
+            tick(t) {
+                var alpha = (t - this.started) / this.duration
+                var lap = Math.floor(alpha)
+                var shouldQuit = (this.loop != 0 && lap >= this.loop)
                 if (shouldQuit) {
                     alpha = 1
                 } else {
                     alpha -= lap
                 }
-                tracks.forEach(track => track(alpha))
+                this.tracks.forEach(track => {
+                    let fn = track[0]
+                    let h = track[1]
+                    let value = fn(alpha)
+                    if (value != undefined) {
+                        h.call(null,value)
+                    }
+                })
                 if (shouldQuit) {
-                    remove()
+                    this.remove()
                 }
             }
-            let added = false
-            function add() {
-                if (added) return
-                added = true
-                animations.push(instance)
+            add() {
+                if (this.added) return
+                this.added = true
+                animations.push(this)
 
-                if (meta.warm) {
-                    instance(0)
+                if (this.warm) {
+                    this.tick(0)
                 }
             }
-            function remove() {
-                if (!added) return
-                added = false
-                animations.splice(animations.indexOf(instance), 1)
+            remove() {
+                if (!this.added) return
+                this.added = false
+                animations.splice(animations.indexOf(this), 1)
                 if (animations.length == 0) {
                     stop()
                 }
             }
+        }
+        function applyAnim(target, meta, anim) {          
+            let I = new Anim(target,meta,anim)      
+            
             if (!running) {
                 run()
             }
-            add()
-            return remove
+            I.add()
+            return I.remove
         }
 
         function loop() {
             if (!running) return
-            let t = currentTime()
-            animations.forEach(anim => anim(t))
+            var t = currentTime()
+            animations.forEach(anim => anim.tick(t))
             process.nextTick(loop)
         }
 
@@ -105,4 +113,4 @@
     }
 
     module.exports = animationDriver
-})()
+})(this)
