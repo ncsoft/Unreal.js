@@ -26,7 +26,7 @@ Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4.
 - https://github.com/ncsoft/Unreal.js/wiki
 
 ### Install and play
-- Make sure you have [UnrealEngine 4.10.2 canonical build](https://www.unrealengine.com/dashboard).
+- Make sure you have [UnrealEngine 4.10.4 canonical build](https://www.unrealengine.com/dashboard).
 - Install git-lfs first to download *.umap, *.uasset properly. (https://git-lfs.github.com/)
 - After installing `git-lfs`, `git clone https://github.com/ncsoft/Unreal.js`
 - Download [prebuilt UnrealJS plugin](https://github.com/ncsoft/Unreal.js/releases) and unzip into `Examples/Plugins/UnrealJS`.
