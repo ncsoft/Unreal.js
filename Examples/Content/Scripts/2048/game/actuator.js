@@ -8,9 +8,12 @@
 
         var widget = instantiate(design)
 
-        var score_attrs = widget.find('score').set_attrs
-        var best_attrs = widget.find('best').set_attrs
-        var message_attrs = widget.find('message').set_attrs
+        var score_prop = widget.find('score');
+        var score_attrs = score_prop.set_attrs.bind(score_prop);
+        var best_prop = widget.find('best');
+        var best_attrs = best_prop.set_attrs.bind(best_prop);
+        var message_prop = widget.find('message');
+        var message_attrs = message_prop.set_attrs.bind(message_prop);
 
         score_attrs({ Text: 0 })
         best_attrs({ Text: 0 })
