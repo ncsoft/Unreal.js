@@ -11,7 +11,7 @@ Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4.
 - Free to subclass existing classes including blueprint
 - Web-dev like UMG ([Jade](http://jade-lang.com), pseudo-css, pseudo-[angular.js](https://angularjs.org/))
 - Live reload
-- Communicate with outer world: REST, process(pipe), arraybuffer, ...
+- Communicate with outer world: REST(http), websocket, process(pipe), arraybuffer, ...
 - Bridge API for editor extension
 - Auto-completion for **Visual Studio Code** (auto-generated [*.d.ts](http://definitelytyped.org/))
 - Debugging within **Visual Studio**, Visual Studio Code, WebStorm and all IDE which supports V8 protocol
