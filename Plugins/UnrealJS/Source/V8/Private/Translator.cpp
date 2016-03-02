@@ -9,7 +9,7 @@ namespace v8
 		if (Memory)
 		{
 			auto uobj = reinterpret_cast<UObject*>(Memory);
-			if (uobj->IsValidLowLevelFast() && !uobj->HasAnyFlags(RF_PendingKill))
+			if (uobj->IsValidLowLevelFast() && !uobj->IsPendingKill())
 			{
 				return uobj;
 			}

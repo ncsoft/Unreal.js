@@ -19,6 +19,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Scripting|Javascript")
 	bool HandleAnalogInputEvent(const FAnalogInputEvent& InKeyEvent);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Scripting|Javascript")
+	bool HandleMouseMoveEvent(const FPointerEvent& InPointerEvent);
 	
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
 	void Activate(bool bEnable);
