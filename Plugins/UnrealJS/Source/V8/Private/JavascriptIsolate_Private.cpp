@@ -1473,13 +1473,36 @@ public:
 		FIsolateHelper I(isolate_);
 
 		auto fn = [](const FunctionCallbackInfo<Value>& info) {
-			auto ClassToExport = reinterpret_cast<UClass*>((Local<External>::Cast(info.Data()))->Value());
+			auto StructToExport = reinterpret_cast<UStruct*>((Local<External>::Cast(info.Data()))->Value());
 
 			auto isolate = info.GetIsolate();
 
 			if (info.Length() == 1)
 			{
-				info.GetReturnValue().Set(info[0]);
+				auto Value = info[0];
+
+				auto Instance = FStructMemoryInstance::FromV8(Value);
+
+				// If given value is an instance
+				if (Instance)
+				{
+					auto GivenStruct = Instance->Struct;
+					if (Instance->Struct->IsChildOf(StructToExport))
+					{
+						info.GetReturnValue().Set(info[0]);
+					}
+				}
+				else if (auto ScriptStruct = Cast<UScriptStruct>(StructToExport))
+				{
+					if (Value->IsObject())
+					{
+						auto v = Value->ToObject();
+						auto Target = (uint8*)(FMemory_Alloca(ScriptStruct->GetStructureSize()));
+						GetSelf(isolate)->ReadOffStruct(v, ScriptStruct, Target);
+						auto out = GetSelf(isolate)->ExportStructInstance(ScriptStruct, Target, FNoPropertyOwner());
+						info.GetReturnValue().Set(out);
+					}
+				}
 			}
 		};
 
