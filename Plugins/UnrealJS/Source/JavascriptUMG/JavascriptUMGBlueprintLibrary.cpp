@@ -29,3 +29,25 @@ void UJavascriptUMGBlueprintLibrary::DrawSpaceSpline(UPARAM(ref) FPaintContext& 
 		ESlateDrawEffect::None,
 		InTint);
 }
+
+FString UJavascriptUMGBlueprintLibrary::GetAsText(UPARAM(ref) const FJavascriptTextLayout& TextLayout)
+{
+	FString String;
+	TextLayout.ConstTextLayout->GetAsText(String);
+	return String;
+}
+
+void UJavascriptUMGBlueprintLibrary::ClearLines(UPARAM(ref) FJavascriptTextLayout& TextLayout)
+{
+	TextLayout.TextLayout->ClearLines();
+}
+
+void UJavascriptUMGBlueprintLibrary::AddLine(UPARAM(ref) FJavascriptTextLayout& TextLayout, const FString& String, const FTextBlockStyle& MessageTextStyle)
+{
+	TSharedRef<FString> LineText(new FString(String));
+
+	TArray<TSharedRef<IRun>> Runs;
+	Runs.Add(FSlateTextRun::Create(FRunInfo(), LineText, MessageTextStyle));
+
+	TextLayout.TextLayout->AddLine(LineText, Runs);
+}
