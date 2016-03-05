@@ -1486,7 +1486,9 @@ public:
 			if (Value->IsObject())
 			{
 				auto v = Value->ToObject();
-				auto Target = (uint8*)(FMemory_Alloca(ScriptStruct->GetStructureSize()));
+				auto Size = ScriptStruct->GetStructureSize();
+				auto Target = (uint8*)(FMemory_Alloca(Size));
+				FMemory::Memzero(Target, Size);
 				ReadOffStruct(v, ScriptStruct, Target);
 				return ExportStructInstance(ScriptStruct, Target, FNoPropertyOwner());
 			}
