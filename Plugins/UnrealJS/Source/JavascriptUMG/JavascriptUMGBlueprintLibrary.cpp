@@ -1,5 +1,6 @@
 #include "JavascriptUMG.h"
 #include "JavascriptUMGBlueprintLibrary.h"
+#include "JavascriptTextModel.h"
 
 FSlateColor UJavascriptUMGBlueprintLibrary::SlateColor_UseForeground()
 {
@@ -42,12 +43,19 @@ void UJavascriptUMGBlueprintLibrary::ClearLines(UPARAM(ref) FJavascriptTextLayou
 	TextLayout.TextLayout->ClearLines();
 }
 
-void UJavascriptUMGBlueprintLibrary::AddLine(UPARAM(ref) FJavascriptTextLayout& TextLayout, const FString& String, const FTextBlockStyle& MessageTextStyle)
+void UJavascriptUMGBlueprintLibrary::AddLine(UPARAM(ref) FJavascriptTextLayout& TextLayout, UJavascriptTextModel* Model, const TArray<FJavascriptSlateTextRun>& InRuns)
 {
-	TSharedRef<FString> LineText(new FString(String));
-
 	TArray<TSharedRef<IRun>> Runs;
-	Runs.Add(FSlateTextRun::Create(FRunInfo(), LineText, MessageTextStyle));
+	for (auto InRun : InRuns)
+	{
+		if (InRun.Run.IsValid())
+		{
+			Runs.Add(InRun.Run.ToSharedRef());
+		}		
+	}	
 
-	TextLayout.TextLayout->AddLine(LineText, Runs);
+	if (Model && Model->Model.IsValid())
+	{
+		TextLayout.TextLayout->AddLine(Model->Model.ToSharedRef(), Runs);
+	}	
 }

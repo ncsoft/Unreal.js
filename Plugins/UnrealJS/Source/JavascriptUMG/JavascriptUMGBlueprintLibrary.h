@@ -3,6 +3,8 @@
 #include "JavascriptMultiLineEditableTextBox.h"
 #include "JavascriptUMGBlueprintLibrary.generated.h"
 
+class UJavascriptTextModel;
+
 /**
  * 
  */
@@ -28,5 +30,5 @@ public:
 	static void ClearLines(UPARAM(ref) FJavascriptTextLayout& TextLayout);
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
-	static void AddLine(UPARAM(ref) FJavascriptTextLayout& TextLayout, const FString& String, const FTextBlockStyle& TextBlockStyle);
+	static void AddLine(UPARAM(ref) FJavascriptTextLayout& TextLayout, UJavascriptTextModel* Model, const TArray<FJavascriptSlateTextRun>& Runs);
 };

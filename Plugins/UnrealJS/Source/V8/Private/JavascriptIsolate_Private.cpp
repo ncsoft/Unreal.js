@@ -377,32 +377,44 @@ public:
 					auto Function = *FuncIt;
 					TFieldIterator<UProperty> It(Function);
 
-					// It should be a static function and have first argument to bind with.
-					if ((Function->FunctionFlags & FUNC_Static) && It && (It->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == CPF_Parm)
+					// It should be a static function 
+					if ((Function->FunctionFlags & FUNC_Static) && It)
 					{
-						// The first argument should be type of object
-						if (auto p = Cast<UObjectPropertyBase>(*It))
+						// and have first argument to bind with.
+						if ((It->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == CPF_Parm)
 						{
-							auto TargetClass = p->PropertyClass;
-
-							// GetWorld() may fail and crash, so target class is bound to UWorld
-							if (TargetClass == UObject::StaticClass() && (p->GetName() == TEXT("WorldContextObject") || p->GetName() == TEXT("WorldContext")))
+							// The first argument should be type of object
+							if (auto p = Cast<UObjectPropertyBase>(*It))
 							{
-								TargetClass = UWorld::StaticClass();
-							}
+								auto TargetClass = p->PropertyClass;
 
-							BlueprintFunctionLibraryMapping.Add(TargetClass, Function);
+								// GetWorld() may fail and crash, so target class is bound to UWorld
+								if (TargetClass == UObject::StaticClass() && (p->GetName() == TEXT("WorldContextObject") || p->GetName() == TEXT("WorldContext")))
+								{
+									TargetClass = UWorld::StaticClass();
+								}
+
+								BlueprintFunctionLibraryMapping.Add(TargetClass, Function);
+								continue;
+							}
+							else if (auto p = Cast<UStructProperty>(*It))
+							{
+								BlueprintFunctionLibraryMapping.Add(p->Struct, Function);
+								continue;
+							}
 						}
-						else if (auto p = Cast<UStructProperty>(*It))
+
+						// Factory function?
+						for (auto It2 = It; It2; ++It2)
 						{
-							BlueprintFunctionLibraryMapping.Add(p->Struct, Function);
-						}
-					}
-					else if ((Function->FunctionFlags & FUNC_Static) && It && (It->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == (CPF_Parm | CPF_ReturnParm))
-					{
-						if (auto p = Cast<UStructProperty>(*It))
-						{
-							BlueprintFunctionLibraryFactoryMapping.Add(p->Struct, Function);
+							if ((It2->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == (CPF_Parm | CPF_ReturnParm))
+							{
+								if (auto p = Cast<UStructProperty>(*It2))
+								{
+									BlueprintFunctionLibraryFactoryMapping.Add(p->Struct, Function);
+									break;
+								}
+							}
 						}
 					}
 				}
