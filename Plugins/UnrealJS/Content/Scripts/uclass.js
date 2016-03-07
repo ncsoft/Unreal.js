@@ -126,7 +126,11 @@
             }
 
             let proxy = {}
-            _.each(Object.getOwnPropertyNames(template.prototype), (k) => {
+            _(Object.getOwnPropertyNames(template.prototype)).filter((name) => {
+                let c = Object.getOwnPropertyDescriptor(template.prototype, name);
+                return (c.get || c.set) == undefined;
+            })
+            .forEach((k) => {
                 if (k == "properties") {
                     let func = String(template.prototype[k])
                     func = func.substr(func.indexOf('{')+1)
@@ -153,7 +157,7 @@
                     a = _.filter(a, (a) => !/^[\-\+]/.test(a))
                     let args = ((matches[2] || '').split(',').map((x) => refactored(x.trim())))
                     F.IsUFUNCTION = false
-                    if (_.all(args, (x) => !!x)) {
+                    if (_.every(args, (x) => !!x)) {
                         F.Signature = args
                         F.IsUFUNCTION = true
                     }
@@ -184,7 +188,7 @@
 
             let klass = null
 
-            if (_.contains(classFlags, "Struct")) {
+            if (_.includes(classFlags, "Struct")) {
                 klass = CreateStruct(className, {
                     Parent: parentClass,
                     Functions: proxy,

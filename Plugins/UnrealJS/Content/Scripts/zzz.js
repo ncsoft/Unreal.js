@@ -103,8 +103,7 @@
                 'class': klass,
                 attrs: attrs,
                 slot: slot,
-                $link: opts.$link,
-                $unlink : opts.$unlink
+                $link: opts.$link
             }, other || {});
         },
         generic2: function (type, opts, children) {

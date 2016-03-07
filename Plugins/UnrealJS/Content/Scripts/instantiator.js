@@ -209,6 +209,8 @@ function proxy(base) {
             
             this.bindings = set_attrs(this, this.attrs, scope)
             this.custom_bindings = []
+            
+            this.has_unlink = !!design.$unlink 
 
             {
                 var children = _.compact(design.children) || []
@@ -307,6 +309,8 @@ function proxy(base) {
             if (this.cached_extended_styles) {
                 c.set_styles(this.cached_extended_styles);
             }
+            
+            this.has_unlink = this.has_unlink || c.has_unlink
 
             this.children.push({ 
                 instance: c, 
@@ -331,14 +335,49 @@ function proxy(base) {
                 console.error('couldnot find child', child_instance)
             }
             if (!no_directop) {
+                child_instance.destroy()
                 child_instance.RemoveFromParent()
             }
         }
         
+        replace_childAt(index, child) {
+            if (index < 0 || index >= this.Slots.length)
+                return false;
+
+            let slot = this.Slots[index];
+            slot.Content = child;
+
+            if (child) {
+                child.Slot = slot;
+            }
+
+            return true;
+        }
+        
+        replace_child(oldChild, newChild) {
+            let index = this.GetChildIndex(oldChild)
+            if(index != 1)
+                this.replace_childAt(index, newChild)
+            return false    
+        }
+        
+        destroy_all_children() {
+            this.children.forEach(child => {
+                child.instance.destroy()
+            })
+        }
+        
+        destroy() {
+            if (!this.has_unlink) return
+            
+            this.design.$unlink && this.design.$unlink()
+            this.destroy_all_children()
+        } 
+        
         set_styles(styles) {
             let design = this.design
             var matched_styles = _.filter(styles, function (style) {
-                return (!style.type || style.type == design.type) && (!style.id || style.id == design.id) && (!style.class || _.all(style.class || [], function (k) { return _.contains(design.class || [], k) }));
+                return (!style.type || style.type == design.type) && (!style.id || style.id == design.id) && (!style.class || _.every(style.class || [], function (k) { return _.includes(design.class || [], k) }));
             }).map(function (style) {
                 style = _.clone(style);
                 if (style.weight == undefined) {
