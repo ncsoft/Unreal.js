@@ -377,32 +377,44 @@ public:
 					auto Function = *FuncIt;
 					TFieldIterator<UProperty> It(Function);
 
-					// It should be a static function and have first argument to bind with.
-					if ((Function->FunctionFlags & FUNC_Static) && It && (It->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == CPF_Parm)
+					// It should be a static function 
+					if ((Function->FunctionFlags & FUNC_Static) && It)
 					{
-						// The first argument should be type of object
-						if (auto p = Cast<UObjectPropertyBase>(*It))
+						// and have first argument to bind with.
+						if ((It->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == CPF_Parm)
 						{
-							auto TargetClass = p->PropertyClass;
-
-							// GetWorld() may fail and crash, so target class is bound to UWorld
-							if (TargetClass == UObject::StaticClass() && (p->GetName() == TEXT("WorldContextObject") || p->GetName() == TEXT("WorldContext")))
+							// The first argument should be type of object
+							if (auto p = Cast<UObjectPropertyBase>(*It))
 							{
-								TargetClass = UWorld::StaticClass();
-							}
+								auto TargetClass = p->PropertyClass;
 
-							BlueprintFunctionLibraryMapping.Add(TargetClass, Function);
+								// GetWorld() may fail and crash, so target class is bound to UWorld
+								if (TargetClass == UObject::StaticClass() && (p->GetName() == TEXT("WorldContextObject") || p->GetName() == TEXT("WorldContext")))
+								{
+									TargetClass = UWorld::StaticClass();
+								}
+
+								BlueprintFunctionLibraryMapping.Add(TargetClass, Function);
+								continue;
+							}
+							else if (auto p = Cast<UStructProperty>(*It))
+							{
+								BlueprintFunctionLibraryMapping.Add(p->Struct, Function);
+								continue;
+							}
 						}
-						else if (auto p = Cast<UStructProperty>(*It))
+
+						// Factory function?
+						for (auto It2 = It; It2; ++It2)
 						{
-							BlueprintFunctionLibraryMapping.Add(p->Struct, Function);
-						}
-					}
-					else if ((Function->FunctionFlags & FUNC_Static) && It && (It->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == (CPF_Parm | CPF_ReturnParm))
-					{
-						if (auto p = Cast<UStructProperty>(*It))
-						{
-							BlueprintFunctionLibraryFactoryMapping.Add(p->Struct, Function);
+							if ((It2->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == (CPF_Parm | CPF_ReturnParm))
+							{
+								if (auto p = Cast<UStructProperty>(*It2))
+								{
+									BlueprintFunctionLibraryFactoryMapping.Add(p->Struct, Function);
+									break;
+								}
+							}
 						}
 					}
 				}
@@ -1468,18 +1480,47 @@ public:
 		Template->Set(I.Keyword("Load"), I.FunctionTemplate(fn, ClassToExport));
 	}
 
+	Local<Value> C_Operator(UStruct* StructToExport, Local<Value> Value)
+	{
+		auto Instance = FStructMemoryInstance::FromV8(Value);
+
+		// If given value is an instance
+		if (Instance)
+		{
+			auto GivenStruct = Instance->Struct;
+			if (Instance->Struct->IsChildOf(StructToExport))
+			{
+				return Value;
+			}
+		}
+		else if (auto ScriptStruct = Cast<UScriptStruct>(StructToExport))
+		{
+			if (Value->IsObject())
+			{
+				auto v = Value->ToObject();
+				auto Size = ScriptStruct->GetStructureSize();
+				auto Target = (uint8*)(FMemory_Alloca(Size));
+				FMemory::Memzero(Target, Size);
+				ReadOffStruct(v, ScriptStruct, Target);
+				return ExportStructInstance(ScriptStruct, Target, FNoPropertyOwner());
+			}
+		}
+
+		return Local<v8::Value>();
+	}
+
 	void AddMemberFunction_Struct_C(Local<FunctionTemplate> Template, UStruct* StructToExport)
 	{
 		FIsolateHelper I(isolate_);
 
 		auto fn = [](const FunctionCallbackInfo<Value>& info) {
-			auto ClassToExport = reinterpret_cast<UClass*>((Local<External>::Cast(info.Data()))->Value());
+			auto StructToExport = reinterpret_cast<UStruct*>((Local<External>::Cast(info.Data()))->Value());
 
 			auto isolate = info.GetIsolate();
 
 			if (info.Length() == 1)
 			{
-				info.GetReturnValue().Set(info[0]);
+				info.GetReturnValue().Set(GetSelf(isolate)->C_Operator(StructToExport,info[0]));
 			}
 		};
 
@@ -1599,118 +1640,125 @@ public:
 
 			auto ClassToExport = reinterpret_cast<UClass*>((Local<External>::Cast(info.Data()))->Value());			
 
-			auto self = info.This();
+			if (info.IsConstructCall())
+			{
+				auto self = info.This();
 
-			UObject* Associated = nullptr;
+				UObject* Associated = nullptr;
 
-			// Called by system (via ExportObject)
-			if (info.Length() == 1 && info[0]->IsExternal())
-			{				
-				auto ext = Local<External>::Cast(info[0]);
-
-				Associated = reinterpret_cast<UObject*>(ext->Value());				
-
-				if (!Associated->IsValidLowLevel())
+				// Called by system (via ExportObject)
+				if (info.Length() == 1 && info[0]->IsExternal())
 				{
-					Associated = nullptr;
-				}
-			}						
+					auto ext = Local<External>::Cast(info[0]);
 
-			// Called by user (via 'new' operator)
-			if (!Associated)
-			{				
-				const bool bIsJavascriptClass = 
-					ClassToExport->GetClass()->IsChildOf(UJavascriptGeneratedClass::StaticClass()) ||
-					ClassToExport->GetClass()->IsChildOf(UJavascriptGeneratedClass_Native::StaticClass());
+					Associated = reinterpret_cast<UObject*>(ext->Value());
 
-				auto PreCreate = [&]() {
-					if (bIsJavascriptClass)
+					if (!Associated->IsValidLowLevel())
 					{
-						GetSelf(isolate)->ObjectUnderConstructionStack.Push(FPendingClassConstruction(self, ClassToExport));
-					}
-				};
-
-				// Custom constructors
-				if (ClassToExport->IsChildOf(AActor::StaticClass()))
-				{
-					if (info.Length() == 0)
-					{
-						I.Throw(TEXT("Missing world to spawn"));
-						return;
-					}
-
-					auto World = Cast<UWorld>(UObjectFromV8(info[0]));
-					if (!World)
-					{
-						I.Throw(TEXT("Missing world to spawn"));
-						return;
-					}
-						
-					FVector Location(ForceInitToZero);
-					FRotator Rotation(ForceInitToZero);
-						
-					UPackage* CoreUObjectPackage = UObject::StaticClass()->GetOutermost();
-					static UScriptStruct* VectorStruct = FindObjectChecked<UScriptStruct>(CoreUObjectPackage, TEXT("Vector"));
-					static UScriptStruct* RotatorStruct = FindObjectChecked<UScriptStruct>(CoreUObjectPackage, TEXT("Rotator"));
-					static TStructReader<FVector> VectorReader(VectorStruct);
-					static TStructReader<FRotator> RotatorReader(RotatorStruct);
-
-					if (info.Length() > 1)
-					{
-						if (!VectorReader.Read(isolate, info[1], Location)) return;							
-
-						if (info.Length() > 2)
-						{
-							if (!RotatorReader.Read(isolate, info[2], Rotation)) return;								
-						}
-					}
-
-					PreCreate();
-					Associated = World->SpawnActor(ClassToExport, &Location, &Rotation);
-				}
-				else
-				{
-					UObject* Outer = GetTransientPackage();
-					FName Name = NAME_None;
-
-					if (info.Length() > 0)
-					{
-						if (auto value = UObjectFromV8(info[0]))
-						{
-							Outer = value;
-						}
-						if (info.Length() > 1)
-						{
-							Name = FName(*StringFromV8(info[1]));
-						}
-					}
-
-					PreCreate();
-					Associated = NewObject<UObject>(Outer, ClassToExport, Name);					
-				}				
-
-				if (bIsJavascriptClass)
-				{
-					const auto& Last = GetSelf(isolate)->ObjectUnderConstructionStack.Last();
-
-					bool bSafeToQuit = Last.bCatched;
-
-					GetSelf(isolate)->ObjectUnderConstructionStack.Pop();
-
-					if (bSafeToQuit)
-					{
-						return;
+						Associated = nullptr;
 					}
 				}
 
+				// Called by user (via 'new' operator)
 				if (!Associated)
 				{
-					I.Throw(TEXT("Failed to spawn"));
-					return;
-				}
-			}	
+					const bool bIsJavascriptClass =
+						ClassToExport->GetClass()->IsChildOf(UJavascriptGeneratedClass::StaticClass()) ||
+						ClassToExport->GetClass()->IsChildOf(UJavascriptGeneratedClass_Native::StaticClass());
 
-			FPendingClassConstruction(self, ClassToExport).Finalize(GetSelf(isolate), Associated);				
+					auto PreCreate = [&]() {
+						if (bIsJavascriptClass)
+						{
+							GetSelf(isolate)->ObjectUnderConstructionStack.Push(FPendingClassConstruction(self, ClassToExport));
+						}
+					};
+
+					// Custom constructors
+					if (ClassToExport->IsChildOf(AActor::StaticClass()))
+					{
+						if (info.Length() == 0)
+						{
+							I.Throw(TEXT("Missing world to spawn"));
+							return;
+						}
+
+						auto World = Cast<UWorld>(UObjectFromV8(info[0]));
+						if (!World)
+						{
+							I.Throw(TEXT("Missing world to spawn"));
+							return;
+						}
+
+						FVector Location(ForceInitToZero);
+						FRotator Rotation(ForceInitToZero);
+
+						UPackage* CoreUObjectPackage = UObject::StaticClass()->GetOutermost();
+						static UScriptStruct* VectorStruct = FindObjectChecked<UScriptStruct>(CoreUObjectPackage, TEXT("Vector"));
+						static UScriptStruct* RotatorStruct = FindObjectChecked<UScriptStruct>(CoreUObjectPackage, TEXT("Rotator"));
+						static TStructReader<FVector> VectorReader(VectorStruct);
+						static TStructReader<FRotator> RotatorReader(RotatorStruct);
+
+						if (info.Length() > 1)
+						{
+							if (!VectorReader.Read(isolate, info[1], Location)) return;
+
+							if (info.Length() > 2)
+							{
+								if (!RotatorReader.Read(isolate, info[2], Rotation)) return;
+							}
+						}
+
+						PreCreate();
+						Associated = World->SpawnActor(ClassToExport, &Location, &Rotation);
+					}
+					else
+					{
+						UObject* Outer = GetTransientPackage();
+						FName Name = NAME_None;
+
+						if (info.Length() > 0)
+						{
+							if (auto value = UObjectFromV8(info[0]))
+							{
+								Outer = value;
+							}
+							if (info.Length() > 1)
+							{
+								Name = FName(*StringFromV8(info[1]));
+							}
+						}
+
+						PreCreate();
+						Associated = NewObject<UObject>(Outer, ClassToExport, Name);
+					}
+
+					if (bIsJavascriptClass)
+					{
+						const auto& Last = GetSelf(isolate)->ObjectUnderConstructionStack.Last();
+
+						bool bSafeToQuit = Last.bCatched;
+
+						GetSelf(isolate)->ObjectUnderConstructionStack.Pop();
+
+						if (bSafeToQuit)
+						{
+							return;
+						}
+					}
+
+					if (!Associated)
+					{
+						I.Throw(TEXT("Failed to spawn"));
+						return;
+					}
+				}
+
+				FPendingClassConstruction(self, ClassToExport).Finalize(GetSelf(isolate), Associated);
+			}			
+			else
+			{
+				info.GetReturnValue().Set(GetSelf(isolate)->C_Operator(ClassToExport, info[0]));
+			}
 		};
 		
 		auto Template = I.FunctionTemplate(ConstructorBody, ClassToExport);
@@ -1778,24 +1826,31 @@ public:
 
 			FIsolateHelper I(isolate);
 
-			auto self = info.This();
+			if (info.IsConstructCall())
+			{
+				auto self = info.This();
 
-			TSharedPtr<FStructMemoryInstance> Memory;
-			
-			if (info.Length() == 2 && info[0]->IsExternal() && info[1]->IsExternal())
-			{			
-				IPropertyOwner& Owner = *reinterpret_cast<IPropertyOwner*>(Local<External>::Cast(info[1])->Value());
+				TSharedPtr<FStructMemoryInstance> Memory;
 
-				Memory = FStructMemoryInstance::Create(StructToExport, Owner, Local<External>::Cast(info[0])->Value());
+				if (info.Length() == 2 && info[0]->IsExternal() && info[1]->IsExternal())
+				{
+					IPropertyOwner& Owner = *reinterpret_cast<IPropertyOwner*>(Local<External>::Cast(info[1])->Value());
+
+					Memory = FStructMemoryInstance::Create(StructToExport, Owner, Local<External>::Cast(info[0])->Value());
+				}
+				else
+				{
+					Memory = FStructMemoryInstance::Create(StructToExport, FNoPropertyOwner());
+				}
+
+				GetSelf(isolate)->RegisterScriptStructInstance(Memory, self);
+
+				self->SetAlignedPointerInInternalField(0, Memory.Get());
 			}
 			else
 			{
-				Memory = FStructMemoryInstance::Create(StructToExport, FNoPropertyOwner());
+				info.GetReturnValue().Set(GetSelf(isolate)->C_Operator(StructToExport, info[0]));
 			}
-			
-			GetSelf(isolate)->RegisterScriptStructInstance(Memory, self);
-
-			self->SetAlignedPointerInInternalField(0, Memory.Get());			
 		};
 				
 		auto Template = I.FunctionTemplate(fn, StructToExport);

@@ -2,20 +2,13 @@ module.exports = function (widget,vbox) {
   "use strict";
 
   var instantiate = require('instantiator')
+  var UMG = require('UMG')
 
   function test() {
-    var design = {
-      id : 'button',
-      type : Button,
-      children : [
-        {
-          type : TextBlock,
-          attrs : {
-            Text : 'Reset'
-          }
-        }
-      ]
-    }
+    var design = 
+        UMG(Button,{id:'button'},
+            UMG.text({},'Reset')
+        )      
 
     var widget = instantiate(design)
     vbox.AddChild(widget)
@@ -23,7 +16,7 @@ module.exports = function (widget,vbox) {
   }
 
   var layout = test()
-  var reset_button = Button.C(layout.find('button'))
+  var reset_button = Button(layout.find('button'))
 
   function KeyboardInputManager() {
     this.events = {};
@@ -63,16 +56,16 @@ module.exports = function (widget,vbox) {
       'Right': () => this.emit("move", 3)
     }
 
-    UserWidget.C(widget.proxy).OnKeyDown = (geom,keyevent) => {
+    widget.proxy.OnKeyDown = (geom,keyevent) => {
       var key = KismetInputLibrary.prototype.GetKey(keyevent).KeyName
 
       var op = map[key]
       if (op != undefined) {
         op()
-        return WidgetBlueprintLibrary.Handled()
+        return Reply.Handled()
       }
       else {
-        return WidgetBlueprintLibrary.Unhandled()
+        return Reply.Unhandled()
       }
     }
 

@@ -1,5 +1,6 @@
 #include "JavascriptUMG.h"
 #include "JavascriptUMGBlueprintLibrary.h"
+#include "JavascriptTextModel.h"
 
 FSlateColor UJavascriptUMGBlueprintLibrary::SlateColor_UseForeground()
 {
@@ -28,4 +29,33 @@ void UJavascriptUMGBlueprintLibrary::DrawSpaceSpline(UPARAM(ref) FPaintContext& 
 		InThickness * Transform.GetScale(),
 		ESlateDrawEffect::None,
 		InTint);
+}
+
+FString UJavascriptUMGBlueprintLibrary::GetAsText(UPARAM(ref) const FJavascriptTextLayout& TextLayout)
+{
+	FString String;
+	TextLayout.ConstTextLayout->GetAsText(String);
+	return String;
+}
+
+void UJavascriptUMGBlueprintLibrary::ClearLines(UPARAM(ref) FJavascriptTextLayout& TextLayout)
+{
+	TextLayout.TextLayout->ClearLines();
+}
+
+void UJavascriptUMGBlueprintLibrary::AddLine(UPARAM(ref) FJavascriptTextLayout& TextLayout, UJavascriptTextModel* Model, const TArray<FJavascriptSlateTextRun>& InRuns)
+{
+	TArray<TSharedRef<IRun>> Runs;
+	for (auto InRun : InRuns)
+	{
+		if (InRun.Run.IsValid())
+		{
+			Runs.Add(InRun.Run.ToSharedRef());
+		}		
+	}	
+
+	if (Model && Model->Model.IsValid())
+	{
+		TextLayout.TextLayout->AddLine(Model->Model.ToSharedRef(), Runs);
+	}	
 }
