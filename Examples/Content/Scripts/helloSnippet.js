@@ -1,28 +1,23 @@
 const UMG = require('UMG')
 const _ = require('lodash')
+const request = require('request')
 const fontSize = 12
 
-function GetPC() {
-    return PlayerController.C(GWorld.GetAllActorsOfClass(PlayerController).OutActors[0])
+function textStyle(color) {
+    return TextBlockStyle({
+        Font: { Size: fontSize },
+        ColorAndOpacity: {
+            SpecifiedColor: color
+        }
+    })
+}
+
+function GetPC() {    
+    return World.C(GWorld).GetPlayerController(0)
 }
 
 function editor() {
-    let source = `
-let actor = new StaticMeshActor(GWorld)
-actor.StaticMeshComponent.SetMobility('Movable')
-actor.StaticMeshComponent.SetStaticMesh(StaticMesh.Load('/Engine/BasicShapes/Cube'))
-
-function tick() {
-  if (!actor.IsValid()) return
-  let rad = $time 
-  let r = 50
-  let p = {Y:Math.cos(rad) * r, Z:Math.sin(rad) * r}
-  actor.SetActorLocation(p)
-  process.nextTick(tick)
-}
-
-tick()
-`
+    let source = ''
     let actors = GWorld.GetAllActorsOfClass(Actor).OutActors
     let elem
     function fire() {
@@ -32,7 +27,6 @@ tick()
 
     class MyEditor extends JavascriptWidget {
         AddChild(x) {
-            console.log('add child')
             this.SetRootWidget(x)
             return {}
         }
@@ -49,10 +43,40 @@ tick()
     }
 
     let MyEditor_C = require('uclass')()(global, MyEditor)
+    
+    let gist = ''
+    
+    function load(id) {
+        gist = id
+        
+        request('GET',`https://gist.githubusercontent.com/${id}/raw`,{res:'string'}).then(str => {
+            elem.SetText(str)
+            fire()
+        }).catch(e => {
+            console.error(String(e))
+        })
+    }
+    
+    load('nakosung/2466994e78e887d19c2b')
 
     return UMG(MyEditor_C, { 'slot.size.size-rule': 'Fill' },
         UMG.div({ 'slot.size.size-rule': 'Fill' },
-            UMG(Button, { OnClicked: _ => fire() }, "RUN (F5)"),
+            UMG.span({},
+                UMG(EditableTextBox,{
+                    'slot.size.size-rule': 'Fill',
+                    WidgetStyle:{'font.size':fontSize},
+                    Text:gist,
+                    HintText:'Gist id',
+                    OnTextCommitted:text => {
+                        if (text != gist) {
+                            load(text)
+                        }
+                    }
+                }),
+                UMG(Button, { OnClicked: _ => fire() }, 
+                    UMG.text({'font.size':fontSize * 1.5},"RUN (F5)")
+                )
+            ),
             UMG(MultiLineEditableTextBox, {
                 'slot.size.size-rule': 'Fill',
                 WidgetStyle: { 'font.size': fontSize },
@@ -67,37 +91,16 @@ tick()
     )
 }
 
-function logWindow() {
-    let onMessage = null
-    let myOutput
 
+function logWindow() {
     return UMG(JavascriptMultiLineEditableTextBox, {
         'slot.size.size-rule': 'Fill',
         AlwaysShowScrollbars: true,
         IsReadOnly: true,
         $link: elem => {
-            class MyOutput extends JavascriptOutputDevice {
-                OnMessage(msg, verbosity, category) {
-                    onMessage && onMessage(msg, verbosity, category)
-                }
-            }
-
-            let MyOutput_C = require('uclass')()(global, MyOutput)
-            myOutput = new MyOutput_C
-
             let layout
-            let style = TextBlockStyle({
-                Font: { Size: fontSize },
-                ColorAndOpacity: {
-                    SpecifiedColor: { R: 1, G: 1, B: 1, A: 1 }
-                }
-            })
-            let style2 = TextBlockStyle({
-                Font: { Size: fontSize },
-                ColorAndOpacity: {
-                    SpecifiedColor: { R: 1, G: 1, B: 1, A: 0.5 }
-                }
-            })
+            let style = textStyle({ R: 1, G: 1, B: 1, A: 1 })
+            let style2 = textStyle({ R: 1, G: 1, B: 1, A: 0.5 })
             elem.SetTextDelegate = (text, _layout) => {
                 layout = _layout
             }
@@ -107,7 +110,7 @@ function logWindow() {
                 userScrolled = (offset < 1 - 1e-5)
             }
             let lines = 0
-            onMessage = (msg, v, category) => {
+            let onMessage = (msg, v, category) => {
                 let str = [category, msg].join(':')
                 let model = new JavascriptTextModel()
                 model.SetString(str)
@@ -123,11 +126,19 @@ function logWindow() {
                     elem.ScrollTo(lines - 1)
                 }
             }
+            
+            class MyOutput extends JavascriptOutputDevice {
+                OnMessage(msg, verbosity, category) {
+                    onMessage && onMessage(msg, verbosity, category)
+                }
+            }
+
+            let MyOutput_C = require('uclass')()(global, MyOutput)
+            elem.myOutput = new MyOutput_C
         },
-        $unlink: _ => {
-            myOutput.Kill()
-            myOutput = null
-            onMessage = null
+        $unlink: elem => {
+            elem.myOutput.Kill()
+            elem.myOutput = null
         }
     })
 }
