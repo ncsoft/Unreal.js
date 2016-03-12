@@ -3,6 +3,7 @@
 
 #define LOCTEXT_NAMESPACE "JavascriptTabManager"
 
+#if WITH_EDITOR
 class JAVASCRIPTEDITOR_API SPrimaryDockingArea : public SVerticalBox
 {
 public:
@@ -25,6 +26,7 @@ public:
 	TSharedPtr<FTabManager> TabManager;
 	TWeakPtr<SDockTab> DockTab;
 };
+#endif
 
 UJavascriptEditorTabManager::UJavascriptEditorTabManager(const FObjectInitializer& ObjectInitializer)
 : Super(ObjectInitializer)

@@ -3,6 +3,7 @@
 #include "EditorSupportDelegates.h"
 #include "JavascriptEditorGlobalDelegates.h"
 
+#if WITH_EDITOR
 void UJavascriptEditorGlobalDelegates::BeginDestroy()
 {
 	Super::BeginDestroy();
@@ -78,18 +79,15 @@ OP_REFLECT_SUPPORT(RedrawAllViewports)\
 OP_REFLECT_SUPPORT(CleanseEditor)\
 OP_REFLECT_SUPPORT(WorldChange)
 
-#if WITH_EDITOR
 FJavascriptAssetData::FJavascriptAssetData(const FAssetData& Source)
 	: ObjectPath(Source.ObjectPath), PackageName(Source.PackageName), PackagePath(Source.PackagePath), GroupNames(Source.GroupNames), AssetName(Source.AssetName), AssetClass(Source.AssetClass), ChunkIDs(Source.ChunkIDs), PackageFlags((int32)Source.PackageFlags), SourceAssetData(Source)
 {
 }
-#endif
 
 void UJavascriptEditorGlobalDelegates::Bind(FString Key)
 {
 	FDelegateHandle Handle;
 
-#if WITH_EDITOR
 	auto& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry")).Get();
 #define OP_REFLECT(x) else if (Key == #x) { Handle = FEditorDelegates::x.AddUObject(this, &UJavascriptEditorGlobalDelegates::x); }
 #define OP_REFLECT_ASSETREGISTRY(x) else if (Key == #x) { Handle = AssetRegistry.x().AddUObject(this, &UJavascriptEditorGlobalDelegates::x); }
@@ -101,7 +99,6 @@ void UJavascriptEditorGlobalDelegates::Bind(FString Key)
 		DO_REFLECT_EDITORENGINE()
 		DO_REFLECT_SUPPORT()
 		;
-#endif
 
 	if (Handle.IsValid())
 	{
@@ -121,7 +118,6 @@ void UJavascriptEditorGlobalDelegates::Unbind(FString Key)
 {
 	auto Handle = Handles[Key];
 
-#if WITH_EDITOR
 	auto& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry")).Get();
 #define OP_REFLECT(x) else if (Key == #x) { FEditorDelegates::x.Remove(Handle); }
 #define OP_REFLECT_ASSETREGISTRY(x) else if (Key == #x) { AssetRegistry.x().Remove(Handle); }
@@ -133,7 +129,7 @@ void UJavascriptEditorGlobalDelegates::Unbind(FString Key)
 		DO_REFLECT_EDITORENGINE()
 		DO_REFLECT_SUPPORT()
 		;
-#endif
 
 	Handles.Remove(Key);
 }
+#endif

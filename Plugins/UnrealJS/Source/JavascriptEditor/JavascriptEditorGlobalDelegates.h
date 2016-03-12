@@ -55,9 +55,9 @@ class JAVASCRIPTEDITOR_API UJavascriptEditorGlobalDelegates : public UObject
 	GENERATED_BODY()
 
 public:
+#if WITH_EDITOR
 	virtual void BeginDestroy() override;
 
-#if WITH_EDITOR
 	UFUNCTION(BlueprintImplementableEvent, Category = "Scripting | Javascript")
 	void NewCurrentLevel();
 
@@ -279,8 +279,6 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Scripting | Javascript")
 	void WorldChange();
 	
-#endif
-
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
 	void Bind(FString Key);
 
@@ -291,4 +289,5 @@ public:
 	void UnbindAll();
 
 	TMap<FString,FDelegateHandle> Handles;
+#endif
 };

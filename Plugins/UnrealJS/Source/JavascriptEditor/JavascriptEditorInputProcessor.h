@@ -11,6 +11,7 @@ class JAVASCRIPTEDITOR_API UJavascriptEditorInputProcessor : public UObject
 	GENERATED_BODY()
 
 public:	
+#if WITH_EDITOR
 	UFUNCTION(BlueprintImplementableEvent, Category = "Scripting|Javascript")
 	bool HandleKeyDownEvent(const FKeyEvent& InKeyEvent);
 
@@ -26,4 +27,5 @@ public:
 	virtual void BeginDestroy() override;
 
 	bool bActivated{ false };
+#endif
 };

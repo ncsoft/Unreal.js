@@ -120,50 +120,53 @@ static void PatchReimportRule()
 void FJavascriptEditorModule::StartupModule()
 {
 #if WITH_EDITOR	
-	// Register to be notified when properties are edited
-	OnPropertyChangedDelegateHandle = FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw(this, &FJavascriptEditorModule::OnPropertyChanged);
-
-	RegisterSettings();
-
-	PatchReimportRule();
-
-	auto Isolate = NewObject<UJavascriptIsolate>();
-	auto Context = Isolate->CreateContext();
-	
-	JavascriptContext = Context;
-	JavascriptContext->AddToRoot();
-
-	JavascriptContext->SetContextId(TEXT("Editor"));
-
-	Tick = NewObject<UJavascriptEditorTick>(JavascriptContext);
-	JavascriptContext->Expose(TEXT("Root"), Tick);
-	Tick->AddToRoot();
-
 	if (!IsRunningCommandlet())
 	{
+		// Register to be notified when properties are edited
+		OnPropertyChangedDelegateHandle = FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw(this, &FJavascriptEditorModule::OnPropertyChanged);
+
+		RegisterSettings();
+
+		PatchReimportRule();
+
+		auto Isolate = NewObject<UJavascriptIsolate>();
+		auto Context = Isolate->CreateContext();
+	
+		JavascriptContext = Context;
+		JavascriptContext->AddToRoot();
+
+		JavascriptContext->SetContextId(TEXT("Editor"));
+
+		Tick = NewObject<UJavascriptEditorTick>(JavascriptContext);
+		JavascriptContext->Expose(TEXT("Root"), Tick);
+		Tick->AddToRoot();
+		
 		FEditorScriptExecutionGuard ScriptGuard;
 
 		Context->RunFile("editor.js");
-	}
-
-	bRegistered = true;
 	
-	FCoreDelegates::OnPreExit.AddRaw(this, &FJavascriptEditorModule::Unregister);
+		bRegistered = true;
+	
+		FCoreDelegates::OnPreExit.AddRaw(this, &FJavascriptEditorModule::Unregister);
+	}
 #endif
 }
 
 void FJavascriptEditorModule::ShutdownModule()
 {
 #if WITH_EDITOR	
-	Unregister();
-
-	if (UObjectInitialized())
+	if (!IsRunningCommandlet())
 	{
-		UnregisterSettings();
-	}
+		Unregister();
 
-	// Unregister the property modification handler
-	FCoreUObjectDelegates::OnObjectPropertyChanged.Remove(OnPropertyChangedDelegateHandle);
+		if (UObjectInitialized())
+		{
+			UnregisterSettings();
+		}
+
+		// Unregister the property modification handler
+		FCoreUObjectDelegates::OnObjectPropertyChanged.Remove(OnPropertyChangedDelegateHandle);
+	}
 #endif
 }
 

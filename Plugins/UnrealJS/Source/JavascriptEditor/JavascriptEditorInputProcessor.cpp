@@ -2,6 +2,7 @@
 #include "Framework/Application/IInputProcessor.h"
 #include "JavascriptEditorInputProcessor.h"
 
+#if WITH_EDITOR
 class FMyInputProcessor : public IInputProcessor
 {
 public:
@@ -60,3 +61,4 @@ void UJavascriptEditorInputProcessor::Activate(bool bActivate)
 		}
 	}
 }
+#endif

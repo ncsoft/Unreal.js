@@ -7,19 +7,17 @@ UPropertyEditor::UPropertyEditor(const FObjectInitializer& ObjectInitializer)
 : Super(ObjectInitializer)
 {}
 
+#if WITH_EDITOR
 void UPropertyEditor::SetObject(UObject* Object)
 {
 	ObjectToInspect = Object;
 
-#if WITH_EDITOR
 	if (View.IsValid())
 	{
 		View->SetObject(Object);
 	}	
-#endif
 }
 
-#if WITH_EDITOR
 TSharedRef<SWidget> UPropertyEditor::RebuildWidget()
 {
 	if (IsDesignTime())

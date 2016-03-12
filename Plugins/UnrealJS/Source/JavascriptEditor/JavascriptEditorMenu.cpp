@@ -2,6 +2,7 @@
 #include "JavascriptEditorMenu.h"
 #include "JavascriptUIExtender.h"
 
+#if WITH_EDITOR
 class JAVASCRIPTEDITOR_API SJavascriptMenu : public SVerticalBox
 {
 public:
@@ -22,6 +23,7 @@ public:
 		Owner->Check(this);
 	}
 };
+#endif
 
 UJavascriptEditorMenu::UJavascriptEditorMenu(const FObjectInitializer& ObjectInitializer)
 : Super(ObjectInitializer)

@@ -11,6 +11,7 @@ class JAVASCRIPTEDITOR_API UJavascriptEditorPopupWindow : public UObject
 	GENERATED_BODY()
 
 public:
+#if WITH_EDITOR
 	UPROPERTY(BlueprintReadonly, Category = "Scripting | Javascript")
 	UWidget* Widget;
 
@@ -21,4 +22,5 @@ public:
 	void OnDismissed();
 
 	void OnDismissedRaw(TSharedRef<IMenu> Menu);
+#endif
 };

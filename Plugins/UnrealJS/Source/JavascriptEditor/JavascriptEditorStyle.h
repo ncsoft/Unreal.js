@@ -44,7 +44,6 @@ public:
 	static FSlateFontInfo GetFontStyle(const FName& StyleName);
 	UFUNCTION(BlueprintCallable, Category = "Javascript")
 	static FSlateSound GetSound(const FName& StyleName);
-#endif
 
 	UPROPERTY()
 	FSlateColor SlateColor;	
@@ -72,4 +71,5 @@ public:
 
 	UPROPERTY()
 	FComboButtonStyle ComboButtonStyle;
+#endif
 };

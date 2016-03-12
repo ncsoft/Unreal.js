@@ -40,6 +40,7 @@ class JAVASCRIPTEDITOR_API UJavascriptUIExtender : public UObject
 	GENERATED_UCLASS_BODY()
 
 public:
+#if WITH_EDITOR
 	UPROPERTY(BlueprintReadWrite, Category = "Javascript | Editor")
 	TArray<FJavascriptMenuExtension> MenuExtensions;
 
@@ -71,7 +72,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")
 	static void Bind(UJavascriptUICommands* Commands);
 
-#if WITH_EDITOR
 	TSharedPtr<FExtender> TakeMenuExtender( const TSharedPtr<FUICommandList>& CommandList );
 	TSharedPtr<FExtender> TakeToolbarExtender(const TSharedPtr<FUICommandList>& CommandList);
 	

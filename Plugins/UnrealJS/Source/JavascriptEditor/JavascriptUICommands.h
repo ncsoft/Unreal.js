@@ -55,6 +55,7 @@ public:
 
 	DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(bool, FJavascriptCanExecuteAction, FString, Id);
 
+#if WITH_EDITOR
 	UPROPERTY()
 	FJavascriptExecuteAction OnExecuteAction;	
 
@@ -93,7 +94,6 @@ public:
 
 	bool bRegistered;
 
-#if WITH_EDITOR
 	TArray<TSharedPtr<FUICommandInfo>> CommandInfos;
 	TSharedPtr<FBindingContext> BindingContext;
 

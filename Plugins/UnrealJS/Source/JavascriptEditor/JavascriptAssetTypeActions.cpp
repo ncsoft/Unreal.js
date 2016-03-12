@@ -8,7 +8,10 @@
 #endif
 
 UJavascriptAssetTypeActions::UJavascriptAssetTypeActions(const FObjectInitializer& ObjectInitializer)
-: Super(ObjectInitializer), bRegistered(false)
+: Super(ObjectInitializer)
+#if WITH_EDITOR
+, bRegistered(false)
+#endif
 {	
 }
 
@@ -19,43 +22,35 @@ void UJavascriptAssetTypeActions::BeginDestroy()
 
 	Discard();
 }
-#endif
 
 void UJavascriptAssetTypeActions::Commit()
 {
-#if WITH_EDITOR
 	Discard();
 
 	IJavascriptEditorModule::Get().AddExtension(this);
 	
 	bRegistered = true;
-#endif
 }
 
 void UJavascriptAssetTypeActions::Discard()
 {
-#if WITH_EDITOR
 	if (bRegistered)
 	{
 		IJavascriptEditorModule::Get().RemoveExtension(this);
 	}
 
 	bRegistered = false;
-#endif
 }
 
 void UJavascriptAssetTypeActions::Refresh()
 {
-#if WITH_EDITOR
 	if (bRegistered)
 	{
 		Unregister();
 		Register();
 	}
-#endif
 }
 
-#if WITH_EDITOR
 class FAssetTypeActions_Javascript : public FAssetTypeActions_Base
 {
 public:
