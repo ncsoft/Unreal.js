@@ -297,7 +297,7 @@ struct TypingGenerator : TypingGeneratorBase
 			w.push(";\n");
 		}
 
-		auto write_function = [&](UFunction* Function, bool is_thunk, bool is_factory = false) {
+		auto write_function = [&](UFunction* Function, bool is_thunk, bool is_factory) {
 			w.tooltip("\t", Function);
 
 			w.push("\t");
@@ -433,7 +433,7 @@ struct TypingGenerator : TypingGeneratorBase
 
 				if (!FV8Config::CanExportFunction(klass, Function)) continue;
 
-				write_function(Function,false);
+				write_function(Function, false, false);
 			}
 		}
 		else
@@ -453,7 +453,7 @@ struct TypingGenerator : TypingGeneratorBase
 
 			for (auto Function : Functions)
 			{
-				write_function(Function, true);
+				write_function(Function, true, false);
 			}
 
 			Environment.BlueprintFunctionLibraryFactoryMapping.MultiFind(source, Functions);

@@ -187,7 +187,7 @@ void UJavascriptEditorLibrary::SetIsTemporarilyHiddenInEditor(AActor* Actor, boo
 	Actor->SetIsTemporarilyHiddenInEditor(bIsHidden);
 }
 
-ABrush* UJavascriptEditorLibrary::GetDefaultBrush(UWorld* World) const
+ABrush* UJavascriptEditorLibrary::GetDefaultBrush(UWorld* World)
 {
 	return World->GetDefaultBrush();
 }

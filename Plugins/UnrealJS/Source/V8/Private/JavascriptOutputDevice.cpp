@@ -33,7 +33,7 @@ protected:
 		if (bIsReentrant) return;
 
 		TGuardValue<bool> ReentrantGuard(bIsReentrant, true);
-		if (!OutputDevice->HasAnyFlags(RF_Unreachable) && !FUObjectThreadContext::Get().IsRoutingPostLoad)
+		if (!OutputDevice->IsUnreachable() && !FUObjectThreadContext::Get().IsRoutingPostLoad)
 		{
 			OutputDevice->OnMessage(V, (ELogVerbosity_JS)Verbosity, Category);
 		}		
