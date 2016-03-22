@@ -4,6 +4,7 @@
 #include "JavascriptContext.h"
 #include "BSPOps.h"
 
+#if WITH_EDITOR
 ULandscapeInfo* UJavascriptEditorLibrary::GetLandscapeInfo(ALandscape* Landscape, bool bSpawnNewActor)
 {
 	return Landscape ? Landscape->GetLandscapeInfo(bSpawnNewActor) : nullptr;
@@ -240,3 +241,4 @@ void UJavascriptEditorLibrary::UpdateModelComponents(ULevel* Level)
 {
 	Level->UpdateModelComponents();
 }
+#endif

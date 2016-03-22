@@ -27,6 +27,7 @@ class JAVASCRIPTEDITOR_API UJavascriptEditorTab : public UObject, public IEditor
 public:	
 	DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(UWidget*, FSpawnTab, UObject*, Context);
 
+#if WITH_EDITOR
 	UPROPERTY()
 	FSpawnTab OnSpawnTab;	
 
@@ -53,7 +54,6 @@ public:
 
 	bool bRegistered;
 
-#if WITH_EDITOR
 	UWidget* TakeWidget(UObject* Context);
 
 	TArray<TWeakPtr<SDockTab>> SpawnedTabs;

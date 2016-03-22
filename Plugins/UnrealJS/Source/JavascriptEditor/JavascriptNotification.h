@@ -17,7 +17,6 @@ class JAVASCRIPTEDITOR_API UJavascriptNotification : public UObject
 
 #if WITH_EDITOR
 	TSharedPtr<SNotificationItem> Item;
-#endif
 
 	UFUNCTION(BlueprintCallable, Category = "JavascriptNotification")
 	void Fire();
@@ -106,4 +105,5 @@ class JAVASCRIPTEDITOR_API UJavascriptNotification : public UObject
 	bool bAllowThrottleWhenFrameRateIsLow;
 
 	ECheckBoxState GetCheckBoxState() const;
+#endif
 };

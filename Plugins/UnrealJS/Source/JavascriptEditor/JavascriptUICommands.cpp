@@ -16,32 +16,26 @@ void UJavascriptUICommands::BeginDestroy()
 
 	Discard();
 }
-#endif
 
 void UJavascriptUICommands::Commit()
 {
-#if WITH_EDITOR
 	Discard();
 
 	IJavascriptEditorModule::Get().AddExtension(this);
 	
 	bRegistered = true;
-#endif
 }
 
 void UJavascriptUICommands::Discard()
 {
-#if WITH_EDITOR
 	if (bRegistered)
 	{
 		IJavascriptEditorModule::Get().RemoveExtension(this);
 	}
 
 	bRegistered = false;
-#endif
 }
 
-#if WITH_EDITOR
 void UJavascriptUICommands::Register()
 {	
 	BindingContext = MakeShareable(new FBindingContext(*ContextName, ContextDesc, ContextNameParent, StyleSetName.IsNone() ? FEditorStyle::GetStyleSetName() : StyleSetName));
@@ -81,13 +75,11 @@ void UJavascriptUICommands::Unregister()
 	
 	FBindingContext::CommandsChanged.Broadcast();
 }
-#endif
 
 void UJavascriptUICommands::Refresh()
 {
 }
 
-#if WITH_EDITOR
 void UJavascriptUICommands::Bind(FUICommandList* CommandList)
 {
 	for (int32 Index = 0; Index < Commands.Num(); ++Index)

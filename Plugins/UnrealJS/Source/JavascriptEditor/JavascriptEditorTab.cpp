@@ -3,45 +3,42 @@
 #include "WorkspaceMenuStructureModule.h"
 
 UJavascriptEditorTab::UJavascriptEditorTab(const FObjectInitializer& ObjectInitializer)
-: Super(ObjectInitializer), bRegistered(false), bIsNomad(true)
+: Super(ObjectInitializer)
+#if WITH_EDITOR
+, bRegistered(false), bIsNomad(true)
+#endif
 {	
 }
 
+#if WITH_EDITOR
 TSharedPtr<SDockTab> UJavascriptEditorTab::MajorTab;
 
-#if WITH_EDITOR
 void UJavascriptEditorTab::BeginDestroy()
 {
 	Super::BeginDestroy();
 
 	Discard();
 }
-#endif
 
 void UJavascriptEditorTab::Commit()
 {
-#if WITH_EDITOR
 	Discard();
 
 	IJavascriptEditorModule::Get().AddExtension(this);
 	
 	bRegistered = true;
-#endif
 }
 
 void UJavascriptEditorTab::Discard()
 {
-#if WITH_EDITOR
 	if (bRegistered)
 	{
 		IJavascriptEditorModule::Get().RemoveExtension(this);
 	}
 
 	bRegistered = false;
-#endif
 }
 
-#if WITH_EDITOR
 struct FHackFindDocktab
 {
 	UWidget* Widget;
@@ -135,11 +132,9 @@ void UJavascriptEditorTab::Unregister()
 {
 	Unregister(FGlobalTabmanager::Get());
 }
-#endif
 
 void UJavascriptEditorTab::Refresh()
 {
-#if WITH_EDITOR
 	for (auto& tab : SpawnedTabs)
 	{		
 		if (tab.IsValid())
@@ -152,5 +147,5 @@ void UJavascriptEditorTab::Refresh()
 	}
 
 	SpawnedTabs.Empty();	
-#endif
 }
+#endif

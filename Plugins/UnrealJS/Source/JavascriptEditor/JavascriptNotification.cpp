@@ -4,7 +4,9 @@
 #define LOCTEXT_NAMESPACE "UMG"
 
 UJavascriptNotification::UJavascriptNotification(const FObjectInitializer& ObjectInitializer)
-: Super(ObjectInitializer),
+: Super(ObjectInitializer)
+#if WITH_EDITOR
+,
 FadeInDuration(0.5f),
 FadeOutDuration(2.0f),
 ExpireDuration(1.0f),
@@ -14,8 +16,10 @@ bUseLargeFont(true),
 bFireAndForget(true),
 CheckBoxState(ECheckBoxState::Unchecked),
 bAllowThrottleWhenFrameRateIsLow(true)
+#endif
 {}
 
+#if WITH_EDITOR
 ECheckBoxState UJavascriptNotification::GetCheckBoxState() const
 {
 	return CheckBoxState;
@@ -23,7 +27,6 @@ ECheckBoxState UJavascriptNotification::GetCheckBoxState() const
 
 void UJavascriptNotification::Fire()
 {
-#if WITH_EDITOR
 	FNotificationInfo Info(Text);
 
 	if (bUseImage)
@@ -59,40 +62,30 @@ void UJavascriptNotification::Fire()
 	Info.bAllowThrottleWhenFrameRateIsLow = bAllowThrottleWhenFrameRateIsLow;
 
 	Item = FSlateNotificationManager::Get().AddNotification(Info);		
-#endif
 }
 
 void UJavascriptNotification::Success()
 {
-#if WITH_EDITOR
 	if (Item.IsValid()) Item->SetCompletionState(SNotificationItem::CS_Success);
-#endif
 }
 
 void UJavascriptNotification::Pending()
 {
-#if WITH_EDITOR
 	if (Item.IsValid()) Item->SetCompletionState(SNotificationItem::CS_Pending);
-#endif
 }
 
 void UJavascriptNotification::Fail()
 {
-#if WITH_EDITOR
 	if (Item.IsValid()) Item->SetCompletionState(SNotificationItem::CS_Fail);
-#endif
 }
 
 void UJavascriptNotification::Fadeout()
 {
-#if WITH_EDITOR
 	if (Item.IsValid()) Item->Fadeout();
-#endif
 }
 
 void UJavascriptNotification::Reset()
 {
-#if WITH_EDITOR
 	Item.Reset();
-#endif
 }
+#endif

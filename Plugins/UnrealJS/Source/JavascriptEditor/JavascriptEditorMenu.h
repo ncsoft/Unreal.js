@@ -14,10 +14,10 @@ class JAVASCRIPTEDITOR_API UJavascriptEditorMenu : public UWidget
 public:	
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnHook, FName, Hook);
 
+#if WITH_EDITOR
 	UPROPERTY()
 	FOnHook OnHook;
 
-#if WITH_EDITOR
 	TArray<TWeakPtr<SVerticalBox>> SpawnedMenus;
 
 	UFUNCTION(BlueprintCallable, Category = "Javascript | Editor")

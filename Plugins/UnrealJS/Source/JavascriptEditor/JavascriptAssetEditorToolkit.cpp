@@ -9,7 +9,10 @@
 #endif
 
 UJavascriptAssetEditorToolkit::UJavascriptAssetEditorToolkit(const FObjectInitializer& ObjectInitializer)
-: Super(ObjectInitializer), bRegistered(false)
+: Super(ObjectInitializer)
+#if WITH_EDITOR
+, bRegistered(false)
+#endif
 {	
 }
 
@@ -20,43 +23,35 @@ void UJavascriptAssetEditorToolkit::BeginDestroy()
 
 	Discard();
 }
-#endif
 
 void UJavascriptAssetEditorToolkit::Commit()
 {
-#if WITH_EDITOR
 	Discard();
 
 	IJavascriptEditorModule::Get().AddExtension(this);
 	
 	bRegistered = true;
-#endif
 }
 
 void UJavascriptAssetEditorToolkit::Discard()
 {
-#if WITH_EDITOR
 	if (bRegistered)
 	{
 		IJavascriptEditorModule::Get().RemoveExtension(this);
 	}
 
 	bRegistered = false;
-#endif
 }
 
 void UJavascriptAssetEditorToolkit::Refresh()
 {
-#if WITH_EDITOR
 	if (bRegistered)
 	{
 		Unregister();
 		Register();
 	}
-#endif
 }
 
-#if WITH_EDITOR
 class FAssetEditorToolkit_Javascript : public FAssetEditorToolkit
 {
 public:

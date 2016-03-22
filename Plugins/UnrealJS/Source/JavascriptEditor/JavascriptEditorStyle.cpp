@@ -6,6 +6,7 @@ UJavascriptEditorStyle::UJavascriptEditorStyle(const FObjectInitializer& ObjectI
 {	
 }
 
+#if WITH_EDITOR
 static UStruct* Struct_SlateColor;
 static UStruct* Struct_ButtonStyle;
 static UStruct* Struct_SlateBrush;
@@ -89,7 +90,6 @@ T FixupWidgetStyle(UStruct* Struct, const FName& StyleName)
 	return Dest;
 }
 
-#if WITH_EDITOR
 FButtonStyle UJavascriptEditorStyle::GetButtonStyle(const FName& StyleName)
 {
 	return FixupWidgetStyle<FButtonStyle>(Struct_ButtonStyle, StyleName);

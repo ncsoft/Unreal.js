@@ -19,6 +19,7 @@ class JAVASCRIPTEDITOR_API UJavascriptAssetEditorToolkit : public UObject, publi
 	GENERATED_UCLASS_BODY()
 
 public:		
+#if WITH_EDITOR
 	UPROPERTY(BlueprintReadWrite, Category = "Javascript | Editor")
 	FName ToolkitFName;
 
@@ -63,7 +64,6 @@ public:
 
 	bool bRegistered;
 
-#if WITH_EDITOR
 	virtual void Register() override;
 	virtual void Unregister() override;
 

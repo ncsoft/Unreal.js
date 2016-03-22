@@ -1,9 +1,9 @@
 #include "JavascriptEditor.h"
 #include "JavascriptEditorPopupWindow.h"
 
+#if WITH_EDITOR
 bool UJavascriptEditorPopupWindow::Open(const FText& HeadingText, const FVector2D& PopupDesiredSize)
 {
-#if WITH_EDITOR
 	// Create the contents of the popup
 	TSharedRef<SWidget> ActualWidget = Widget->TakeWidget();
 
@@ -36,12 +36,10 @@ bool UJavascriptEditorPopupWindow::Open(const FText& HeadingText, const FVector2
 	}
 
 	return true;
-#else
-	return false;
-#endif
 }
 
 void UJavascriptEditorPopupWindow::OnDismissedRaw(TSharedRef<IMenu> Menu)
 {
 	OnDismissed();
 }
+#endif

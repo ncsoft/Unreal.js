@@ -2,7 +2,7 @@
 #include "JavascriptEditorEngineLibrary.h"
 #include "JavascriptContext.h"
 
-
+#if WITH_EDITOR
 UWorld* UJavascriptEditorEngineLibrary::GetEditorWorld(UEngine* Engine)
 {
 	for (const FWorldContext& Context : GEngine->GetWorldContexts())
@@ -130,3 +130,4 @@ void UJavascriptEditorEngineLibrary::GetSurfaces(ABrush* Brush, TArray<int32>& S
 		}
 	}
 }
+#endif

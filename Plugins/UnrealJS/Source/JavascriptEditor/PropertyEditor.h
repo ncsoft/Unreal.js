@@ -14,6 +14,7 @@ class JAVASCRIPTEDITOR_API UPropertyEditor : public UWidget
 {
 	GENERATED_UCLASS_BODY()
 
+#if WITH_EDITOR
 	UFUNCTION(BlueprintCallable, Category = "PropertyEditor")
 	void SetObject(UObject* Object);
 
@@ -22,7 +23,6 @@ class JAVASCRIPTEDITOR_API UPropertyEditor : public UWidget
 	
 	FWeakObjectPtr ObjectToInspect;
 
-#if WITH_EDITOR
 public:	
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
 

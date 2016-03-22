@@ -17,9 +17,9 @@ UJavascriptUIExtender::UJavascriptUIExtender(const FObjectInitializer& ObjectIni
 {	
 }
 
+#if WITH_EDITOR
 void UJavascriptUIExtender::BeginSection(FName Name, FText Text)
 {
-#if WITH_EDITOR
 	if (SectionDisabled) return;
 
 	if (CurrentMenuBuilder)
@@ -30,12 +30,10 @@ void UJavascriptUIExtender::BeginSection(FName Name, FText Text)
 	{
 		CurrentToolbarBuilder->BeginSection(Name);
 	}
-#endif
 }
 
 void UJavascriptUIExtender::EndSection()
 {
-#if WITH_EDITOR
 	if (SectionDisabled) return;
 
 	if (CurrentMenuBuilder)
@@ -46,12 +44,10 @@ void UJavascriptUIExtender::EndSection()
 	{
 		CurrentToolbarBuilder->EndSection();
 	}
-#endif
 }
 
 void UJavascriptUIExtender::AddMenuEntry(UJavascriptUICommands* Commands, FString Id)
 {
-#if WITH_EDITOR
 	if (CurrentMenuBuilder)
 	{
 		auto Action = Commands->GetAction(Id);
@@ -60,22 +56,18 @@ void UJavascriptUIExtender::AddMenuEntry(UJavascriptUICommands* Commands, FStrin
 			CurrentMenuBuilder->AddMenuEntry(Action);
 		}		
 	}
-#endif
 }
 
 void UJavascriptUIExtender::AddMenuSeparator()
 {	
-#if WITH_EDITOR
 	if (CurrentMenuBuilder)
 	{
 		CurrentMenuBuilder->AddMenuSeparator();		
 	}
-#endif
 }
 
 void UJavascriptUIExtender::AddToolBarButton(UJavascriptUICommands* Commands, FString Id)
 {
-#if WITH_EDITOR
 	if (CurrentToolbarBuilder)
 	{
 		auto Action = Commands->GetAction(Id);
@@ -84,12 +76,10 @@ void UJavascriptUIExtender::AddToolBarButton(UJavascriptUICommands* Commands, FS
 			CurrentToolbarBuilder->AddToolBarButton(Action);
 		}
 	}
-#endif
 }
 
 void UJavascriptUIExtender::Bind(UJavascriptUICommands* Commands)
 {
-#if WITH_EDITOR
 	if (CurrentMenuBuilder && Commands)
 	{
 		auto List = CurrentMenuBuilder->GetTopCommandList();
@@ -98,10 +88,8 @@ void UJavascriptUIExtender::Bind(UJavascriptUICommands* Commands)
 			Commands->Bind(const_cast<FUICommandList*>(List.Get()));
 		}		
 	}
-#endif
 }
 
-#if WITH_EDITOR
 TSharedPtr<FExtender> UJavascriptUIExtender::TakeMenuExtender(const TSharedPtr< FUICommandList >& CommandList)
 {
 	TSharedPtr<FExtender> MenuExtender = MakeShareable(new FExtender);

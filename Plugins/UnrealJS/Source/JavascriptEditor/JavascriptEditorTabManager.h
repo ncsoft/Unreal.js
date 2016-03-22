@@ -14,13 +14,13 @@ class JAVASCRIPTEDITOR_API UJavascriptEditorTabManager : public UWidget
 	GENERATED_UCLASS_BODY()
 
 public:	
+#if WITH_EDITOR
 	UPROPERTY(BlueprintReadWrite, Category = "Javascript | Editor")
 	FString Layout;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Javascript | Editor")
 	TArray<UJavascriptEditorTab*> Tabs;
 
-#if WITH_EDITOR
 	TArray<TWeakPtr<SVerticalBox>> SpawnedAreas;
 	
 	void Commit();
