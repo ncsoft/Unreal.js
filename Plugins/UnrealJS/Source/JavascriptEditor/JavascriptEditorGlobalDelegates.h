@@ -1,6 +1,7 @@
 #pragma once
 #if WITH_EDITOR
 #include "AssetData.h"
+#include "IAssetRegistry.h"
 #endif
 #include "JavascriptEditorGlobalDelegates.generated.h"
 
@@ -245,9 +246,18 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Scripting | Javascript")
 	void OnFilesLoaded();
+	
+	void OnFileLoadProgressUpdated(const IAssetRegistry::FFileLoadProgressUpdateData& ProgressUpdateData)
+	{
+		OnFileLoadProgressUpdated_Friendly(
+			ProgressUpdateData.NumTotalAssets, 
+			ProgressUpdateData.NumAssetsProcessedByAssetRegistry, 
+			ProgressUpdateData.NumAssetsPendingDataLoad, 
+			ProgressUpdateData.bIsDiscoveringAssetFiles);
+	}
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Scripting | Javascript")
-	void OnFileLoadProgressUpdated(int32 NumAssetsDiscovered, int32 TotalAssets);
+	void OnFileLoadProgressUpdated_Friendly(int32 NumTotalAssets, int32 NumAssetsProcessedByAssetRegistry, int32 NumAssetsPendingDataLoad, bool bIsDiscoveringAssetFiles);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Scripting | Javascript")
 	void OnBlueprintPreCompile(UBlueprint* Blueprint);

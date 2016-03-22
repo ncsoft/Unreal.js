@@ -18,6 +18,9 @@ public:
 	bool HandleKeyUpEvent(const FKeyEvent& InKeyEvent);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Scripting|Javascript")
+	bool HandleMouseMoveEvent(const FPointerEvent& InPointerEvent);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Scripting|Javascript")
 	bool HandleAnalogInputEvent(const FAnalogInputEvent& InKeyEvent);
 	
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")

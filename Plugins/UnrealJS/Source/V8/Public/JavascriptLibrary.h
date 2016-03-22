@@ -169,4 +169,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
 	static FString GetDeoptInfo_Stack(FJavascriptProfileNode Node, int32 index);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static FString GetArchetypePathName(AActor* Actor);
+
+	UFUNCTION(BlueprintCallable, Category = "Scripting | Javascript")
+	static void SetObjectFlags(UObject* Obj, int32 Flags);
 };

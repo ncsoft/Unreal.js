@@ -488,7 +488,7 @@ void UJavascriptGeneratedFunction::Thunk(FFrame& Stack, RESULT_DECL)
 		}
 	};
 
-	bool bIsVMVirtual = Function->GetSuperStruct() && Cast<UBlueprintGeneratedClass>(Function->GetSuperStruct()->GetOuter()) != nullptr;
+	bool bIsVMVirtual = Function->GetInheritanceSuper() && Cast<UBlueprintGeneratedClass>(Function->GetInheritanceSuper()->GetOuter()) != nullptr;
 	if (bIsVMVirtual)
 	{
 		uint8* Frame = NULL;

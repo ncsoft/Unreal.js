@@ -618,7 +618,7 @@ void FJavascriptLogTextLayoutMarshaller::AppendMessageToTextLayout(const TShared
 	TArray<TSharedRef<IRun>> Runs;
 	Runs.Add(FSlateTextRun::Create(FRunInfo(), LineText, MessageTextStyle));
 
-	TextLayout->AddLine(LineText, Runs);
+	TextLayout->AddLine(FTextLayout::FNewLineData(LineText, Runs));
 }
 
 void FJavascriptLogTextLayoutMarshaller::ClearMessages()

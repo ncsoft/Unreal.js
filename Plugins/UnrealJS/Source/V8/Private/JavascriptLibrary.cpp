@@ -300,3 +300,13 @@ ULevel* UJavascriptLibrary::GetLevel(AActor* Actor)
 {
 	return Actor ? Actor->GetLevel() : nullptr;
 }
+
+FString UJavascriptLibrary::GetArchetypePathName(AActor* Actor)
+{
+	return Actor->GetArchetype()->GetPathName();
+}
+
+void UJavascriptLibrary::SetObjectFlags(UObject* Obj, int32 Flags)
+{
+	Obj->SetFlags((EObjectFlags)Flags);
+}

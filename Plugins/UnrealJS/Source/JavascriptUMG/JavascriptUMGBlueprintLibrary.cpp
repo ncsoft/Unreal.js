@@ -56,6 +56,13 @@ void UJavascriptUMGBlueprintLibrary::AddLine(UPARAM(ref) FJavascriptTextLayout& 
 
 	if (Model && Model->Model.IsValid())
 	{
-		TextLayout.TextLayout->AddLine(Model->Model.ToSharedRef(), Runs);
+		TextLayout.TextLayout->AddLine(FTextLayout::FNewLineData(Model->Model.ToSharedRef(), Runs));
 	}	
+}
+
+int32 UJavascriptUMGBlueprintLibrary::GetLineLength(UPARAM(ref) const FJavascriptTextLayout& TargetTextLayout)
+{
+	auto TextLayout = TargetTextLayout.TextLayout;
+	auto Lines = TextLayout->GetLineModels();
+	return Lines.Num();
 }

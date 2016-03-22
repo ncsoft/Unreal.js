@@ -45,7 +45,7 @@ void UJavascriptEditorLibrary::GetHeightmapDataToMemory(ULandscapeInfo* Landscap
 	}
 }
 
-void UJavascriptEditorLibrary::SetAlphamapDataFromMemory(ULandscapeInfo* LandscapeInfo, ULandscapeLayerInfoObject* LayerInfo, int32 MinX, int32 MinY, int32 MaxX, int32 MaxY, ELandscapeLayerPaintingRestriction::Type PaintingRestriction)
+void UJavascriptEditorLibrary::SetAlphamapDataFromMemory(ULandscapeInfo* LandscapeInfo, ULandscapeLayerInfoObject* LayerInfo, int32 MinX, int32 MinY, int32 MaxX, int32 MaxY, ELandscapeLayerPaintingRestriction PaintingRestriction)
 {
 	if (LayerInfo == nullptr)
 	{
@@ -186,7 +186,7 @@ void UJavascriptEditorLibrary::SetIsTemporarilyHiddenInEditor(AActor* Actor, boo
 	Actor->SetIsTemporarilyHiddenInEditor(bIsHidden);
 }
 
-ABrush* UJavascriptEditorLibrary::GetDefaultBrush(UWorld* World) const
+ABrush* UJavascriptEditorLibrary::GetDefaultBrush(UWorld* World)
 {
 	return World->GetDefaultBrush();
 }

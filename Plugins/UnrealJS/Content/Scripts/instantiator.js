@@ -340,17 +340,15 @@ function proxy(base) {
             }
         }
         
-        replace_childAt(index, child) {
+        replace_childAt(index, child, scope) {
             if (index < 0 || index >= this.Slots.length)
                 return false;
-
+            var c = instantiate(child, scope)         
             let slot = this.Slots[index];
-            slot.Content = child;
-
-            if (child) {
-                child.Slot = slot;
+            slot.Content = c;
+            if (c) {
+                c.Slot = slot;
             }
-
             return true;
         }
         

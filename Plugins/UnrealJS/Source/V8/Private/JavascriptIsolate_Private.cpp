@@ -836,6 +836,35 @@ public:
 			}
 		};
 		global_templ->Set(I.Keyword("$execTransaction"), I.FunctionTemplate(exec_transaction));
+
+		auto exec_profile = [](const FunctionCallbackInfo<Value>& info)
+		{
+			if (info.Length() == 2)
+			{
+				for (;;)
+				{
+					auto function = info[1].As<Function>();
+					if (function.IsEmpty())
+					{
+						break;
+					}
+
+					if (info[0]->IsObject())
+					{
+						auto Object = UObjectFromV8(info[0]);
+						if (Object)
+						{
+							FScopeCycleCounterUObject ContextScope(Object);
+							info.GetReturnValue().Set(function->Call(info.This(), 0, nullptr));
+							return;
+						}
+					}
+
+					info.GetReturnValue().Set(function->Call(info.This(), 0, nullptr));
+				}
+			}
+		};
+		global_templ->Set(I.Keyword("$profile"), I.FunctionTemplate(exec_profile));
 #endif
 	}
 
@@ -1688,7 +1717,7 @@ public:
 							I.Throw(TEXT("Missing world to spawn"));
 							return;
 						}
-
+						
 						FVector Location(ForceInitToZero);
 						FRotator Rotation(ForceInitToZero);
 
@@ -1698,18 +1727,30 @@ public:
 						static TStructReader<FVector> VectorReader(VectorStruct);
 						static TStructReader<FRotator> RotatorReader(RotatorStruct);
 
-						if (info.Length() > 1)
-						{
+						FActorSpawnParameters SpawnInfo;
+						switch (FMath::Min(2, info.Length())) {
+						case 2:
 							if (!VectorReader.Read(isolate, info[1], Location)) return;
-
-							if (info.Length() > 2)
-							{
-								if (!RotatorReader.Read(isolate, info[2], Rotation)) return;
-							}
+							if (info.Length() == 2) break;
+						case 3:
+							if (!RotatorReader.Read(isolate, info[2], Rotation)) return;
+							if (info.Length() == 3) break;
+						case 4:
+							SpawnInfo.Name = FName(*StringFromV8(info[3]));
+							if (info.Length() == 4) break;
+						case 5:
+							SpawnInfo.ObjectFlags = RF_Transient | RF_Transactional;
+							break;
+						default:
+							break;
 						}
 
 						PreCreate();
-						Associated = World->SpawnActor(ClassToExport, &Location, &Rotation);
+						Associated = World->SpawnActor(ClassToExport, &Location, &Rotation, SpawnInfo);
+#if WITH_EDITOR
+						if (SpawnInfo.Name != NAME_None)
+							(Cast<AActor>(Associated))->SetActorLabel(StringFromV8(info[3]));
+#endif
 					}
 					else
 					{
@@ -2043,10 +2084,10 @@ public:
 			else
 			{
 				auto Class = Object->GetClass();
-				if (Class->ClassGeneratedBy && Cast<ULevel>(Class->ClassGeneratedBy->GetOuter()))
-				{
-					return Undefined(isolate_);
-				}
+				//if (Class->ClassGeneratedBy && Cast<ULevel>(Class->ClassGeneratedBy->GetOuter()))
+				//{
+				//	return Undefined(isolate_);
+				//}
 
 				auto v8_class = ExportClass(Class);
 				auto arg = I.External(Object);

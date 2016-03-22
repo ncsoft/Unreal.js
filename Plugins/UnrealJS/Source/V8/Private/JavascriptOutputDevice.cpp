@@ -33,7 +33,7 @@ protected:
 		if (bIsReentrant) return;
 
 		TGuardValue<bool> ReentrantGuard(bIsReentrant, true);
-		if (!OutputDevice->HasAnyFlags(RF_Unreachable) && !FUObjectThreadContext::Get().IsRoutingPostLoad)
+		if (!OutputDevice->IsUnreachable() && !FUObjectThreadContext::Get().IsRoutingPostLoad)
 		{
 			OutputDevice->OnMessage(V, (ELogVerbosity_JS)Verbosity, Category);
 		}		
@@ -59,4 +59,19 @@ void UJavascriptOutputDevice::BeginDestroy()
 void UJavascriptOutputDevice::Kill()
 {
 	OutputDevice.Reset();	
+}
+
+void UJavascriptOutputDevice::Log(FName Category, ELogVerbosity_JS _Verbosity, const FString& Filename, int32 LineNumber, const FString& Message)
+{
+#if NO_LOGGING
+	
+#else
+	auto Verbosity = (ELogVerbosity::Type)_Verbosity;	
+	FMsg::Logf_Internal(TCHAR_TO_ANSI(*Filename), LineNumber, Category, Verbosity, TEXT("%s"), *Message);
+	if (Verbosity == ELogVerbosity::Fatal)
+	{
+		_DebugBreakAndPromptForRemote();
+		FDebug::AssertFailed("", TCHAR_TO_ANSI(*Filename), LineNumber, TEXT("%s"), *Message);
+	}
+#endif
 }

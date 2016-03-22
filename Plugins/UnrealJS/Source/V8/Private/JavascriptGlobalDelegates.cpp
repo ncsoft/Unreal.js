@@ -19,6 +19,14 @@ OP_REFLECT(PostLoadMap)\
 OP_REFLECT(PostDemoPlay)\
 OP_REFLECT(PackageCreatedForLoad)
 
+#define DO_REFLECT_WORLD() \
+OP_REFLECT_WORLD(OnPostWorldCreation)\
+OP_REFLECT_WORLD(OnWorldCleanup)\
+OP_REFLECT_WORLD(OnPreWorldFinishDestroy)\
+OP_REFLECT_WORLD(LevelAddedToWorld)\
+OP_REFLECT_WORLD(LevelRemovedFromWorld)\
+OP_REFLECT_WORLD(PostApplyLevelOffset)
+
 #if WITH_EDITOR
 #define DO_REFLECT_EDITOR_ONLY() \
 OP_REFLECT(OnObjectModified)\
@@ -33,8 +41,10 @@ void UJavascriptGlobalDelegates::Bind(FString Key)
 	FDelegateHandle Handle;
 	
 #define OP_REFLECT(x) else if (Key == #x) { Handle = FCoreUObjectDelegates::x.AddUObject(this, &UJavascriptGlobalDelegates::x); }
+#define OP_REFLECT_WORLD(x) else if (Key == #x) { Handle = FWorldDelegates::x.AddUObject(this, &UJavascriptGlobalDelegates::x); }
 	if (false) {}
 	DO_REFLECT()
+	DO_REFLECT_WORLD()
 	DO_REFLECT_EDITOR_ONLY()
 
 	if (Handle.IsValid())
@@ -56,8 +66,10 @@ void UJavascriptGlobalDelegates::Unbind(FString Key)
 	auto Handle = Handles[Key];
 
 #define OP_REFLECT(x) else if (Key == #x) { FCoreUObjectDelegates::x.Remove(Handle); }
+#define OP_REFLECT_WORLD(x) else if (Key == #x) { FWorldDelegates::x.Remove(Handle); }
 	if (false) {}
 	DO_REFLECT()
+	DO_REFLECT_WORLD()
 	DO_REFLECT_EDITOR_ONLY()
 
 	Handles.Remove(Key);

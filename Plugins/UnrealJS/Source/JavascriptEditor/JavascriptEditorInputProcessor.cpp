@@ -27,6 +27,11 @@ public:
 		return Processor.IsValid() && Processor->HandleKeyUpEvent(InKeyEvent);
 	}
 
+	virtual bool HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& InPointerEvent)
+	{
+		return Processor.IsValid() && Processor->HandleMouseMoveEvent(InPointerEvent);
+	}
+	
 	virtual bool HandleAnalogInputEvent(FSlateApplication& SlateApp, const FAnalogInputEvent& InAnalogInputEvent)
 	{
 		return Processor.IsValid() && Processor->HandleAnalogInputEvent(InAnalogInputEvent);

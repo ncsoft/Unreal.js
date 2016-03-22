@@ -4,14 +4,9 @@ using System;
 
 public class V8 : ModuleRules
 {
-    protected string ModulePath
-    {
-        get { return Path.GetDirectoryName(RulesCompiler.GetModuleFilename(this.GetType().Name)); }
-    }
-
     protected string ThirdPartyPath
     {
-        get { return Path.GetFullPath(Path.Combine(ModulePath, "..", "..", "ThirdParty")); }
+        get { return Path.GetFullPath(Path.Combine(ModuleDirectory, "..", "..", "ThirdParty")); }
     }
 
     public V8(TargetInfo Target)
