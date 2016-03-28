@@ -27,11 +27,20 @@
         page.set_styles([
             Style('.full',{'slot.size.size-rule':'Fill'}),
             Style('Button',{'WidgetStyle':ES.GetButtonStyle('FlatButton.Default')},
-                Style('TextBlock',{'font.size':53})
+                Style('TextBlock',{
+                    'font.font-object' : GEngine.SmallFont,
+                    'font.size':53
+                })
             ),
-            Style('TextBlock',{'font.size':43}),
+            Style('TextBlock',{
+                'font.font-object' : GEngine.SmallFont,
+                'font.size':43
+            }),
             Style('.yellow',{'color-and-opacity.specified-color':{R:1,G:1,B:0.2,A:1}}),
-            Style('.small',{'font.size':23},
+            Style('.small',{
+                'font.font-object' : GEngine.SmallFont,
+                'font.size':23
+            },
                 Style('TextBlock',{'font.size':23})
             ),
             Style('EditableText',{WidgetStyle:{'font.size':43}})

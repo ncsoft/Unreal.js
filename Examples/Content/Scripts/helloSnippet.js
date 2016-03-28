@@ -5,7 +5,7 @@ const fontSize = 12
 
 function textStyle(color) {
     return TextBlockStyle({
-        Font: { Size: fontSize },
+        Font: { FontObject:GEngine.SmallFont, Size: fontSize },
         ColorAndOpacity: {
             SpecifiedColor: color
         }

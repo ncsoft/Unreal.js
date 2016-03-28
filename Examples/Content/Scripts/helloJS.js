@@ -94,7 +94,11 @@
         function LogWindow() {
             return UMG.div({$link:elem => {
                 function add(msg) {
-                    let child = elem.add_child(UMG.text({Font:{Size:18}},msg))
+                    let child = elem.add_child(UMG.text({
+                        Font:{
+                            FontObject : GEngine.SmallFont,
+                            Size:18
+                        }},msg))
                     setTimeout(_ => elem.remove_child(child),5000)
                 }
 
@@ -109,8 +113,16 @@
     }
     
     function tutorial_Draggable(root) {
+        for (var i=0; i<1000; ++i) {
+i += i;
+}
+
+
+        //v8.SetSamplingInterval(100)
+        //v8.StartProfiling("main",false)
         let sprite
         let mygeom
+        let ad = require('animation-driver')()
         class DragOp extends DragDropOperation {
             Dragged(event) {
                 let pos = UPointerEvent.C(event).GetScreenSpacePosition()
@@ -163,6 +175,159 @@
         }
         let MyDraggable_C = uclass(MyDraggable)
         let MyDropTarget_C = uclass(MyDropTarget)
+        function binding() {
+            let data = {
+                wrap: (bindings,design) => {
+                    let old = design.$link
+                    data.bindings = bindings
+                    design.$link = elem => {
+                        old && old()
+                        data.widget = elem
+                    }
+                    return design
+                },
+                set: (value) => {
+                    function update() {
+                        let bag = {}
+                        _.each(data.bindings,(v,k) => {
+                            bag[k] = v(value)
+                        })
+                        data.widget.set_attrs(bag)
+                    }
+                    if (data.widget) {
+                        update()
+                    } else {
+                        process.nextTick(update)
+                    }                
+                }
+            }
+            return data
+        }
+        function repeat() {
+            let data = {
+                map : fn => {
+                    data.fn = fn
+                    data.$map = new Map()
+                    return UMG.div({$link:elem => {
+                        data.elem = elem
+                    }})
+                },
+                set : arr => {
+                    function update(arr) {
+                        let old = data.old || []
+                        let added = _.difference(arr,old)
+                        let removed = _.difference(old,arr)
+                        data.old = arr        
+                        let parent = data.elem.GetParent()    
+                        removed.forEach(x => {
+                            parent.remove_child(data.$map.get(x))
+                            data.$map.delete(x)
+                        })        
+                        added.forEach(x => {
+                            x.$binding = binding()
+                            x.$binding.set(x)
+                            let widget = parent.add_child(data.fn(x))
+                            data.$map.set(x,widget)
+                        })
+                    }
+                    if (data.elem) {
+                        update(arr)
+                    } else {
+                        process.nextTick(_ => update(arr))
+                    }
+                }
+            }          
+            return data      
+        }
+        let a = {value:1}
+        let data = repeat()
+        data.set([a,{value:2},{value:3}])
+        data.set([a])
+        process.nextTick(_ => {
+            a.value = 9
+            a.$binding.set(a)
+        })
+        
+        let data3 = [1,2,3,4,5,6,7,8,9]
+        let N = 0
+        let interval = setInterval(_ => data3.push(N++), 500)
+        let interval2 = setInterval(_ => data3.shift(), 500)
+        
+        function bye() {
+           clearInterval(interval)
+            clearInterval(interval2)
+        }
+    
+        let data2 = binding()
+        data2.set({value:9282})
+        data2.set({value:9281})
+        console.log("INIT")
+        
+        function dyn_wrap(data3,bindings,design) {            
+            let elem
+            function update(value) {
+                let bag = {}
+                _.each(bindings,(v,k) => {
+                    bag[k] = v(value)
+                })
+                elem.set_attrs(bag)
+            }
+            function listener() {
+                update(data3)
+            }
+            function link() {
+                Object.observe(data3,listener,['update'])                
+            }
+            function unlink() {
+                Object.unobserve(data3,listener)
+            }           
+            
+            let old = design.$link
+            design.$link = _elem => {
+                elem = _elem
+                old && old()        
+                update(data3)
+            }
+            let old_unlink = design.$unlink
+            design.$unlink = _ => {
+                old_unlink && old_unlink()
+                unlink()
+            }
+            return design
+        }
+        
+        function dyn_map(data3,fn) {
+            let elem
+            let map = new Map()
+            let old = [...data3]
+            function add(added) {
+                added.forEach(data => {
+                    map.set(data,elem.add_child(fn(data)))
+                })
+            }
+            function remove(removed) {
+                removed.forEach(x => {
+                    elem.remove_child(map.get(x))
+                    map.delete(x)
+                })
+            }
+            function listener(changes) {
+                let added = _.difference(data3,old)
+                let removed = _.difference(old,data3)
+                old = [...data3]
+                add(added)
+                remove(removed)
+            }                           
+            function link(_elem) {
+                elem = _elem                
+                add(data3)
+                Object.observe(data3,listener,['update'])                
+            }
+            function unlink() {
+                Object.unobserve(data3,listener)
+            }
+            return UMG.div({$link:link,$unlink:unlink})
+        }
         let widget = root.add_child(
             UMG(Overlay,{'Slot.Size.Rule':'Fill','VerticalAlignment':'VAlign_Fill'},
                 UMG.div({'Slot.HorizontalAlignment':'HAlign_Fill'},
@@ -171,18 +336,76 @@
                     ),
                     UMG(MyDropTarget_C,{},
                         UMG(Border,{BrushColor:{R:1,A:0.5}},"Drop target")
-                    )
+                    ),
+                    dyn_wrap(data3,{Text:x => `${x.length}`},UMG.text({},'uninit')),
+                    dyn_map(data3,x => UMG.text({},`binding ${x}`)),
+                    data2.wrap({Text:item=>item.value},UMG.text({},"hello")),
+                    data.map(x => x.$binding.wrap({Text:x => `${x.value} value`},UMG.text({},`${x} item`)))
                 ),
                 UMG(CanvasPanel,{
                     'Visibility':'HitTestInvisible',
                     'Slot.HorizontalAlignment':'HAlign_Fill','Slot.VerticalAlignment':'VAlign_Fill'
                     },
-                    UMG(Border,{Visibility:'Hidden',$link:elem => sprite = elem})
-                )
+                    UMG(Border,{Visibility:'Hidden',$link:elem => sprite = elem}),
+                    0 && _.range(140).map(index => UMG(Border,{Slot:{AutoSize:true},Visibility:'Hidden',$link:elem => {
+                        let cubicout = x => Math.pow(x-1,3) + 1
+                        let current = {
+                            X : 0,
+                            Y : 0,
+                            Width : 0,
+                            Height : 0,
+                            Opacity : 0                            
+                        }
+                        function MorphToShape(T,target) {
+                            let prev = _.clone(current)
+                            current = target
+                            function lerp(t,a,b) {
+                                return cubicout(t) * (b-a) + a
+                            }
+                            ad.apply(elem.GetContentSlot().Content,{duration:T,warm:true},{
+                                WidthOverride:t => lerp(t,prev.Width,current.Width),
+                                HeightOverride:t => lerp(t,prev.Height,current.Height),
+                            })
+                            let l = new AnchorData()
+                            ad.apply(elem.Slot,{duration:T,warm:true},{
+                                Layout:t => {       
+                                    l.Offsets.Left =  lerp(t,prev.X,target.X)
+                                    l.Offsets.Top = lerp(t,prev.Y,target.Y)
+                                    return l
+                                }                                
+                            })  
+                            let color = new LinearColor()
+                            color.R = color.G = color.B = 1
+                            ad.apply(elem,{duration:T,warm:true},{
+                                BrushColor:t => {
+                                    color.A = lerp(t,prev.Opacity,target.Opacity)
+                                    return color 
+                                },
+                                ContentColorAndOpacity:t => {
+                                    color.A = lerp(t,prev.Opacity,target.Opacity)
+                                    return color 
+                                }
+                            })
+                        }
+                        process.nextTick(_ => {
+                            elem.SetVisibility('Visible')
+                            MorphToShape(0.15,{X:100 + index * 20,Y:200,Width:400,Height:400,Opacity:1})
+                            setTimeout(_ => {
+                                MorphToShape(0.25,{X:0,Y:0,Width:0,Height:0,Opacity:0})
+                            },1000)
+                        })                        
+                    }},
+                    UMG(SizeBox,{},
+                        UMG(Button,{}))
+                    )                    
+                ))
             )
         )
         return _ => {
+            bye()
+            // console.log(JSON.stringify(v8.StopProfiling("main"),null,2))
             root.remove_child(widget)
+            ad.destroy()
         }
     }
 

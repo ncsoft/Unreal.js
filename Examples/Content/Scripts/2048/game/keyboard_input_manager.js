@@ -62,10 +62,10 @@ module.exports = function (widget,vbox) {
       var op = map[key]
       if (op != undefined) {
         op()
-        return Reply.Handled()
+        return EventReply.Handled()
       }
       else {
-        return Reply.Unhandled()
+        return EventReply.Unhandled()
       }
     }
 

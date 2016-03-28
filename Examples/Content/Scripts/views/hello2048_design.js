@@ -46,6 +46,7 @@ module.exports = {
         attrs : {
           Text : '2048',
           Font : {
+            FontObject : GEngine.SmallFont,
             Size : 90
           }
         }
@@ -60,6 +61,7 @@ module.exports = {
               Text: 'github.com/gabrielecirculli/2048',
               Justification: 'Right',
               Font: {
+                  FontObject : GEngine.SmallFont,
                   Size:40
               }
           }
