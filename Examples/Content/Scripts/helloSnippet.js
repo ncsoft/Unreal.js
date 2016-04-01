@@ -64,7 +64,10 @@ function editor() {
             UMG.span({},
                 UMG(EditableTextBox,{
                     'slot.size.size-rule': 'Fill',
-                    WidgetStyle:{'font.size':fontSize},
+                    WidgetStyle:{
+                        'font.size':fontSize,
+                        'font.font-object': GEngine.SmallFont,
+                    },
                     Text:gist,
                     HintText:'Gist id',
                     OnTextCommitted:text => {
@@ -74,7 +77,10 @@ function editor() {
                     }
                 }),
                 UMG(Button, { OnClicked: _ => fire() }, 
-                    UMG.text({'font.size':fontSize * 1.5},"RUN (F5)")
+                    UMG.text({
+                        'font.size':fontSize * 1.5,
+                        'font.font-object': GEngine.SmallFont,
+                    },"RUN (F5)")
                 )
             ),
             UMG(MultiLineEditableTextBox, {
