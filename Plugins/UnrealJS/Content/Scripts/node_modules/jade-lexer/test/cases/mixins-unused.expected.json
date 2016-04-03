@@ -1,7 +1,0 @@
-{"type":"mixin","line":1,"val":"never-called","args":null}
-{"type":"indent","line":2,"val":2}
-{"type":"class","line":2,"val":"wtf"}
-{"type":"text","line":2,"val":"This isn't something we ever want to output"}
-{"type":"outdent","line":3}
-{"type":"tag","line":3,"val":"body","selfClosing":false}
-{"type":"eos","line":3}

@@ -1,8 +1,0 @@
-{"type":"tag","line":1,"val":"pre","selfClosing":false}
-{"type":"indent","line":2,"val":2}
-{"type":"tag","line":2,"val":"code","selfClosing":false}
-{"type":"indent","line":3,"val":4}
-{"type":"include","line":3,"val":"javascript-new-lines.js"}
-{"type":"outdent","line":4}
-{"type":"outdent","line":4}
-{"type":"eos","line":4}

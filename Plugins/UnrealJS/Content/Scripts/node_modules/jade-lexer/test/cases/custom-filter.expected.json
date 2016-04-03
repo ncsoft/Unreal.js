@@ -1,6 +1,0 @@
-{"type":"filter","line":1,"val":"custom-filter"}
-{"type":"attrs","line":1,"attrs":[{"name":"foo","val":"'bar'","escaped":true}]}
-{"type":"start-pipeless-text","line":1}
-{"type":"text","line":2,"val":"foo bar"}
-{"type":"end-pipeless-text","line":2}
-{"type":"eos","line":2}

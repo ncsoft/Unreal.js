@@ -1,8 +1,0 @@
-{"type":"extends","line":1,"val":"./auxiliary/blocks-in-blocks-layout.jade"}
-{"type":"newline","line":3}
-{"type":"block","line":3,"val":"body","mode":"replace"}
-{"type":"indent","line":4,"val":2}
-{"type":"tag","line":4,"val":"h1","selfClosing":false}
-{"type":"text","line":4,"val":"Page 2"}
-{"type":"outdent","line":5}
-{"type":"eos","line":5}
