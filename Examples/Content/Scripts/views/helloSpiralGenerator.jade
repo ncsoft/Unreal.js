@@ -1,9 +1,0 @@
-div
-	list_div(repeat="item in properties")
-		span
-			text(slot.size.rule='full') {{item.key}}
-			span(slot.size.rule='full') 
-				text {{item.value}}
-				Slider(slot.size.rule='full',Value='item.u',fn.on-value-changed="item.update(^arguments[0])",fn.on-mouse-capture-end="test()")
-	Button(fn.on-clicked="clear()") Purge	
-	Button(fn.on-clicked="test()") Generate

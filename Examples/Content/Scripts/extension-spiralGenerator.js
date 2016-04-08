@@ -1,16 +1,25 @@
 function main() {
-	const jade_file = 'views/helloSpiralGenerator.jade'	
 	const mesh = StaticMesh.Load('/Engine/BasicShapes/Sphere')
 	const mtrl = Material.Load('/Game/Color.Color')
 	const tags = ["PCG"]
 
 	let UMG = require('UMG')
-	let jade = require('jade-umg')(UMG, jade_file)
+    let instantiator = require('instantiator')
 	 
 	function purge(world) {
 		let prev_actors = world.GetAllActorsOfClassAndTags(StaticMeshActor, tags).OutActors
 		prev_actors.forEach((actor) => world.EditorDestroyActor(actor))
-	} 
+	}
+    
+    class SpiralMeta {
+        properties() {
+            this.N/*EditAnywhere+int*/;
+            this.height/*EditAnywhere+float*/;
+            this.num_spirals/*EditAnywhere+int*/;
+            this.radius/*EditAnywhere+float*/;
+        }
+    } 
+    let meta = require('uclass')()(global,SpiralMeta)
  
 	function generate_spiral(world, opts) {
 		let N = opts.N || 10
@@ -44,64 +53,43 @@ function main() {
 			sma.Tags = tags
 		}
 	}
-
-	function controller(scope) {
-		scope.test = function () {
-			let world = Root.GetEngine().GetEditorWorld()
-			generate_spiral(world, scope)
-			Root.GetEngine().RedrawAllViewports(true)
-		}
-		scope.properties = [
-			{
-				key : "N",
-				min : 1,
-				max : 300,
-				value : 100
-			},
-			{
-				key : "num_spirals",
-				min : 1,
-				max : 10,
-				value : 3
-			}, 
-			{
-				key: "radius",
-				min: 10,
-				max: 1000,
-				value: 320
-			},
-			{
-				key: "height",
-				min: 10,
-				max: 2000,
-				value: 1000
-			}
-		]
-		scope.properties.forEach((prop) => {
-			prop.u = (prop.value - prop.min) / (prop.max - prop.min)
-			prop.update = (u) => { 
-				prop.value = Math.floor( u * (prop.max - prop.min) + prop.min )
-				scope[prop.key] = prop.value
-			}
-			prop.update(prop.u) 
-		})
-		scope.clear = () => {
-			let world = Root.GetEngine().GetEditorWorld()
-			purge(world)
-			Root.GetEngine().RedrawAllViewports(true)
-		}
-		
-		scope.val = '<root scope value>';
-	}
-    
+	
     let maker = require('editor-maker')
 
     let opts = {
         DisplayName: "SpiralGenerator",
         TabId: "SpiralGenerator@"
     }
+    
+    let data = new meta()
+    data.num_spirals = 10;
+    data.radius = 320; 
+    data.N = 100;
+    data.height = 1000
+    
+    function generate() {
+        let world = Root.GetEngine().GetEditorWorld()
+        generate_spiral(world, data)
+        Root.GetEngine().RedrawAllViewports(true)
+    }
+    
+    function clear() {
+        let world = Root.GetEngine().GetEditorWorld()
+        purge(world)
+        Root.GetEngine().RedrawAllViewports(true)
+    }    
 
-    let tab = maker.tab(opts, (context) => UMG.app(jade, controller))
+    let tab = maker.tab(opts, (context) => {
+        let design = UMG.div({},
+            UMG(PropertyEditor,{$link:elem => {
+                elem.SetObject(data)
+                console.log(elem,data)
+            }}),
+            UMG(Button,{OnClicked:generate},UMG.text({},"Generate")),
+            UMG(Button,{OnClicked:clear},UMG.text({},"Purge"))
+        )
+        return instantiator(design)
+    })
     tab.Commit()
     global.refresh && global.refresh()
     global.refresh = function () {
