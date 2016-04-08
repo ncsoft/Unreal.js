@@ -100,11 +100,17 @@ function main() {
 		purge(world)
 		Root.GetEngine().RedrawAllViewports(true)
 	}    
-
-	let design = UMG.div({},
+	
+	let design = UMG.div({
+		$link: elem => {
+			console.log("OPEN")
+		},
+		$unlink:_ => {
+			console.log("DESTROY")
+		}
+	},
 		UMG(PropertyEditor,{$link:elem => {
 			elem.SetObject(data)
-			console.log(elem,data)
 		}}),
 		UMG(Button,{OnClicked:generate},UMG.text({},"Generate")),
 		UMG(Button,{OnClicked:clear},UMG.text({},"Purge"))
@@ -120,15 +126,7 @@ module.exports = function () {
 		TabId: "SpiralGenerator@"
 	}
 	
-	let tab = maker.tab(opts, (context) => {
-		return main()
-	})
-	tab.Commit()
-	global.refresh && global.refresh()
-	global.refresh = function () {
-		tab.Refresh()
-	}
-	return function () {
-		tab.Discard()
-	}
+	maker.tabSpawner(opts,main);
+	
+	return _ => {}
 }
