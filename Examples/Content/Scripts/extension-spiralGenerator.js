@@ -1,27 +1,56 @@
 function main() {
-	const mesh = StaticMesh.Load('/Engine/BasicShapes/Sphere')
-	const mtrl = Material.Load('/Game/Color.Color')
-	const tags = ["PCG"]
-
 	let UMG = require('UMG')
 	let instantiator = require('instantiator')
-	 
-	function purge(world) {
-		let prev_actors = world.GetAllActorsOfClassAndTags(StaticMeshActor, tags).OutActors
-		prev_actors.forEach((actor) => world.EditorDestroyActor(actor))
+	
+	let schema = {
+		"title": "SpiralMetaData",
+		"type": "object",
+		"properties": {
+			"N" : {
+				"type" : "integer",
+			},
+			"height" : {
+				"type" : "float",
+			},
+			"num_spirals" : {
+				"type" : "integer",
+			},
+			"radius" : {
+				"type" : "float"
+			}
+		},
+		"required" : [ "N", "height", "num_spirals", "radius" ]
 	}
 	
-	class SpiralMeta {
-		properties() {
-			this.N/*Category:Spiral+EditAnywhere+int*/;
-			this.height/*Category:Spiral+EditAnywhere+float*/;
-			this.num_spirals/*Category:Spiral+EditAnywhere+int*/;
-			this.radius/*Category:Spiral+EditAnywhere+float*/;
+	let _ = require('lodash')
+	
+	function create_meta(schema) {
+		let section = schema.title
+		let typedict = {
+			integer: 'int'
 		}
-	} 
-	let meta = require('uclass')()(global,SpiralMeta)
- 
+		let lines = _.map(schema.properties,(v,k) => {
+			return `this.${k}/*Category:${section}+EditAnywhere+${typedict[v.type] || v.type}*/;`
+		})
+		let code = `
+(function () {
+	class ${section} {
+		properties() {
+			${lines.join('\n')}		
+		}
+	}
+	return ${section}
+})()
+`
+		return require('uclass')()(global,eval(code))
+	}
+	let meta = create_meta(schema)
+		
 	function generate_spiral(world, opts) {
+		const mesh = StaticMesh.Load('/Engine/BasicShapes/Sphere')
+		const mtrl = Material.Load('/Game/Color.Color')
+		const tags = ["PCG"]
+
 		let N = opts.N || 10
 		let num_spirals = opts.num_spirals || 5
 		let radius = opts.radius || 200
@@ -53,14 +82,7 @@ function main() {
 			sma.Tags = tags
 		}
 	}
-	
-	let maker = require('editor-maker')
-
-	let opts = {
-		DisplayName: "SpiralGenerator",
-		TabId: "SpiralGenerator@"
-	}
-	
+		
 	let data = new meta()
 	data.num_spirals = 10;
 	data.radius = 320; 
@@ -79,16 +101,27 @@ function main() {
 		Root.GetEngine().RedrawAllViewports(true)
 	}    
 
+	let design = UMG.div({},
+		UMG(PropertyEditor,{$link:elem => {
+			elem.SetObject(data)
+			console.log(elem,data)
+		}}),
+		UMG(Button,{OnClicked:generate},UMG.text({},"Generate")),
+		UMG(Button,{OnClicked:clear},UMG.text({},"Purge"))
+	)
+	return instantiator(design)
+}
+
+module.exports = function () {
+	let maker = require('editor-maker')
+
+	let opts = {
+		DisplayName: "SpiralGenerator",
+		TabId: "SpiralGenerator@"
+	}
+	
 	let tab = maker.tab(opts, (context) => {
-		let design = UMG.div({},
-			UMG(PropertyEditor,{$link:elem => {
-				elem.SetObject(data)
-				console.log(elem,data)
-			}}),
-			UMG(Button,{OnClicked:generate},UMG.text({},"Generate")),
-			UMG(Button,{OnClicked:clear},UMG.text({},"Purge"))
-		)
-		return instantiator(design)
+		return main()
 	})
 	tab.Commit()
 	global.refresh && global.refresh()
@@ -97,16 +130,5 @@ function main() {
 	}
 	return function () {
 		tab.Discard()
-	}
-}
-
-module.exports = function () {
-	let bye
-	process.nextTick(_ => {
-		bye = main()            
-	})
-	
-	return function() {
-		bye()
 	}
 }
