@@ -1,5 +1,5 @@
 [![star this repo](http://githubbadges.com/star.svg?user=ncsoft&repo=Unreal.js&style=default)](https://github.com/ncsoft/Unreal.js)
-[![fork this repo](http://githubbadges.com/fork.svg?user=ncsoft&repo=Unreal.js&style=default)](https://github.com/ncsoft/Unreal.js/fork)
+[![fork this repo](http://githubbadges.com/fork.svg?user=ncsoft&repo=Unreal.js&style=default)](https://github.com/ncsoft/Unreal.js/fork) ![download](https://img.shields.io/github/downloads/ncsoft/Unreal.js/total.svg)
 # Unreal.js
 
 Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4. 
@@ -11,7 +11,6 @@ Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4.
 - CommonJS modules
 - Full access to the whole UnrealEngine API
 - Free to subclass existing classes including blueprint
-- Web-dev like UMG ([Jade](http://jade-lang.com), pseudo-css, pseudo-[angular.js](https://angularjs.org/))
 - Live reload
 - Communicate with outer world: REST(http), websocket, process(pipe), arraybuffer, ...
 - Bridge API for editor extension
@@ -103,27 +102,4 @@ let kick = () => {
   setTimeout(kick,1000);
 };
 kick();
-```
-
-#### Web-dev like
-```jade
-div
-	span.full
-		Button.full
-			text {{text}}
-		div.full
-			Button.full(fn.on-clicked="inc()")
-				text {{count}}
-			Button.full(fn.on-clicked="add()")
-				text Click button above!
-	span
-		text.yellow >
-		EditableText(Binding.Text='text',
-			fn.on-text-changed='text = ^arguments[0]',
-			HintText="Your secret goes here")
-		
-	list.full(repeat='item in items',on-click="discard(item)") 
-		HorizontalBox.small
-			text.full {{item.key}}
-			text.full {{item.value}}
 ```
