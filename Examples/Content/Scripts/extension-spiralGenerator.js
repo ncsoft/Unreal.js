@@ -1,6 +1,4 @@
-(function (global) {
-	"use strict"
-
+function main() {
 	const jade_file = 'views/helloSpiralGenerator.jade'	
 	const mesh = StaticMesh.Load('/Engine/BasicShapes/Sphere')
 	const mtrl = Material.Load('/Game/Color.Color')
@@ -13,7 +11,7 @@
 		let prev_actors = world.GetAllActorsOfClassAndTags(StaticMeshActor, tags).OutActors
 		prev_actors.forEach((actor) => world.EditorDestroyActor(actor))
 	} 
-
+ 
 	function generate_spiral(world, opts) {
 		let N = opts.N || 10
 		let num_spirals = opts.num_spirals || 5
@@ -95,23 +93,32 @@
 		
 		scope.val = '<root scope value>';
 	}
+    
+    let maker = require('editor-maker')
 
-	module.exports = function () {
-		let maker = require('editor-maker')
+    let opts = {
+        DisplayName: "SpiralGenerator",
+        TabId: "SpiralGenerator@"
+    }
 
-		let opts = {
-			DisplayName: "SpiralGenerator",
-			TabId: "SpiralGenerator@"
-		}
+    let tab = maker.tab(opts, (context) => UMG.app(jade, controller))
+    tab.Commit()
+    global.refresh && global.refresh()
+    global.refresh = function () {
+        tab.Refresh()
+    }
+    return function () {
+        tab.Discard()
+    }
+}
 
-		let tab = maker.tab(opts, (context) => UMG.app(jade, controller))
-		tab.Commit()
-		global.refresh && global.refresh()
-		global.refresh = function () {
-			tab.Refresh()
-		}
-		return function () {
-			tab.Discard()
-		}
-	}
-})(this)
+module.exports = function () {
+    let bye
+    process.nextTick(_ => {
+        bye = main()            
+    })
+    
+    return function() {
+        bye()
+    }
+}
