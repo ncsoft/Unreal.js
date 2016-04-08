@@ -4,22 +4,22 @@ function main() {
 	const tags = ["PCG"]
 
 	let UMG = require('UMG')
-    let instantiator = require('instantiator')
+	let instantiator = require('instantiator')
 	 
 	function purge(world) {
 		let prev_actors = world.GetAllActorsOfClassAndTags(StaticMeshActor, tags).OutActors
 		prev_actors.forEach((actor) => world.EditorDestroyActor(actor))
 	}
-    
-    class SpiralMeta {
-        properties() {
-            this.N/*Category:Spiral+EditAnywhere+int*/;
-            this.height/*Category:Spiral+EditAnywhere+float*/;
-            this.num_spirals/*Category:Spiral+EditAnywhere+int*/;
-            this.radius/*Category:Spiral+EditAnywhere+float*/;
-        }
-    } 
-    let meta = require('uclass')()(global,SpiralMeta)
+	
+	class SpiralMeta {
+		properties() {
+			this.N/*Category:Spiral+EditAnywhere+int*/;
+			this.height/*Category:Spiral+EditAnywhere+float*/;
+			this.num_spirals/*Category:Spiral+EditAnywhere+int*/;
+			this.radius/*Category:Spiral+EditAnywhere+float*/;
+		}
+	} 
+	let meta = require('uclass')()(global,SpiralMeta)
  
 	function generate_spiral(world, opts) {
 		let N = opts.N || 10
@@ -54,59 +54,59 @@ function main() {
 		}
 	}
 	
-    let maker = require('editor-maker')
+	let maker = require('editor-maker')
 
-    let opts = {
-        DisplayName: "SpiralGenerator",
-        TabId: "SpiralGenerator@"
-    }
-    
-    let data = new meta()
-    data.num_spirals = 10;
-    data.radius = 320; 
-    data.N = 100;
-    data.height = 1000
-    
-    function generate() {
-        let world = Root.GetEngine().GetEditorWorld()
-        generate_spiral(world, data)
-        Root.GetEngine().RedrawAllViewports(true)
-    }
-    
-    function clear() {
-        let world = Root.GetEngine().GetEditorWorld()
-        purge(world)
-        Root.GetEngine().RedrawAllViewports(true)
-    }    
+	let opts = {
+		DisplayName: "SpiralGenerator",
+		TabId: "SpiralGenerator@"
+	}
+	
+	let data = new meta()
+	data.num_spirals = 10;
+	data.radius = 320; 
+	data.N = 100;
+	data.height = 1000
+	
+	function generate() {
+		let world = Root.GetEngine().GetEditorWorld()
+		generate_spiral(world, data)
+		Root.GetEngine().RedrawAllViewports(true)
+	}
+	
+	function clear() {
+		let world = Root.GetEngine().GetEditorWorld()
+		purge(world)
+		Root.GetEngine().RedrawAllViewports(true)
+	}    
 
-    let tab = maker.tab(opts, (context) => {
-        let design = UMG.div({},
-            UMG(PropertyEditor,{$link:elem => {
-                elem.SetObject(data)
-                console.log(elem,data)
-            }}),
-            UMG(Button,{OnClicked:generate},UMG.text({},"Generate")),
-            UMG(Button,{OnClicked:clear},UMG.text({},"Purge"))
-        )
-        return instantiator(design)
-    })
-    tab.Commit()
-    global.refresh && global.refresh()
-    global.refresh = function () {
-        tab.Refresh()
-    }
-    return function () {
-        tab.Discard()
-    }
+	let tab = maker.tab(opts, (context) => {
+		let design = UMG.div({},
+			UMG(PropertyEditor,{$link:elem => {
+				elem.SetObject(data)
+				console.log(elem,data)
+			}}),
+			UMG(Button,{OnClicked:generate},UMG.text({},"Generate")),
+			UMG(Button,{OnClicked:clear},UMG.text({},"Purge"))
+		)
+		return instantiator(design)
+	})
+	tab.Commit()
+	global.refresh && global.refresh()
+	global.refresh = function () {
+		tab.Refresh()
+	}
+	return function () {
+		tab.Discard()
+	}
 }
 
 module.exports = function () {
-    let bye
-    process.nextTick(_ => {
-        bye = main()            
-    })
-    
-    return function() {
-        bye()
-    }
+	let bye
+	process.nextTick(_ => {
+		bye = main()            
+	})
+	
+	return function() {
+		bye()
+	}
 }
