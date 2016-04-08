@@ -105,7 +105,7 @@ function main() {
 		UMG(PropertyEditor,{$link:elem => {
 			elem.SetObject(data)
 		}}),
-		UMG(Button,{OnClicked:generate},UMG.text({},"Generate")),
+		UMG(Button,{OnClicked:generate},UMG.text({},"Generate!")),
 		UMG(Button,{OnClicked:clear},UMG.text({},"Purge"))
 	)
 	return instantiator(design)
