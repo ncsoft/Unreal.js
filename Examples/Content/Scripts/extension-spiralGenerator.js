@@ -101,14 +101,7 @@ function main() {
 		Root.GetEngine().RedrawAllViewports(true)
 	}    
 	
-	let design = UMG.div({
-		$link: elem => {
-			console.log("OPEN")
-		},
-		$unlink:_ => {
-			console.log("DESTROY")
-		}
-	},
+	let design = UMG.div({},
 		UMG(PropertyEditor,{$link:elem => {
 			elem.SetObject(data)
 		}}),
