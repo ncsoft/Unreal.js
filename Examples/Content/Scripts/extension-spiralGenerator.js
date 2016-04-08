@@ -13,10 +13,10 @@ function main() {
     
     class SpiralMeta {
         properties() {
-            this.N/*EditAnywhere+int*/;
-            this.height/*EditAnywhere+float*/;
-            this.num_spirals/*EditAnywhere+int*/;
-            this.radius/*EditAnywhere+float*/;
+            this.N/*Category:Spiral+EditAnywhere+int*/;
+            this.height/*Category:Spiral+EditAnywhere+float*/;
+            this.num_spirals/*Category:Spiral+EditAnywhere+int*/;
+            this.radius/*Category:Spiral+EditAnywhere+float*/;
         }
     } 
     let meta = require('uclass')()(global,SpiralMeta)
