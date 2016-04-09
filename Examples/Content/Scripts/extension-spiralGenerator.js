@@ -82,34 +82,35 @@ function main() {
 			},
 			"radius" : {
 				"type" : "float"
-			}
+			},
+            "test2" : {
+                "type" : "array",
+                "items" : {
+                    "type" : "float"
+                }  
+            },
+            "test" : {
+                "type" : "array",
+                "items" : {
+                    "title": "TestStruct",
+                    "type": "object",
+                    "struct": "true",
+                    "properties": {
+                        "A": {
+                            "type" : "integer"                            
+                        },
+                        "B": {
+                            "type" : "string"                            
+                        }
+                    }   
+                }                
+            }
 		},
 		"required" : [ "N", "height", "num_spirals", "radius" ]
 	}
 	
-	let _ = require('lodash')
-	
-	function create_meta(schema) {
-		let section = schema.title
-		let typedict = {
-			integer: 'int'
-		}
-		let lines = _.map(schema.properties,(v,k) => {
-			return `this.${k}/*Category:${section}+EditAnywhere+${typedict[v.type] || v.type}*/;`
-		})
-		let code = `
-(function () {
-	class ${section} {
-		properties() {
-			${lines.join('\n')}		
-		}
-	}
-	return ${section}
-})()
-`
-		return require('uclass')()(global,eval(code))
-	}
-	let meta = create_meta(schema)
+    let json2u = require('./json2u')()	
+	let meta = json2u.create('spiral',schema)
     
     let data = new meta()
     data.num_spirals = 10;
