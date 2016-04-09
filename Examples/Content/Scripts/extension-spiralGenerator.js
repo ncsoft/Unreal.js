@@ -6,8 +6,8 @@ function purge(world) {
 }
     
 function generate_spiral(world, opts) {
-    const mesh = StaticMesh.Load('/Engine/BasicShapes/Sphere')
-    const mtrl = Material.Load('/Game/Color.Color')
+    const mesh = opts.mesh
+    const mtrl = opts.mtrl
     
     let N = opts.N || 10
     let num_spirals = opts.num_spirals || 5
@@ -71,6 +71,12 @@ function main() {
 		"title": "SpiralMetaData",
 		"type": "object",
 		"properties": {
+            "mesh" : {
+                "type" : "StaticMesh",
+            },
+            "mtrl" : {
+                "type" : "Material",
+            },
 			"N" : {
 				"type" : "integer",
 			},
@@ -117,6 +123,8 @@ function main() {
     data.radius = 320; 
     data.N = 100;
     data.height = 1000
+    data.mesh = StaticMesh.Load('/Engine/BasicShapes/Sphere')
+    data.mtrl = Material.Load('/Game/Color.Color')
     
     let GEngine = Root.GetEngine()    
     const buttonTextStyle = {
