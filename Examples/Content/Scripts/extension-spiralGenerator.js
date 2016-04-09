@@ -118,6 +118,7 @@ function main() {
     let json2u = require('./json2u')()	
 	let meta = json2u.create('spiral',schema)
     
+    let previewWorld
     let data = new meta()
     data.num_spirals = 10;
     data.radius = 320; 
@@ -136,10 +137,59 @@ function main() {
             SpecifiedColor:{R:0,G:0,B:0,A:1}
         }
     }
-	let design = UMG.div({},
-		UMG(PropertyEditor,{$link:elem => {
-			elem.SetObject(data)
-		}}),
+    let spin    
+    let viewport
+    function preview() {
+        purge(previewWorld)
+        generate_spiral(previewWorld, data)
+    }
+    function update_camera() {
+        let eyePos = Vector.MakeVector(-data.radius * 4,0,data.height * 1.5)
+        viewport.SetViewLocation(eyePos)
+        viewport.SetViewRotation(eyePos.FindLookAtRotation({X:0,Y:0,Z:data.height / 2}))
+    }
+    function tick() {
+        if (--spin > 0) {
+            process.nextTick(tick)
+        } else {
+            spin = null
+            preview()
+        }
+    }
+    function touch() {
+        if (!spin) {
+            process.nextTick(tick)
+        }
+        spin = 10        
+    }
+    class MyDelegate extends JavascriptGlobalDelegates {
+        OnObjectModified(mod) {
+            if (mod == data) {
+                touch()                
+            }
+        }
+    }
+    let MyDelegate_C = require('uclass')()(global,MyDelegate)
+    let delegates = new MyDelegate_C()
+    delegates.Bind('OnObjectModified')
+	let design = UMG.div(
+        {
+            $unlink:_ => {
+                delegates.UnbindAll()
+            }
+        },
+        UMG(Viewport,
+        {
+            $link:elem => {
+                viewport = Viewport.C(elem)
+                process.nextTick(__ => {                    
+                    previewWorld = viewport.GetViewportWorld()
+                    update_camera()
+                    generate_spiral(previewWorld, data)                      
+                })                
+            }
+        }
+        ),
         UMG.span({},
             UMG(Button,
                 {
@@ -155,7 +205,13 @@ function main() {
                 },
                 UMG.text(buttonTextStyle,"Purge")
             )
-        )		
+        ),
+		UMG(PropertyEditor,
+        {            
+            $link:elem => {
+			    elem.SetObject(data)
+		    }
+        })        		
 	)
 	return instantiator(design)
 }
@@ -167,7 +223,7 @@ module.exports = function () {
 		DisplayName: "SpiralGenerator",
 		TabId: "SpiralGenerator@"
 	}
-	
+    
 	maker.tabSpawner(opts,main);
 	
 	return _ => {}
