@@ -142,11 +142,7 @@ function main() {
     function preview() {
         purge(previewWorld)
         generate_spiral(previewWorld, data)
-    }
-    function update_camera() {
-        let eyePos = Vector.MakeVector(-data.radius * 4,0,data.height * 1.5)
-        viewport.SetViewLocation(eyePos)
-        viewport.SetViewRotation(eyePos.FindLookAtRotation({X:0,Y:0,Z:data.height / 2}))
+        viewport.Redraw()
     }
     function tick() {
         if (--spin > 0) {
@@ -162,29 +158,13 @@ function main() {
         }
         spin = 10        
     }
-    class MyDelegate extends JavascriptGlobalDelegates {
-        OnObjectModified(mod) {
-            if (mod == data) {
-                touch()                
-            }
-        }
-    }
-    let MyDelegate_C = require('uclass')()(global,MyDelegate)
-    let delegates = new MyDelegate_C()
-    delegates.Bind('OnObjectModified')
-	let design = UMG.div(
-        {
-            $unlink:_ => {
-                delegates.UnbindAll()
-            }
-        },
-        UMG(Viewport,
+	let design = UMG.div({},
+        UMG(JavascriptEditorViewport,
         {
             $link:elem => {
-                viewport = Viewport.C(elem)
+                viewport = JavascriptEditorViewport.C(elem)
                 process.nextTick(__ => {                    
                     previewWorld = viewport.GetViewportWorld()
-                    update_camera()
                     generate_spiral(previewWorld, data)                      
                 })                
             }
@@ -208,6 +188,9 @@ function main() {
         ),
 		UMG(PropertyEditor,
         {            
+            OnChange: _ => {
+                touch()
+            },
             $link:elem => {
 			    elem.SetObject(data)
 		    }
