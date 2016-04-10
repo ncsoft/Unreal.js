@@ -167,8 +167,17 @@ function main() {
                     previewWorld = viewport.GetViewportWorld()
                     generate_spiral(previewWorld, data)                      
                 })                
-            }
-        }
+            },            
+        },
+            UMG.text(
+                {
+                    Font : {
+                        FontObject : GEngine.SmallFont,
+                        Size : 7
+                    },
+                },
+                "SPIRAL GENERATOR PREVIEW"
+            )
         ),
         UMG.span({},
             UMG(Button,
