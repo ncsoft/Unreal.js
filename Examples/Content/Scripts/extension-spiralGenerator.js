@@ -345,8 +345,29 @@ function main() {
             }
         ]
     })
+        
+    let menu = new JavascriptEditorMenu
+    menu.OnHook = name => {
+        if (name == 'Menubar') {
+            menu.AddPullDownMenu('Test','TestMenu','TestMenutoolip');    
+        } else if (name == 'Test') {
+            JavascriptUIExtender.BeginSection('Test','Test')
+            JavascriptUIExtender.AddMenuEntry(global.$commands,'Test');
+            JavascriptUIExtender.AddMenuSeparator()
+            JavascriptUIExtender.EndSection('Test','Test')
+        }
+    }
     
-    return tabManager
+    return instantiator(
+        UMG.div(
+            {
+                $link:elem => {
+                    elem.AddChild(menu)
+                    elem.AddChild(tabManager).Size.SizeRule = 'Fill'  
+                }
+            }
+        )
+    )
 }
 
 module.exports = function () {
@@ -357,7 +378,27 @@ module.exports = function () {
 		TabId: "SpiralGenerator@"
 	}
     
+    let commands = global.$commands = maker.commands({
+        commands : {
+            Test : {
+                name : 'test menu',
+                execute : _ => {
+                    //@FIX
+                    console.log('test!')
+                },
+                query : _ => {
+                    //@FIX
+                    console.log("QUERY")
+                    true
+                }
+            }
+        }
+    }) 
+    commands.Commit()
+    
 	maker.tabSpawner(opts,main);
 	
-	return _ => {}
+	return _ => {
+        commands.Discard()
+    }
 }
