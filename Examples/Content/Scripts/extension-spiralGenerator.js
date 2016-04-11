@@ -89,12 +89,6 @@ function main() {
 			"radius" : {
 				"type" : "float"
 			},
-            "test2" : {
-                "type" : "array",
-                "items" : {
-                    "type" : "float"
-                }  
-            },
             "test" : {
                 "type" : "array",
                 "items" : {
@@ -158,7 +152,7 @@ function main() {
         }
         spin = 10        
     }
-	let design = UMG.div({},
+    let viewportDesign = 
         UMG(JavascriptEditorViewport,
         {
             $link:elem => {
@@ -178,34 +172,102 @@ function main() {
                 },
                 "SPIRAL GENERATOR PREVIEW"
             )
-        ),
-        UMG.span({},
-            UMG(Button,
-                {
-                    OnClicked:_ => generate(data),
-                    ToolTipText:'Generate spirals on editor world'
-                },
-                UMG.text(buttonTextStyle,"Generate!!")
+        )
+    let editorDesign = 
+        UMG.div({'Slot.Size.Rule':'Auto'},
+            UMG.span({},
+                UMG(Button,
+                    {
+                        OnClicked:_ => generate(data),
+                        ToolTipText:'Generate spirals on editor world'
+                    },
+                    UMG.text(buttonTextStyle,"Generate!!")
+                ),
+                UMG(Button,
+                    {
+                        OnClicked:clear,
+                        ToolTipText:'Purge last created spirals'
+                    },
+                    UMG.text(buttonTextStyle,"Purge")
+                )
             ),
-            UMG(Button,
-                {
-                    OnClicked:clear,
-                    ToolTipText:'Purge last created spirals'
+            UMG(PropertyEditor,
+            {            
+                OnChange: _ => {
+                    touch()
                 },
-                UMG.text(buttonTextStyle,"Purge")
-            )
-        ),
-		UMG(PropertyEditor,
-        {            
-            OnChange: _ => {
-                touch()
-            },
-            $link:elem => {
-			    elem.SetObject(data)
-		    }
-        })        		
+                $link:elem => {
+                    elem.SetObject(data)
+                }
+            })        		
+        )
+    let design = UMG.div({'Slot.Size.Rule':'Auto'},        
+        viewportDesign,
+        editorDesign
 	)
-	return instantiator(design)
+    
+    function viewportTab() {
+        var tab = new JavascriptEditorTab
+        tab.TabId = 'TestInnerTabViewport'
+        tab.Role = 'MajorTab'
+        tab.DisplayName = 'Inner'
+        tab.OnSpawnTab.Add(_ => {
+            return instantiator(viewportDesign)
+        })
+        return tab
+    }
+    
+    function editorTab() {
+        var tab = new JavascriptEditorTab
+        tab.TabId = 'TestInnerTab'
+        tab.Role = 'MajorTab'
+        tab.DisplayName = 'Inner'
+        tab.OnSpawnTab.Add(_ => {
+            return instantiator(editorDesign)
+        })
+        return tab
+    }        
+	
+    let tabManager = new JavascriptEditorTabManager(JavascriptLibrary.CreatePackage(null,'/Script/Javascript'))
+    tabManager.Tabs = [editorTab(),viewportTab()]
+    tabManager.Layout = JSON.stringify({
+        Type:'Layout',
+        Name:'TestLayout',
+        PrimaryAreaIndex: 0,
+        Areas: [
+            {
+                Type: 'Area',
+                Orientation: 'Orient_Horizontal',
+                WindowPlacement: 'Placement_NoWindow',
+                Nodes: [
+                    {
+                        Type: 'Stack',
+                        SizeCoefficient : 0.5,
+                        HideTabWell: 'true',
+                        Tabs: [
+                            {                                
+                                TabId: 'TestInnerTabViewport',
+                                TabState: 'OpenedTab'  
+                            }
+                        ]
+                    },
+                    {
+                        Type: 'Stack',
+                        SizeCoefficient : 0.5,
+                        HideTabWell: 'true',
+                        Tabs: [
+                            {                                
+                                TabId: 'TestInnerTab',
+                                TabState: 'OpenedTab'  
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    })
+    
+    return tabManager
 }
 
 module.exports = function () {
