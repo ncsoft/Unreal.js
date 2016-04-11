@@ -160,6 +160,8 @@ function main() {
         }
         spin = 10        
     }
+    let filter = ''
+    let filter_listeners = []
     let listeners = []
     let viewportDesign = 
         UMG(JavascriptEditorViewport,
@@ -229,36 +231,64 @@ function main() {
         )
     
     let _ = require('lodash')
-    let browserDesign = 
-    UMG(JavascriptListView,
-    {
-        ItemHeight: 20,
-        OnGenerateRowEvent: item => {
-            let design = 
-                UMG.text(
-                    {
-                        Font : {
-                            FontObject : GEngine.SmallFont,
-                            Size : 10
-                        }
-                    },
-                    item.desc
-                )
-            return instantiator(design)
-        },
-        $link:elem => {
-            console.log('link up!')
-            elem.JavascriptContext = Context
-            elem.proxy = {
-                OnSelectionChanged: item => {
-                    data = item
-                    listeners.forEach(listener => listener.updateData())  
-                },
+    let browserDesign =
+    UMG.div({},
+        UMG(JavascriptSearchBox,
+            {
+                HintText: 'Spiral database',
+                OnTextChanged: text => {
+                    filter = text
+                    filter_listeners.forEach(filter => filter.updateFilter(filter))
+                }
             }
-            elem.Items = _.range(10).map(gen)
+        ),
+        UMG(JavascriptListView,
+        {
+            'slot.size.size-rule' : 'Fill',
+            ItemHeight: 20,
+            OnGenerateRowEvent: item => {
+                let design = 
+                    UMG(JavascriptTextBlock,
+                        {
+                            Font : {
+                                FontObject : GEngine.SmallFont,
+                                Size : 10
+                            },
+                            HighlightTextDelegate : _ => filter,
+                            Text : item.desc
+                        }
+                    )
+                return instantiator(design)
+            },
+            $link:elem => {
+                console.log('link up!')
+                elem.JavascriptContext = Context
+                elem.proxy = {
+                    OnSelectionChanged: item => {
+                        data = item
+                        listeners.forEach(listener => listener.updateData())  
+                    },
+                }
+                let items = _.range(10).map(gen)
+                function update() {
+                    elem.Items = _.filter(items,item => filter == '' || item.desc.indexOf(filter) >= 0)
+                    elem.RequestListRefresh()
+                }
+                
+                update()
+                
+                filter_listeners.push(elem)
+                elem.updateFilter = __ => {
+                    update()
+                }
+            },
+            $unlink:elem => {
+                filter_listeners.splice(filter_listeners.indexOf(elem),1)
+            }
         }
-    }
-    )
+        )
+    ) 
+    
     
     function makeTab(id,design) {
         let tabs = global[id] = []
