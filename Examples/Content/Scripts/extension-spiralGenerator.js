@@ -192,7 +192,7 @@ function main() {
             )
         )
     let editorDesign = 
-        UMG.div({'Slot.Size.Rule':'Auto'},
+        UMG.div({},
             UMG.span({},
                 UMG(Button,
                     {
@@ -211,6 +211,7 @@ function main() {
             ),
             UMG(PropertyEditor,
             {            
+                'slot.size.size-rule':'Fill',
                 OnChange: _ => {
                     touch()
                 },
