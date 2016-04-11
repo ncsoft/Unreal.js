@@ -71,6 +71,9 @@ function main() {
 		"title": "SpiralMetaData",
 		"type": "object",
 		"properties": {
+            "desc" : {
+                "type" : "string"  
+            },
             "mesh" : {
                 "type" : "StaticMesh",
             },
@@ -113,13 +116,18 @@ function main() {
 	let meta = json2u.create('spiral',schema)
     
     let previewWorld
-    let data = new meta()
-    data.num_spirals = 10;
-    data.radius = 320; 
-    data.N = 100;
-    data.height = 1000
-    data.mesh = StaticMesh.Load('/Engine/BasicShapes/Sphere')
-    data.mtrl = Material.Load('/Game/Color.Color')
+    function gen() {
+        let data = new meta()
+        data.num_spirals = 10;
+        data.radius = Math.random() * 300 + 100; 
+        data.N = 100;
+        data.height = Math.random() * 800 + 200
+        data.mesh = StaticMesh.Load('/Engine/BasicShapes/Sphere')
+        data.mtrl = Material.Load('/Game/Color.Color')
+        data.desc = Math.random().toString(16)
+        return data
+    }
+    let data = gen()
     
     let GEngine = Root.GetEngine()    
     const buttonTextStyle = {
@@ -152,6 +160,7 @@ function main() {
         }
         spin = 10        
     }
+    let listeners = []
     let viewportDesign = 
         UMG(JavascriptEditorViewport,
         {
@@ -160,8 +169,17 @@ function main() {
                 process.nextTick(__ => {                    
                     previewWorld = viewport.GetViewportWorld()
                     generate_spiral(previewWorld, data)                      
-                })                
+                })  
+                elem.updateData = _ => {
+                    purge(previewWorld)
+                    generate_spiral(previewWorld, data)
+                    redraw()
+                }
+                listeners.push(elem)
             },            
+            $unlink:elem => {
+                listeners.splice(listeners.indexOf(elem),1)
+            }
         },
             UMG.text(
                 {
@@ -198,38 +216,80 @@ function main() {
                 },
                 $link:elem => {
                     elem.SetObject(data)
+                    elem.updateData = _ => {
+                        elem.SetObject(data)
+                    }
+                    listeners.push(elem)
+                },
+                $unlink:elem => {
+                    listeners.splice(listeners.indexOf(elem),1)
                 }
             })        		
         )
-    let design = UMG.div({'Slot.Size.Rule':'Auto'},        
-        viewportDesign,
-        editorDesign
-	)
     
-    function viewportTab() {
+    let _ = require('lodash')
+    let browserDesign = 
+    UMG(JavascriptListView,
+    {
+        ItemHeight: 20,
+        OnGenerateRowEvent: item => {
+            let design = 
+                UMG.text(
+                    {
+                        Font : {
+                            FontObject : GEngine.SmallFont,
+                            Size : 10
+                        }
+                    },
+                    item.desc
+                )
+            return instantiator(design)
+        },
+        $link:elem => {
+            console.log('link up!')
+            elem.JavascriptContext = Context
+            elem.proxy = {
+                OnSelectionChanged: item => {
+                    data = item
+                    listeners.forEach(listener => listener.updateData())  
+                },
+            }
+            elem.Items = _.range(10).map(gen)
+        }
+    }
+    )
+    
+    function makeTab(id,design) {
+        let tabs = global[id] = []
         var tab = new JavascriptEditorTab
-        tab.TabId = 'TestInnerTabViewport'
+        tab.TabId = id
         tab.Role = 'MajorTab'
         tab.DisplayName = 'Inner'
-        tab.OnSpawnTab.Add(_ => {
-            return instantiator(viewportDesign)
-        })
+        tab.OnSpawnTab = _ => {
+            let widget = instantiator(design)
+            tabs.push(widget)
+            return widget
+        }
+        tab.OnCloseTab = tab => {
+            tabs.splice(tbas.indexOf(tab),1)
+        }
         return tab
     }
     
+    function browserTab() {
+        return makeTab('TestBrowserTab',browserDesign)        
+    } 
+    
+    function viewportTab() {
+        return makeTab('TestInnerTabViewport',viewportDesign)        
+    }
+    
     function editorTab() {
-        var tab = new JavascriptEditorTab
-        tab.TabId = 'TestInnerTab'
-        tab.Role = 'MajorTab'
-        tab.DisplayName = 'Inner'
-        tab.OnSpawnTab.Add(_ => {
-            return instantiator(editorDesign)
-        })
-        return tab
+        return makeTab('TestInnerTab',editorDesign)        
     }        
 	
     let tabManager = new JavascriptEditorTabManager(JavascriptLibrary.CreatePackage(null,'/Script/Javascript'))
-    tabManager.Tabs = [editorTab(),viewportTab()]
+    tabManager.Tabs = [editorTab(),viewportTab(),browserTab()]
     tabManager.Layout = JSON.stringify({
         Type:'Layout',
         Name:'TestLayout',
@@ -242,26 +302,44 @@ function main() {
                 Nodes: [
                     {
                         Type: 'Stack',
-                        SizeCoefficient : 0.5,
+                        SizeCoefficient : 0.3,
                         HideTabWell: 'true',
                         Tabs: [
                             {                                
-                                TabId: 'TestInnerTabViewport',
+                                TabId: 'TestBrowserTab',
                                 TabState: 'OpenedTab'  
                             }
                         ]
                     },
                     {
-                        Type: 'Stack',
-                        SizeCoefficient : 0.5,
-                        HideTabWell: 'true',
-                        Tabs: [
-                            {                                
-                                TabId: 'TestInnerTab',
-                                TabState: 'OpenedTab'  
-                            }
+                        Type: 'Splitter',
+                        Orientation: 'Orient_Vertical',
+                        SizeCoefficient : 0.7,
+                        Nodes : [
+                            {
+                                Type: 'Stack',
+                                SizeCoefficient : 0.5,
+                                HideTabWell: 'true',
+                                Tabs: [
+                                    {                                
+                                        TabId: 'TestInnerTabViewport',
+                                        TabState: 'OpenedTab'  
+                                    }
+                                ]
+                            },
+                            {
+                                Type: 'Stack',
+                                SizeCoefficient : 0.5,
+                                HideTabWell: 'true',
+                                Tabs: [
+                                    {                                
+                                        TabId: 'TestInnerTab',
+                                        TabState: 'OpenedTab'  
+                                    }
+                                ]
+                            }        
                         ]
-                    }
+                    }                                        
                 ]
             }
         ]
