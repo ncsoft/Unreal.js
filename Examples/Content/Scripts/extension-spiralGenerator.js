@@ -13,7 +13,7 @@ function generate_spiral(world, opts) {
     let num_spirals = opts.num_spirals || 5
     let radius = opts.radius || 200
     let height = opts.height || 200 * 5
-    purge(world)		
+    purge(world)  
     for (let i = 0; i < N; ++i) {
         let v = i / N
         let u = v * num_spirals * 2 * Math.PI
@@ -180,7 +180,7 @@ function main() {
                 listeners.push(elem)
             },            
             $unlink:elem => {
-                listeners.splice(listeners.indexOf(elem),1)
+                listeners.splice(listeners.indexOf(elem),1)                
             }
         },
             UMG.text(
@@ -196,7 +196,7 @@ function main() {
     let editorDesign = 
         UMG.div({},
             UMG.span({},
-                UMG(Button,
+                UMG(Button, 
                     {
                         OnClicked:_ => generate(data),
                         ToolTipText:'Generate spirals on editor world'
@@ -261,7 +261,6 @@ function main() {
                 return instantiator(design)
             },
             $link:elem => {
-                console.log('link up!')
                 elem.JavascriptContext = Context
                 elem.proxy = {
                     OnSelectionChanged: item => {
@@ -302,7 +301,12 @@ function main() {
             return widget
         }
         tab.OnCloseTab = tab => {
-            tabs.splice(tbas.indexOf(tab),1)
+            tab.destroy()
+            tabs.splice(tabs.indexOf(tab),1)
+        }
+        tab.destroy = _ => {
+            tabs.forEach(t => tab.CloseTab(t))
+            tabs.length = 0
         }
         return tab
     }
@@ -394,6 +398,10 @@ function main() {
                 $link:elem => {
                     elem.AddChild(menu)
                     elem.AddChild(tabManager).Size.SizeRule = 'Fill'  
+                },
+                $unlink:elem => {
+                    tabManager.Tabs.forEach(tab => tab.destroy())
+                    tabManager = null
                 }
             }
         )
