@@ -32,7 +32,8 @@ function generate_spiral(world, opts) {
         } 
         let mi = world.CreateDynamicMaterialInstance(mtrl)
         mi.SetVectorParameterValue('color', color)
-        let sma = StaticMeshActor.C(world.BeginSpawningActorFromClass(StaticMeshActor, t, true))
+        let sma = StaticMeshActor.C(world.BeginSpawningActorFromClass(StaticMeshActor, t, false))
+        sma.StaticMeshComponent.SetMobility('Movable')
         sma.StaticMeshComponent.StaticMesh = mesh			
         sma.StaticMeshComponent.SetMaterial(0, mi)
         sma.StaticMeshComponent.ReregisterComponent()
@@ -414,33 +415,12 @@ function main() {
     let commands = makeCommands()
         
     let commandList = JavascriptEditorLibrary.CreateUICommandList()
-    commands.Bind(commandList)
-    
-    let menu = new JavascriptEditorMenu
-    menu.CommandList = commandList
-    menu.OnHook = name => {
-        if (name == 'Menubar') {
-            menu.AddPullDownMenu('Test','TestMenu','TestMenutoolip');    
-        } else if (name == 'Test') {
-            JavascriptUIExtender.BeginSection('Test','Test')
-            JavascriptUIExtender.AddMenuEntry(commands,'PowerOff');
-            JavascriptUIExtender.AddMenuSeparator()
-            JavascriptUIExtender.EndSection('Test','Test')
-        }
-    }
-    
-    let toolbar = new JavascriptEditorToolbar
-    toolbar.CommandList = commandList
-    toolbar.OnHook = name => {
-        toolbar.AddToolBarButton(commands.CommandInfos[0]); 
-    }
+    commands.Bind(commandList)    
     
     return instantiator(
         UMG.div(
             {
                 $link:elem => {
-                    elem.AddChild(menu)
-                    elem.AddChild(toolbar)
                     elem.AddChild(tabManager).Size.SizeRule = 'Fill'  
                 },
                 $unlink:elem => {
@@ -448,7 +428,38 @@ function main() {
                     tabManager = null
                     commands.destroy()
                 }
-            }
+            },
+            UMG(JavascriptEditorMenu,{            
+                CommandList : commandList,
+                SubMenus : [
+                    {
+                        Id: 'Test',
+                        Label: 'TestMenu',
+                        Tooltip: 'Hello world'
+                    }
+                ],
+                OnHook : name => {
+                    if (name == 'Test') {
+                        let builder = JavascriptUIExtender 
+                        builder.BeginSection('Test','Test')
+                        builder.AddMenuEntry(commands,'PowerOff');
+                        builder.AddMenuSeparator()
+                        builder.EndSection('Test','Test')
+                    }
+                }
+            }),
+            UMG(JavascriptEditorToolbar,{
+                CommandList : commandList,
+                OnHook : __ => {
+                    let builder = JavascriptEditorLibrary.CreateToolbarBuilder(commandList)
+                    builder.BeginSection("Test")
+                    builder.AddToolBarButton(commands.CommandInfos[0]);
+                    builder.EndSection()
+                    builder.AddSeparator()
+                    builder.AddToolBarButton(commands.CommandInfos[0]);
+                    return builder 
+                }
+            }) 
         )
     )
 }
