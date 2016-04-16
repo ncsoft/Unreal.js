@@ -1,4 +1,5 @@
 const tags = ["PCG"]
+const StyleSetName = 'UnrealJS'
 	
 function purge(world) {
     let prev_actors = world.GetAllActorsOfClassAndTags(StaticMeshActor, tags).OutActors  
@@ -367,14 +368,14 @@ function main() {
     tabManager.Layout = layout
     
     function makeCommands() {
-        let context = JavascriptEditorLibrary.NewBindingContext('DeviceDetails','Test menu','','None');  
+        let context = JavascriptEditorLibrary.NewBindingContext('SpiralGenerator','Test menu','',StyleSetName);  
         let commands = new JavascriptUICommands
         
         function init() {
             commands.BindingContext = context
             commands.Commands = [
             {
-                Id: 'PowerOn',
+                Id: 'Generate',
                 FriendlyName : 'Generate!',
                 Description : 'Hello Javascript',
                 ActionType : 'Button',
@@ -386,7 +387,7 @@ function main() {
                 }
             },
             {
-                Id : 'PowerOff',
+                Id : 'Purge',
                 FriendlyName : 'Purge',
                 Description : 'Hello Javascript',
                 ActionType : 'Button',
@@ -422,10 +423,10 @@ function main() {
                 case 'Disconnect' :            
                     connected = false
                     break
-                case 'PowerOn' : 
+                case 'Generate' : 
                     generate(data)
                     break
-                case 'PowerOff' :
+                case 'Purge' :
                     clear()
                     break
             }
@@ -488,9 +489,9 @@ function main() {
                     if (name == 'Test') {
                         let builder = JavascriptUIExtender 
                         builder.BeginSection('Test','Test')
-                        builder.AddMenuEntry(commands,'PowerOff');
+                        builder.AddMenuEntry(commands,'Purge');
                         builder.AddMenuSeparator()
-                        builder.AddMenuEntry(commands,'PowerOn');
+                        builder.AddMenuEntry(commands,'Generate');
                         builder.EndSection('Test','Test')
                     }
                 }
@@ -515,6 +516,14 @@ function main() {
 
 module.exports = function () {
 	let maker = require('editor-maker')
+    
+    let Icon40x40 = {X:40,Y:40}
+    let style = JavascriptUMGLibrary.CreateSlateStyle(StyleSetName)
+    style.SetContentRoot( Context.GetDir('EngineContent') + "Editor/Slate" );
+	style.SetCoreContentRoot( Context.GetDir('EngineContent') + "Slate" );    
+    style.AddImageBrush("SpiralGenerator.Purge", style.RootToContentDir("Icons/icon_DevicePowerOff_40x.png"), Icon40x40, {R:1,G:1,B:1,A:1}, 'NoTile', 'FullColor' )
+    style.AddImageBrush("SpiralGenerator.Generate", style.RootToContentDir("Icons/icon_DevicePowerOn_40x.png"), Icon40x40, {R:1,G:1,B:1,A:1}, 'NoTile', 'FullColor' ) 
+    style.Register()
 
 	let opts = {
 		DisplayName: "SpiralGenerator",
@@ -524,5 +533,6 @@ module.exports = function () {
 	maker.tabSpawner(opts,main);        
     
 	return _ => {
+        style.Unregister()
     }
 }
