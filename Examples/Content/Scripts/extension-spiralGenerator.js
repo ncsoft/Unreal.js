@@ -195,41 +195,23 @@ function main() {
             )
         )
     let editorDesign = 
-        UMG.div({},
-            UMG.span({},
-                UMG(Button, 
-                    {
-                        OnClicked:_ => generate(data),
-                        ToolTipText:'Generate spirals on editor world'
-                    },
-                    UMG.text(buttonTextStyle,"Generate!!")
-                ),
-                UMG(Button,
-                    {
-                        OnClicked:clear,
-                        ToolTipText:'Purge last created spirals'
-                    },
-                    UMG.text(buttonTextStyle,"Purge")
-                )
-            ),
-            UMG(PropertyEditor,
-            {            
-                'slot.size.size-rule':'Fill',
-                OnChange: _ => {
-                    touch()
-                },
-                $link:elem => {
+        UMG(PropertyEditor,
+        {            
+            'slot.size.size-rule':'Fill',
+            OnChange: _ => {
+                touch()
+            },
+            $link:elem => {
+                elem.SetObject(data)
+                elem.updateData = _ => {
                     elem.SetObject(data)
-                    elem.updateData = _ => {
-                        elem.SetObject(data)
-                    }
-                    listeners.push(elem)
-                },
-                $unlink:elem => {
-                    listeners.splice(listeners.indexOf(elem),1)
                 }
-            })        		
-        )
+                listeners.push(elem)
+            },
+            $unlink:elem => {
+                listeners.splice(listeners.indexOf(elem),1)
+            }
+        })   
     
     let _ = require('lodash')
     let browserDesign =
@@ -294,7 +276,7 @@ function main() {
         let tabs = global[id] = []
         var tab = new JavascriptEditorTab
         tab.TabId = id
-        tab.Role = 'MajorTab'
+        tab.Role = 'PanelTab'
         tab.DisplayName = 'Inner'
         tab.OnSpawnTab = _ => {
             let widget = instantiator(design)
@@ -322,11 +304,10 @@ function main() {
     
     function editorTab() {
         return makeTab('TestInnerTab',editorDesign)        
-    }        
+    }       
 	
-    let tabManager = new JavascriptEditorTabManager(JavascriptLibrary.CreatePackage(null,'/Script/Javascript'))
-    tabManager.Tabs = [editorTab(),viewportTab(),browserTab()]
-    tabManager.Layout = JSON.stringify({
+    
+    let layout = JSON.stringify({
         Type:'Layout',
         Name:'TestLayout',
         PrimaryAreaIndex: 0,
@@ -381,23 +362,88 @@ function main() {
         ]
     })
     
+    let tabManager = new JavascriptEditorTabManager(JavascriptLibrary.CreatePackage(null,'/Script/Javascript'))
+    tabManager.Tabs = [editorTab(),viewportTab(),browserTab()]
+    tabManager.Layout = layout
+    
     function makeCommands() {
         let context = JavascriptEditorLibrary.NewBindingContext('DeviceDetails','Test menu','','None');  
         let commands = new JavascriptUICommands
         
         function init() {
             commands.BindingContext = context
-            commands.Commands = [{
-                Id : 'PowerOff',
-                FriendlyName : 'World',
+            commands.Commands = [
+            {
+                Id: 'PowerOn',
+                FriendlyName : 'Generate!',
                 Description : 'Hello Javascript',
                 ActionType : 'Button',
-            }]
+                DefaultChord: {
+                    Key: {
+                        KeyName: 'B',
+                    },
+                    bAlt: true
+                }
+            },
+            {
+                Id : 'PowerOff',
+                FriendlyName : 'Purge',
+                Description : 'Hello Javascript',
+                ActionType : 'Button',
+                DefaultChord: {
+                    Key: {
+                        KeyName: 'A',
+                    },
+                    bAlt: true
+                }
+            },
+            {
+                Id: 'Connect',
+                FriendlyName : 'Connect',
+                Description : 'Hello Javascript',
+                ActionType : 'RadioButton'
+            },
+            {
+                Id: 'Disconnect',
+                FriendlyName : 'Disconnect',
+                Description : 'Hello Javascript',
+                ActionType : 'RadioButton'
+            }
+            ]
             commands.Initialize();    
         }        
         
+        let connected = false
         commands.OnExecuteAction = (what) => {
-            console.error(what,'exec')
+            switch (what) {
+                case 'Connect' : 
+                    connected = true
+                    break
+                case 'Disconnect' :            
+                    connected = false
+                    break
+                case 'PowerOn' : 
+                    generate(data)
+                    break
+                case 'PowerOff' :
+                    clear()
+                    break
+            }
+        }        
+        
+        commands.OnCanExecuteAction = (what) => {
+            if (what == 'Connect' && connected || what == 'Disconnect' && !connected) return false
+            return true
+        }
+        
+        commands.OnIsActionChecked = (what) => {
+            if (what == 'Connect') {
+                return !connected
+            } else if (what == 'Disconnect') {
+                return connected
+            } else {
+                return true
+            }
         }
        
         function uninit() {
@@ -444,6 +490,7 @@ function main() {
                         builder.BeginSection('Test','Test')
                         builder.AddMenuEntry(commands,'PowerOff');
                         builder.AddMenuSeparator()
+                        builder.AddMenuEntry(commands,'PowerOn');
                         builder.EndSection('Test','Test')
                     }
                 }
@@ -452,11 +499,13 @@ function main() {
                 CommandList : commandList,
                 OnHook : __ => {
                     let builder = JavascriptEditorLibrary.CreateToolbarBuilder(commandList)
-                    builder.BeginSection("Test")
+                    builder.BeginSection("Spiral")
                     builder.AddToolBarButton(commands.CommandInfos[0]);
+                    builder.AddToolBarButton(commands.CommandInfos[1]);
                     builder.EndSection()
                     builder.AddSeparator()
-                    builder.AddToolBarButton(commands.CommandInfos[0]);
+                    builder.AddToolBarButton(commands.CommandInfos[2]);
+                    builder.AddToolBarButton(commands.CommandInfos[3]);
                     return builder 
                 }
             }) 
