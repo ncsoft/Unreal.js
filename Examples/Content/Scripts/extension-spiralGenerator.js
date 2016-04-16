@@ -379,17 +379,60 @@ function main() {
             }
         ]
     })
+    
+    function makeCommands() {
+        let context = JavascriptEditorLibrary.NewBindingContext('DeviceDetails','Test menu','','None');  
+        let commands = new JavascriptUICommands
         
+        function init() {
+            commands.BindingContext = context
+            commands.Commands = [{
+                Id : 'PowerOff',
+                FriendlyName : 'World',
+                Description : 'Hello Javascript',
+                ActionType : 'Button',
+            }]
+            commands.Initialize();    
+        }        
+        
+        commands.OnExecuteAction = (what) => {
+            console.error(what,'exec')
+        }
+       
+        function uninit() {
+            commands.Uninitialize();
+            context.Destroy();
+        }
+        
+        init();
+        
+        commands.destroy = uninit
+        
+        return commands        
+    }
+    
+    let commands = makeCommands()
+        
+    let commandList = JavascriptEditorLibrary.CreateUICommandList()
+    commands.Bind(commandList)
+    
     let menu = new JavascriptEditorMenu
+    menu.CommandList = commandList
     menu.OnHook = name => {
         if (name == 'Menubar') {
             menu.AddPullDownMenu('Test','TestMenu','TestMenutoolip');    
         } else if (name == 'Test') {
             JavascriptUIExtender.BeginSection('Test','Test')
-            JavascriptUIExtender.AddMenuEntry(global.$commands,'Test');
+            JavascriptUIExtender.AddMenuEntry(commands,'PowerOff');
             JavascriptUIExtender.AddMenuSeparator()
             JavascriptUIExtender.EndSection('Test','Test')
         }
+    }
+    
+    let toolbar = new JavascriptEditorToolbar
+    toolbar.CommandList = commandList
+    toolbar.OnHook = name => {
+        toolbar.AddToolBarButton(commands.CommandInfos[0]); 
     }
     
     return instantiator(
@@ -397,11 +440,13 @@ function main() {
             {
                 $link:elem => {
                     elem.AddChild(menu)
+                    elem.AddChild(toolbar)
                     elem.AddChild(tabManager).Size.SizeRule = 'Fill'  
                 },
                 $unlink:elem => {
                     tabManager.Tabs.forEach(tab => tab.destroy())
                     tabManager = null
+                    commands.destroy()
                 }
             }
         )
@@ -414,29 +459,10 @@ module.exports = function () {
 	let opts = {
 		DisplayName: "SpiralGenerator",
 		TabId: "SpiralGenerator@"
-	}
+	}    
+        
+	maker.tabSpawner(opts,main);        
     
-    let commands = global.$commands = maker.commands({
-        commands : {
-            Test : {
-                name : 'test menu',
-                execute : _ => {
-                    //@FIX
-                    console.log('test!')
-                },
-                query : _ => {
-                    //@FIX
-                    console.log("QUERY")
-                    true
-                }
-            }
-        }
-    }) 
-    commands.Commit()
-    
-	maker.tabSpawner(opts,main);
-	
 	return _ => {
-        commands.Discard()
     }
 }
