@@ -215,6 +215,10 @@ function main() {
         })   
     
     let _ = require('lodash')
+    
+    let editorStyle = new JavascriptStyleSet
+    editorStyle.StyleSetName = 'EditorStyle'
+    
     let browserDesign =
     UMG.div({},
         UMG(JavascriptSearchBox,
@@ -226,49 +230,54 @@ function main() {
                 }
             }
         ),
-        UMG(JavascriptListView,
-        {
-            'slot.size.size-rule' : 'Fill',
-            ItemHeight: 20,
-            OnGenerateRowEvent: item => {
-                let design = 
-                    UMG(JavascriptTextBlock,
-                        {
-                            Font : {
-                                FontObject : GEngine.SmallFont,
-                                Size : 10
-                            },
-                            HighlightTextDelegate : _ => filter,
-                            Text : item.desc
-                        }
-                    )
-                return instantiator(design)
-            },
-            $link:elem => {
-                elem.JavascriptContext = Context
-                elem.proxy = {
-                    OnSelectionChanged: item => {
-                        data = item
-                        listeners.forEach(listener => listener.updateData())  
-                    },
-                }
-                let items = _.range(10).map(gen)
-                function update() {
-                    elem.Items = _.filter(items,item => filter == '' || item.desc.indexOf(filter) >= 0)
-                    elem.RequestListRefresh()
-                }
-                
-                update()
-                
-                filter_listeners.push(elem)
-                elem.updateFilter = __ => {
+        UMG(Border,
+            {
+                'slot.size.size-rule' : 'Fill',
+                Background: editorStyle.GetBrush('ProjectBrowser.Background')
+            },        
+            UMG(JavascriptListView,
+            {                
+                ItemHeight: 20,
+                OnGenerateRowEvent: item => {
+                    let design = 
+                        UMG(JavascriptTextBlock,
+                            {
+                                Font : {
+                                    FontObject : GEngine.SmallFont,
+                                    Size : 10
+                                },
+                                HighlightTextDelegate : _ => filter,
+                                Text : item.desc
+                            }
+                        )
+                    return instantiator(design)
+                },
+                $link:elem => {
+                    elem.JavascriptContext = Context
+                    elem.proxy = {
+                        OnSelectionChanged: item => {
+                            data = item
+                            listeners.forEach(listener => listener.updateData())  
+                        },
+                    }
+                    let items = _.range(10).map(gen)
+                    function update() {
+                        elem.Items = _.filter(items,item => filter == '' || item.desc.indexOf(filter) >= 0)
+                        elem.RequestListRefresh()
+                    }
+                    
                     update()
+                    
+                    filter_listeners.push(elem)
+                    elem.updateFilter = __ => {
+                        update()
+                    }
+                },
+                $unlink:elem => {
+                    filter_listeners.splice(filter_listeners.indexOf(elem),1)
                 }
-            },
-            $unlink:elem => {
-                filter_listeners.splice(filter_listeners.indexOf(elem),1)
             }
-        }
+            )
         )
     ) 
     
@@ -532,7 +541,7 @@ module.exports = function () {
         
 	maker.tabSpawner(opts,main);        
     
-	return _ => {
+	return _ => { 
         style.Unregister()
     }
 }
