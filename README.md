@@ -33,7 +33,7 @@ Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4.
 - Video tutorial available! 
  * https://www.youtube.com/watch?v=XxPSLjBg7DU
  * https://www.youtube.com/watch?v=QDEy71oiHOg
-- Make sure you have [UnrealEngine 4.11.1 canonical build](https://www.unrealengine.com/dashboard).
+- Make sure you have [UnrealEngine 4.11.2 canonical build](https://www.unrealengine.com/dashboard).
 - Download [prebuilt UnrealJS plugin](https://github.com/ncsoft/Unreal.js/releases) and unzip into `Examples/Plugins/UnrealJS`.
  * Make sure your directory layout is correct:
   ```
