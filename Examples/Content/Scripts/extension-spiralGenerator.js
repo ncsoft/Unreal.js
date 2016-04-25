@@ -235,10 +235,20 @@ function main() {
                 'slot.size.size-rule' : 'Fill',
                 Background: editorStyle.GetBrush('ProjectBrowser.Background')
             },        
-            UMG(JavascriptListView,
+            UMG(JavascriptTreeView,
             {                
                 ItemHeight: 20,
-                OnGenerateRowEvent: item => {
+                Columns: [
+                    {
+                        Id: 'First',
+                        Width: 0.5
+                    },
+                    {
+                        Id: 'Second',
+                        Width: 0.5
+                    }
+                ],
+                OnGenerateRowEvent: (item, column) => {
                     let design = 
                         UMG(JavascriptTextBlock,
                             {
@@ -247,10 +257,13 @@ function main() {
                                     Size : 10
                                 },
                                 HighlightTextDelegate : _ => filter,
-                                Text : item.desc
+                                Text : item ? item.desc : column
                             }
                         )
                     return instantiator(design)
+                },
+                OnGetChildren: (item,list) => {
+                    list.Children = _.range(3).map(gen)
                 },
                 $link:elem => {
                     elem.JavascriptContext = Context
@@ -263,7 +276,7 @@ function main() {
                     let items = _.range(10).map(gen)
                     function update() {
                         elem.Items = _.filter(items,item => filter == '' || item.desc.indexOf(filter) >= 0)
-                        elem.RequestListRefresh()
+                        elem.RequestTreeRefresh()
                     }
                     
                     update()
@@ -377,7 +390,7 @@ function main() {
     tabManager.Layout = layout
     
     function makeCommands() {
-        let context = JavascriptEditorLibrary.NewBindingContext('SpiralGenerator','Test menu','',StyleSetName);  
+        let context = JavascriptMenuLibrary.NewBindingContext('SpiralGenerator','Test menu','',StyleSetName);  
         let commands = new JavascriptUICommands
         
         function init() {
@@ -470,7 +483,7 @@ function main() {
     
     let commands = makeCommands()
         
-    let commandList = JavascriptEditorLibrary.CreateUICommandList()
+    let commandList = JavascriptMenuLibrary.CreateUICommandList()
     commands.Bind(commandList)    
     
     return instantiator(
@@ -485,30 +498,40 @@ function main() {
                     commands.destroy()
                 }
             },
-            UMG(JavascriptEditorMenu,{            
+            UMG(JavascriptMultiBox,{
                 CommandList : commandList,
-                SubMenus : [
-                    {
-                        Id: 'Test',
-                        Label: 'TestMenu',
-                        Tooltip: 'Hello world'
-                    }
-                ],
-                OnHook : name => {
-                    if (name == 'Test') {
-                        let builder = JavascriptUIExtender 
-                        builder.BeginSection('Test','Test')
-                        builder.AddMenuEntry(commands,'Purge');
-                        builder.AddMenuSeparator()
-                        builder.AddMenuEntry(commands,'Generate');
-                        builder.EndSection('Test','Test')
-                    }
+                OnHook : (id,elem,builder) => {
+                    if (id == 'Main') {                        
+                        try {
+                            let builder = JavascriptMenuLibrary.CreateMenuBarBuilder(commandList)
+                            elem.AddPullDownMenu(builder,'Test',"TEST","TEST")
+                            return builder
+                        } catch (e) {
+                            console.error(String(e))
+                        }
+                          
+                    } else if (id == 'Test') {
+                        builder.PushCommandList(commandList)
+                        builder.BeginSection("Test Section")
+                        builder.AddToolBarButton(commands.CommandInfos[0]);
+                        builder.AddToolBarButton(commands.CommandInfos[1]);
+                        elem.AddSubMenu(builder,'Sub','Sub menu','Sub menu tooltip',false)
+                        builder.EndSection()
+                    } else if (id == 'Sub') {
+                        builder.PushCommandList(commandList)
+                        builder.BeginSection("Sub  Section")
+                        builder.AddToolBarButton(commands.CommandInfos[2]);
+                        builder.AddToolBarButton(commands.CommandInfos[3]);
+                        builder.EndSection()                    
+                    } else {
+                        console.log("UNHANDLED",id)
+                    }          
                 }
-            }),
-            UMG(JavascriptEditorToolbar,{
+            }),            
+            UMG(JavascriptMultiBox,{
                 CommandList : commandList,
                 OnHook : __ => {
-                    let builder = JavascriptEditorLibrary.CreateToolbarBuilder(commandList)
+                    let builder = JavascriptMenuLibrary.CreateToolbarBuilder(commandList)
                     builder.BeginSection("Spiral")
                     builder.AddToolBarButton(commands.CommandInfos[0]);
                     builder.AddToolBarButton(commands.CommandInfos[1]);
