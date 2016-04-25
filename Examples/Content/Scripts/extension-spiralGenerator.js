@@ -522,6 +522,7 @@ function main() {
                         builder.BeginSection("Sub  Section")
                         builder.AddToolBarButton(commands.CommandInfos[2]);
                         builder.AddToolBarButton(commands.CommandInfos[3]);
+                        builder.AddWidget(instantiator(UMG.text({TextDelegate:_ => `${Math.random().toFixed(3)}`},"TEST")),"Widget")
                         builder.EndSection()                    
                     } else {
                         console.log("UNHANDLED",id)
@@ -539,6 +540,7 @@ function main() {
                     builder.AddSeparator()
                     builder.AddToolBarButton(commands.CommandInfos[2]);
                     builder.AddToolBarButton(commands.CommandInfos[3]);
+                    builder.AddWidget(instantiator(UMG.text({TextDelegate:_ => `${Math.random().toFixed(3)}`},"TEST")))
                     return builder 
                 }
             }) 
