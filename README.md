@@ -43,7 +43,6 @@ Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4.
      Plugins/
          UnrealJS/
 ```            
-- `cd Examples/Content/Scripts && npm i` to install node.js packages which are required to run examples.
 - Open `Examples/JavascriptPlayground.uproject`
 - Activate `JavascriptConsole` by clicking `Windows - Developer Tools - JavascriptConsole`.
 
