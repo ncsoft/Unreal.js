@@ -47,9 +47,13 @@ Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4.
 - Activate `JavascriptConsole` by clicking `Windows - Developer Tools - JavascriptConsole`.
 
 ### Build
-- Download prebuilt V8 and unzip into .../Plugins/UnrealJS. (files are located in *releases*)
-- ```mklink /d /j Build/Plugins Plugins```
-- ```mklink /d /j Examples/Plugins Plugins```
+- Windows
+ - Download prebuilt V8 and unzip into .../Plugins/UnrealJS. (files are located in *releases*)
+ - ```mklink /d /j Build/Plugins Plugins```
+ - ```mklink /d /j Examples/Plugins Plugins```
+- Mac
+ - ```brew install v8```
+ - ```cd <your project>/Plugins; git clone https://github.com/ncsoft/Unreal.js-core UnrealJS```
 
 ### License
 Apache2
