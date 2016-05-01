@@ -52,7 +52,7 @@ Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4.
  - ```mklink /d /j Build/Plugins Plugins```
  - ```mklink /d /j Examples/Plugins Plugins```
 - Mac
- - ```brew install v8```
+ - ```brew install v8``` (Please use 4.8.271) 
  - ```cd <your project>/Plugins; git clone https://github.com/ncsoft/Unreal.js-core UnrealJS```
 
 ### License
