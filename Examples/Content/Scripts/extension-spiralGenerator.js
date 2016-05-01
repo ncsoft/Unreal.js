@@ -168,6 +168,17 @@ function main() {
     let viewportDesign = 
         UMG(JavascriptEditorViewport,
         {
+            OnDraw:(_PDI,elem) => {
+                let PDI = JavascriptPDI.C(_PDI)
+                PDI.SetHitProxy('Line')
+                PDI.DrawDashedLine({},{X:1000,Z:1000},{R:1,A:1},4,'SDPG_World',0)
+                PDI.SetHitProxy('Circle')
+                PDI.DrawCircle({},{X:1},{Y:1},{R:1,A:1},1000,32,'SDPG_World',2)
+                PDI.SetHitProxy('None')  
+            },
+            OnClick:(click,proxy) => {
+                console.log(proxy.GetName())
+            },
             $link:elem => {
                 viewport = JavascriptEditorViewport.C(elem)
                 process.nextTick(__ => {                    
@@ -502,13 +513,14 @@ function main() {
                 CommandList : commandList,
                 OnHook : (id,elem,builder) => {
                     if (id == 'Main') {                        
-                        try {
-                            let builder = JavascriptMenuLibrary.CreateMenuBarBuilder(commandList)
-                            elem.AddPullDownMenu(builder,'Test',"TEST","TEST")
-                            return builder
+                        try { 
+                            JavascriptMenuLibrary.CreateMenuBarBuilder(commandList,builder => {
+                                elem.AddPullDownMenu(builder,'Test',"TEST","TEST")
+                                JavascriptMultiBox.Bind(builder)
+                            })
                         } catch (e) {
                             console.error(String(e))
-                        }
+                        } 
                           
                     } else if (id == 'Test') {
                         builder.PushCommandList(commandList)
@@ -517,7 +529,7 @@ function main() {
                         builder.AddToolBarButton(commands.CommandInfos[1]);
                         elem.AddSubMenu(builder,'Sub','Sub menu','Sub menu tooltip',false)
                         builder.EndSection()
-                    } else if (id == 'Sub') {
+                    } else if (id == 'Sub') { 
                         builder.PushCommandList(commandList)
                         builder.BeginSection("Sub  Section")
                         builder.AddToolBarButton(commands.CommandInfos[2]);
@@ -532,16 +544,17 @@ function main() {
             UMG(JavascriptMultiBox,{
                 CommandList : commandList,
                 OnHook : __ => {
-                    let builder = JavascriptMenuLibrary.CreateToolbarBuilder(commandList)
-                    builder.BeginSection("Spiral")
-                    builder.AddToolBarButton(commands.CommandInfos[0]);
-                    builder.AddToolBarButton(commands.CommandInfos[1]);
-                    builder.EndSection()
-                    builder.AddSeparator()
-                    builder.AddToolBarButton(commands.CommandInfos[2]);
-                    builder.AddToolBarButton(commands.CommandInfos[3]);
-                    builder.AddWidget(instantiator(UMG.text({TextDelegate:_ => `${Math.random().toFixed(3)}`},"TEST")))
-                    return builder 
+                    JavascriptMenuLibrary.CreateToolbarBuilder(commandList,'Orient_Horizontal',builder => {
+                        builder.BeginSection("Spiral")
+                        builder.AddToolBarButton(commands.CommandInfos[0]);
+                        builder.AddToolBarButton(commands.CommandInfos[1]);
+                        builder.EndSection()
+                        builder.AddSeparator()
+                        builder.AddToolBarButton(commands.CommandInfos[2]);
+                        builder.AddToolBarButton(commands.CommandInfos[3]);
+                        builder.AddWidget(instantiator(UMG.text({TextDelegate:_ => `${Math.random().toFixed(3)}`},"TEST")))
+                        JavascriptMultiBox.Bind(builder)
+                    }) 
                 }
             }) 
         )
