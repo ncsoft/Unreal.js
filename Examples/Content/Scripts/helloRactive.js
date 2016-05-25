@@ -3,6 +3,7 @@
 let UMG = require('UMG')
 let instantiator = require('instantiator')
 let _ = require('lodash')
+let Ractive = require('ractive')
 
 function GetPC() {
     return PlayerController.C(GWorld.GetAllActorsOfClass(PlayerController).OutActors[0])

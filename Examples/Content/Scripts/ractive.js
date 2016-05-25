@@ -1,5 +1,5 @@
 /*
-active.js v0.7.3
+ractive.js v0.7.3
 	Sat Apr 25 2015 13:52:38 GMT-0400 (EDT) - commit da40f81c660ba2f09c45a09a9c20fdd34ee36d80
 
 	http://ractivejs.org
