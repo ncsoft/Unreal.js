@@ -29,28 +29,16 @@ Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4.
 ### Dummy demo 
 - Very simple demo available (https://github.com/ncsoft/Unreal.js/archive/snippet-editor.zip)
 
-### Install and play
-- Video tutorial available! 
- * https://www.youtube.com/watch?v=XxPSLjBg7DU
- * https://www.youtube.com/watch?v=QDEy71oiHOg
-- Make sure you have [UnrealEngine 4.11.2 canonical build](https://www.unrealengine.com/dashboard).
-- Download [prebuilt UnrealJS plugin](https://github.com/ncsoft/Unreal.js/releases) and unzip into `Examples/Plugins/UnrealJS`.
- * Make sure your directory layout is correct:
-  ```
- Examples/          # project root directory
-     Content/
-         Scripts/   # "npm install" here
-     Plugins/
-         UnrealJS/
-```            
-- Open `Examples/JavascriptPlayground.uproject`
-- Activate `JavascriptConsole` by clicking `Windows - Developer Tools - JavascriptConsole`.
-
 ### Build
+- Make sure you have [UnrealEngine 4.12.0 canonical build](https://www.unrealengine.com/dashboard).
 - Create a C++ project
 - Download [ready to build Zip file](https://github.com/ncsoft/Unreal.js-core/releases/tag/ready-to-build) and unzip into Plugins folder under your project root.
  * <your project root>/Plugins/UnrealJS/... unzip here
 - Open your `uproject` and click yes to build modules.
+- Video tutorial available! 
+ * https://www.youtube.com/watch?v=XxPSLjBg7DU
+ * https://www.youtube.com/watch?v=QDEy71oiHOg
+
  
 ### License
 Apache2
