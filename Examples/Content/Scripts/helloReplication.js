@@ -1,74 +1,72 @@
 /// <reference path="typings/ue.d.ts">/>
-(function (global) {
-    "use strict"
+"use strict"
 
-    class MyActor extends Actor {
-        ctor() {
-            this.bAlwaysRelevant = true
-        }
-
-        properties() {
-            this.Hello/*Replicated+EditAnywhere+int*/;
-            this.World/*Replicated+EditAnywhere+Actor*/;
-            this.Position/*EditAnywhere+Vector*/;
-        }
-
-        ReceiveBeginPlay() {
-            super.ReceiveBeginPlay()
-
-            console.log("Hello, this is MyActor")
-        }
-
-        // RPC function!
-        test(data/*float*/)/*NetMulticast*/ {
-            if (this.Role == 'ROLE_Authority') {
-                this.Hello++
-            }
-            console.log('multicast!',data,this.GetName(),this.Hello,this.Role)
-        }
+class MyActor extends Actor {
+    ctor() {
+        this.bAlwaysRelevant = true
     }
 
-    let MyActor_C = require('uclass')()(global,MyActor)
-
-    let _ = require('lodash')
-
-    function GetPC() {
-        return GWorld.GetAllActorsOfClass(PlayerController).OutActors[0]
+    properties() {
+        this.Hello/*Replicated+EditAnywhere+int*/;
+        this.World/*Replicated+EditAnywhere+Actor*/;
+        this.Position/*EditAnywhere+Vector*/;
     }
-    function main() {
-        // Replicated actor should be created in server node.
-        if (GWorld.IsServer()) {
-            let actor = new MyActor_C(GWorld,{X:1})
 
-            // replace this actor, please.
-            actor.SetReplicates(true)
+    ReceiveBeginPlay() {
+        super.ReceiveBeginPlay()
 
-            let alive = true
-            function kick() {
-                if (!alive) return
-                actor.test(Math.random())
-                setTimeout(kick,1000)
-            }
+        console.log("Hello, this is MyActor")
+    }
 
-            kick()
-
-            return function () {
-                alive = false
-                actor.DestroyActor()
-            }
-        } else {
-            return function() {}
+    // RPC function!
+    test(data/*float*/)/*NetMulticast*/ {
+        if (this.Role == 'ROLE_Authority') {
+            this.Hello++
         }
+        console.log('multicast!',data,this.GetName(),this.Hello,this.Role)
     }
+}
 
-    try {
-        module.exports = () => {
-            let cleanup = null
-            process.nextTick(() => cleanup = main());
-            return () => cleanup()
+let MyActor_C = require('uclass')()(global,MyActor)
+
+let _ = require('lodash')
+
+function GetPC() {
+    return GWorld.GetAllActorsOfClass(PlayerController).OutActors[0]
+}
+function main() {
+    // Replicated actor should be created in server node.
+    if (GWorld.IsServer()) {
+        let actor = new MyActor_C(GWorld,{X:1})
+
+        // replace this actor, please.
+        actor.SetReplicates(true)
+
+        let alive = true
+        function kick() {
+            if (!alive) return
+            actor.test(Math.random())
+            setTimeout(kick,1000)
         }
+
+        kick()
+
+        return function () {
+            alive = false
+            actor.DestroyActor()
+        }
+    } else {
+        return function() {}
     }
-    catch (e) {
-        require('bootstrap')('helloReplication')
+}
+
+try {
+    module.exports = () => {
+        let cleanup = null
+        process.nextTick(() => cleanup = main());
+        return () => cleanup()
     }
-})(this)
+}
+catch (e) {
+    require('bootstrap')('helloReplication')
+}
