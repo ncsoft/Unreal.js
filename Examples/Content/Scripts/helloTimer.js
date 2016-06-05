@@ -1,35 +1,33 @@
 /// <reference path="typings/ue.d.ts">/>
 
-(function (global) {
-    "use strict"
+"use strict"
 
-    function main() {
-        let actor = new TextRenderActor(GWorld,{X:100,Z:100},{Yaw:180})
+function main() {
+    let actor = new TextRenderActor(GWorld,{X:100,Z:100},{Yaw:180})
 
-        let timer = null;
-        function update() {
-            actor.TextRender.SetText(`Hello Timer : ${new Date().toISOString()}`)
+    let timer = null;
+    function update() {
+        actor.TextRender.SetText(`Hello Timer : ${new Date().toISOString()}`)
 
-            // just like node.js, we can use timer functions. (setTimeout, setInterval, ...)
-            timer = setTimeout(update, 1000)
-        }
-
-        update()
-
-        return function () {
-            actor.DestroyActor()
-            clearTimeout(timer)
-        }
+        // just like node.js, we can use timer functions. (setTimeout, setInterval, ...)
+        timer = setTimeout(update, 1000)
     }
 
-    try {
-        module.exports = () => {
-            let cleanup = null
-            process.nextTick(() => cleanup = main());
-            return () => cleanup()
-        }
+    update()
+
+    return function () {
+        actor.DestroyActor()
+        clearTimeout(timer)
     }
-    catch (e) {
-        require('bootstrap')('helloTimer')
+}
+
+try {
+    module.exports = () => {
+        let cleanup = null
+        process.nextTick(() => cleanup = main());
+        return () => cleanup()
     }
-})(this)
+}
+catch (e) {
+    require('bootstrap')('helloTimer')
+}
