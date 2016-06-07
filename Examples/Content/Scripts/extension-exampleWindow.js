@@ -1,6 +1,10 @@
 /// <reference path="typings/ue.d.ts" />
 "use strict"
 
+const I = require('instantiator')
+const _ = require('lodash')
+const UMG = require('UMG')
+
 function packageRegistryService() {
     const repositoryUrl = 'https://raw.githubusercontent.com/ncsoft/Unreal.js-packages/master/repository.json'
     const svnPath = `${Context.GetDir('Engine')}/Binaries/ThirdParty/svn/Win64/svn`
@@ -68,6 +72,72 @@ function packageRegistryService() {
     }
 }
 
+function makeContext(opts) {
+    let selectedItem
+
+    function makeCommands() {
+        let context = JavascriptMenuLibrary.NewBindingContext(opts.Id + extensionId,'Test menu','','EditorStyle');
+        let commands = new JavascriptUICommands
+
+        let hasPendingExecution
+
+        function init() {
+            commands.BindingContext = context
+            commands.Commands = opts.Commands
+            commands.Initialize()
+        }
+
+        commands.OnExecuteAction = (what) => {
+            hasPendingExecution = true
+            selectedItem.actions[what]()
+                .then(_ => console.log(`${what} completed`))
+                .catch(e => console.error(String(e)))
+                .then(_ => hasPendingExecution = false)
+        }
+
+        commands.OnCanExecuteAction = (what) => {
+            return !hasPendingExecution && selectedItem && !!selectedItem.actions[what]
+        }
+
+        function uninit() {
+            commands.Uninitialize()
+            context.Destroy()
+        }
+
+        init()
+
+        commands.destroy = uninit
+
+        return commands
+    }
+
+    let commands = makeCommands()
+    let commandList = JavascriptMenuLibrary.CreateUICommandList()
+    commands.Bind(commandList)
+
+    return {
+        commands : commands,
+        commandList : commandList,
+        setCurrent : what => selectedItem = what,
+        destroy : _ => {
+            commands.destroy()
+        },
+        contextMenu : () => I(
+            UMG(JavascriptMultiBox,{
+                CommandList : commandList,
+                OnHook : __ => {
+                    JavascriptMenuLibrary.CreateMenuBuilder(commandList,true,builder => {
+                        opts.Commands.forEach((v,k) => {
+                            builder.AddToolBarButton(commands.CommandInfos[k])
+                        })
+                        JavascriptMultiBox.Bind(builder)
+                    })
+                }
+            })
+        )
+    }
+}
+
 const githubUrl = 'https://api.github.com/repos/ncsoft/Unreal.js'
 const homepageUrl = "https://github.com/ncsoft/Unreal.js"
 
@@ -75,7 +145,6 @@ let extensionId = global.$extensionUnreal = (global.$extensionUnreal || 0) + 1
 
 function main() {
     let registry = packageRegistryService()
-    const UMG = require('UMG')
     let {EventEmitter} = require('events')
 
     let font = {
@@ -83,13 +152,9 @@ function main() {
         FontObject:Root.GetEngine().SmallFont
     }
 
-    const I = require('instantiator')
-    const _ = require('lodash')
     const request = require('request')
     const style = new JavascriptStyleSet
     style.StyleSetName = 'EditorStyle'
-
-    let selectedPackage
 
     function fetchGithub() {
         return request('GET',githubUrl)
@@ -147,27 +212,9 @@ function main() {
         return o
     }
 
-    function makeCommands() {
-        let context = JavascriptMenuLibrary.NewBindingContext('UnrealJS' + extensionId,'Test menu','','EditorStyle');
-        let commands = new JavascriptUICommands
-
-        let hasPendingExecution
-
-        function init() {
-            commands.BindingContext = context
-            commands.Commands = [
-            {
-                Id: 'install',
-                FriendlyName : 'Install this package',
-                Description : 'Install this package',
-                ActionType : 'Button'
-            },
-            {
-                Id: 'uninstall',
-                FriendlyName : 'Remove this package',
-                Description : 'Remove this package',
-                ActionType : 'Button'
-            },
+    let contexts = makeContext({
+        Id:'UnrealJS_Contexts',
+        Commands:[
             {
                 Id: 'debug',
                 FriendlyName : 'Set as debug context',
@@ -180,38 +227,26 @@ function main() {
                 Description : 'Reset to normal context',
                 ActionType : 'Button'
             }
-            ]
-            commands.Initialize()
-        }
+        ]
+    })
 
-        commands.OnExecuteAction = (what) => {
-            hasPendingExecution = true
-            selectedPackage.actions[what]()
-                .then(_ => console.log(`${what} completed`))
-                .catch(e => console.error(String(e)))
-                .then(_ => hasPendingExecution = false)
-        }
-
-        commands.OnCanExecuteAction = (what) => {
-            return !hasPendingExecution && selectedPackage && !!selectedPackage.actions[what]
-        }
-
-        function uninit() {
-            commands.Uninitialize();
-            context.Destroy();
-        }
-
-        init();
-
-        commands.destroy = uninit
-
-        return commands
-    }
-
-    let commands = makeCommands()
-
-    let commandList = JavascriptMenuLibrary.CreateUICommandList()
-    commands.Bind(commandList)
+    let packages = makeContext({
+        Id:'UnrealJS_Packages',
+        Commands: [
+            {
+                Id: 'install',
+                FriendlyName : 'Install this package',
+                Description : 'Install this package',
+                ActionType : 'Button'
+            },
+            {
+                Id: 'uninstall',
+                FriendlyName : 'Remove this package',
+                Description : 'Remove this package',
+                ActionType : 'Button'
+            }
+        ]
+    })
 
     let throbber
     makeWindow("$window",
@@ -223,6 +258,177 @@ function main() {
         E.refreshPackages = _ => E.emit('refreshPackages')
         E.refreshContexts = _ => E.emit('refreshContexts')
         let root = {}
+
+        function contextList() {
+            return UMG(JavascriptListView,{
+                ItemHeight:20,
+                Columns:[
+                    {
+                        Id: 'Name',
+                        Width: 0.7
+                    },
+                    {
+                        Id: 'Status',
+                        Width: 0.3
+                    }
+                ],
+                OnContextMenuOpening: contexts.contextMenu,
+                OnGenerateRowEvent:(item,column) => I(
+                    UMG.text({Font:font},column == 'Name' ?
+                        item ? item.target : 'Context' :
+                        item ? item.status : 'Status'
+                    )
+                ),
+                $link:elem => {
+                    elem.JavascriptContext = Context
+                    elem.alive = true
+                    elem.proxy = {
+                        OnSelectionChanged: item => contexts.setCurrent(item)
+                    }
+
+                    let old
+                    function refresh() {
+                        function fetch() {
+                            let out
+                            {
+                                out = JavascriptLibrary.GetObjectsOfClass(JavascriptContext, [], false, 0x10).Results
+                                out = out.map(x => [x.GetDisplayName(),x.IsDebugContext() ? 'Debug' : ''])
+                                let cur = _.flatten(out).join(',')
+                                if (cur != old) {
+                                    old = cur
+                                    out = out.map(x => {
+                                        let y = new JavascriptObject()
+                                        let [a,b] = x
+                                        y.target = x[0]
+                                        y.status = x[1]
+
+                                        function find() {
+                                            let out = JavascriptLibrary.GetObjectsOfClass(JavascriptContext, [], false, 0x10).Results
+                                            let x = _.filter(out,x => x.GetDisplayName() == y.target)
+                                            if (x.length) {
+                                                return Promise.resolve(x[0])
+                                            } else {
+                                                return Promise.reject(new Error('not found'))
+                                            }
+                                        }
+
+                                        function refreshContexts() {
+                                            E.refreshContexts()
+                                            return Promise.resolve()
+                                        }
+
+                                        y.actions = {
+                                            debug : _ => find().then(obj=>obj.SetAsDebugContext()).then(gc).then(refreshContexts),
+                                            undebug : _ => find().then(obj=>obj.ResetAsDebugContext()).then(gc).then(refreshContexts),
+                                        }
+
+                                        if (y.status == 'Debug') {
+                                            delete y.actions.debug
+                                        } else {
+                                            delete y.actions.undebug
+                                        }
+                                        return y
+                                    })
+                                } else {
+                                    out = null
+                                }
+                            }
+                            gc()
+                            return out
+                        }
+                        let cur = fetch()
+                        if (cur) {
+                            root.Contexts = elem.Items = cur
+                            elem.RequestListRefresh()
+                        }
+                    }
+
+                    function tick() {
+                        if (!elem.alive) return
+                        refresh()
+                        setTimeout(tick,1000)
+                    }
+
+                    elem.refresh = refresh
+
+                    tick()
+                    E.on('refreshContexts',elem.refresh)
+                },
+                $unlink:elem => {
+                    elem.alive = false
+                    E.removeListener('refreshContexts',elem.refresh)
+                }
+            })
+        }
+
+        function packageList(opts) {
+            return UMG.div(
+                {
+                    Slot:opts.Slot
+                },
+                    UMG(JavascriptListView,{
+                        ItemHeight:20,
+                        OnContextMenuOpening: packages.contextMenu,
+                        OnGenerateRowEvent:(item,column) => {
+                            const isName = column == 'Name'
+                            return I(
+                                UMG.text(
+                                    {
+                                        Font:font,
+                                        ToolTipText: isName && item ? item.package.details : ''
+                                    },
+                                    isName ?
+                                        (item ? item.package.name : 'Package name') :
+                                        (item ? item.installed ? "Installed" : "" : 'Status')
+                                )
+                            )
+                        },
+                        Columns:[
+                            {
+                                Id: 'Name',
+                                Width: 0.7
+                            },
+                            {
+                                Id: 'Status',
+                                Width: 0.3
+                            }
+                        ],
+                        $link:elem => {
+                            elem.JavascriptContext = Context
+                            elem.alive = true
+                            elem.proxy = {
+                                OnDoubleClick : item => item.actions.install(),
+                                OnSelectionChanged: item => packages.setCurrent(item)
+                            }
+
+                            function refresh() {
+                                throbber.SetVisibility('Visible')
+                                registry.fetch().then(packages => {
+                                    if (!elem.alive) throw new Error("interrupted")
+                                    // root.Items = ... is necessary to keep these items not to be collected by GC
+                                    // because JavascriptObject has a JS object attached.
+                                    root.Items = elem.Items = packages.map(x => packageToObject(x,E))
+                                    throbber.SetVisibility('Hidden')
+                                    elem.RequestListRefresh()
+                                })
+                            }
+
+                            process.nextTick(refresh)
+                            elem.refresh = refresh
+
+                            E.on('refreshPackages',elem.refresh)
+                        },
+                        $unlink:elem => {
+                            elem.alive = false
+                            E.removeListener('refreshPackages',elem.refresh)
+                        }
+                    }),
+                    UMG(Throbber,{
+                        'Slot.HorizontalAlignment':'HAlign_Center',
+                        $link:elem => throbber = elem
+                    })
+                )
+        }
         return UMG(SizeBox,{WidthOverride:400},
             UMG.div({Size:{Rule:'Fill'}},
                 UMG.span({},
@@ -241,7 +447,8 @@ function main() {
                         },
                         $unlink:elem => {
                             elem.alive = false
-                            commands.destroy()
+                            contexts.destroy()
+                            packages.destroy()
                         }
                     })
                 ),
@@ -254,202 +461,12 @@ ${getNumClassesExported()} classes exported`
                 ),
                 UMG(SizeBox,{HeightOverride:20}),
                 UMG(SizeBox,{HeightOverride:100},
-                    UMG(JavascriptListView,{
-                        ItemHeight:20,
-                        Columns:[
-                            {
-                                Id: 'Name',
-                                Width: 0.7
-                            },
-                            {
-                                Id: 'Status',
-                                Width: 0.3
-                            }
-                        ],
-                        OnContextMenuOpening: elem => I(
-                            UMG(JavascriptMultiBox,{
-                                CommandList : commandList,
-                                OnHook : __ => {
-                                    JavascriptMenuLibrary.CreateMenuBuilder(commandList,true,builder => {
-                                        builder.AddToolBarButton(commands.CommandInfos[2])
-                                        builder.AddToolBarButton(commands.CommandInfos[3])
-                                        JavascriptMultiBox.Bind(builder)
-                                    })
-                                }
-                            })
-                        ),
-                        OnGenerateRowEvent:(item,column) => I(
-                            UMG.text({Font:font},column == 'Name' ?
-                                item ? item.target : 'Context' :
-                                item ? item.status : 'Status'
-                            )
-                        ),
-                        $link:elem => {
-                            elem.JavascriptContext = Context
-                            elem.alive = true
-                            elem.proxy = {
-                                OnSelectionChanged: item => {
-                                    selectedPackage = item
-                                },
-                            }
-
-                            let old
-                            function refresh() {
-                                function fetch() {
-                                    let out
-                                    {
-                                        out = JavascriptLibrary.GetObjectsOfClass(JavascriptContext, [], false, 0x10).Results
-                                        out = out.map(x => [x.GetDisplayName(),x.IsDebugContext() ? 'Debug' : ''])
-                                        let cur = _.flatten(out).join(',')
-                                        if (cur != old) {
-                                            old = cur
-                                            out = out.map(x => {
-                                                let y = new JavascriptObject()
-                                                let [a,b] = x
-                                                y.target = x[0]
-                                                y.status = x[1]
-
-                                                function find() {
-                                                    let out = JavascriptLibrary.GetObjectsOfClass(JavascriptContext, [], false, 0x10).Results
-                                                    let x = _.filter(out,x => x.GetDisplayName() == y.target)
-                                                    if (x.length) {
-                                                        return Promise.resolve(x[0])
-                                                    } else {
-                                                        return Promise.reject(new Error('not found'))
-                                                    }
-                                                }
-
-                                                function refreshContexts() {
-                                                    E.refreshContexts()
-                                                    return Promise.resolve()
-                                                }
-
-                                                y.actions = {
-                                                    debug : _ => find().then(obj=>obj.SetAsDebugContext()).then(gc).then(refreshContexts),
-                                                    undebug : _ => find().then(obj=>obj.ResetAsDebugContext()).then(gc).then(refreshContexts),
-                                                }
-
-                                                if (y.status == 'Debug') {
-                                                    delete y.actions.debug
-                                                } else {
-                                                    delete y.actions.undebug
-                                                }
-                                                return y
-                                            })
-                                        } else {
-                                            out = null
-                                        }
-                                    }
-                                    gc()
-                                    return out
-                                }
-                                let cur = fetch()
-                                if (cur) {
-                                    root.Contexts = elem.Items = cur
-                                    elem.RequestListRefresh()
-                                }
-                            }
-
-                            function tick() {
-                                if (!elem.alive) return
-                                refresh()
-                                setTimeout(tick,1000)
-                            }
-
-                            elem.refresh = refresh
-
-                            tick()
-                            E.on('refreshContexts',elem.refresh)
-                        },
-                        $unlink:elem => {
-                            elem.alive = false
-                            E.removeListener('refreshContexts',elem.refresh)
-                        }
-                    })
+                    contextList()
                 ),
                 UMG(SizeBox,{HeightOverride:200},
-                    UMG.div(
-                    {
-                        'Slot.HorizontalAlignment':'HAlign_Fill',
-                        'Slot.VerticalAlignment':'VAlign_Fill'
-                    },
-                        UMG(JavascriptListView,{
-                            ItemHeight:20,
-                            OnContextMenuOpening: elem => I(
-                                UMG(JavascriptMultiBox,{
-                                    CommandList : commandList,
-                                    OnHook : __ => {
-                                        JavascriptMenuLibrary.CreateMenuBuilder(commandList,true,builder => {
-                                            builder.AddToolBarButton(commands.CommandInfos[0])
-                                            builder.AddToolBarButton(commands.CommandInfos[1])
-                                            JavascriptMultiBox.Bind(builder)
-                                        })
-                                    }
-                                })
-                            ),
-                            OnGenerateRowEvent:(item,column) => {
-                                const isName = column == 'Name'
-                                return I(
-                                    UMG.text(
-                                        {
-                                            Font:font,
-                                            ToolTipText: isName && item ? item.package.details : ''
-                                        },
-                                        isName ?
-                                            (item ? item.package.name : 'Package name') :
-                                            (item ? item.installed ? "Installed" : "" : 'Status')
-                                    )
-                                )
-                            },
-                            Columns:[
-                                {
-                                    Id: 'Name',
-                                    Width: 0.7
-                                },
-                                {
-                                    Id: 'Status',
-                                    Width: 0.3
-                                }
-                            ],
-                            $link:elem => {
-                                elem.JavascriptContext = Context
-                                elem.alive = true
-                                elem.proxy = {
-                                    OnDoubleClick : item => {
-                                        item.actions.install()
-                                    },
-                                    OnSelectionChanged: item => {
-                                        selectedPackage = item
-                                    },
-                                }
-
-                                function refresh() {
-                                    throbber.SetVisibility('Visible')
-                                    registry.fetch().then(packages => {
-                                        if (!elem.alive) throw new Error("interrupted")
-                                        // root.Items = ... is necessary to keep these items not to be collected by GC
-                                        // because JavascriptObject has a JS object attached.
-                                        root.Items = elem.Items = packages.map(x => packageToObject(x,E))
-                                        throbber.SetVisibility('Hidden')
-                                        elem.RequestListRefresh()
-                                    })
-                                }
-
-                                process.nextTick(refresh)
-                                elem.refresh = refresh
-
-                                E.on('refreshPackages',elem.refresh)
-                            },
-                            $unlink:elem => {
-                                elem.alive = false
-                                E.removeListener('refreshPackages',elem.refresh)
-                            }
-                        }),
-                        UMG(Throbber,{
-                            'Slot.HorizontalAlignment':'HAlign_Center',
-                            $link:elem => throbber = elem
-                        })
-                    )
+                    packageList({Slot:{
+                        HorizontalAlignment:'HAlign_Fill',
+                        VerticalAlignment:'VAlign_Fill'}})
                 ),
 
                 UMG(Spacer,{'Slot.Size.Rule' : 'Fill'}),
