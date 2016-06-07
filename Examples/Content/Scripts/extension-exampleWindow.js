@@ -56,6 +56,15 @@ function main() {
         }
 
         function installPackage() {
+            var note = new JavascriptNotification
+            note.Text = `Installing ${details}`
+            note.Text = `Installing ${details}`
+            note.bFireAndForget = false
+            note.bUseImage = true
+            note.Image = style.GetBrush('LevelEditor.Build')
+            note.Pending()
+            note.Fire()
+
             return new Promise(resolve => {
                 JavascriptLibrary.MakeDirectory(workDir,false)
                 let p = JavascriptProcess.Create(
@@ -72,7 +81,17 @@ function main() {
                     process.nextTick(tick)
                 }
                 tick()
-            }).then(refreshPackages)
+            })
+            .then(refreshPackages)
+            .then(_ => {
+                note.Success()
+                note.Fadeout()
+            })
+            .catch(e => {
+                note.Fail()
+                note.Fadeout()
+                throw e
+            })
         }
         function removePackage() {
             return new Promise((resolve,reject) => {
@@ -115,6 +134,18 @@ function main() {
                 FriendlyName : 'Remove this package',
                 Description : 'Remove this package',
                 ActionType : 'Button'
+            },
+            {
+                Id: 'debug',
+                FriendlyName : 'Set as debug context',
+                Description : 'Set as debug context',
+                ActionType : 'Button'
+            },
+            {
+                Id: 'undebug',
+                FriendlyName : 'Reset to normal context',
+                Description : 'Reset to normal context',
+                ActionType : 'Button'
             }
             ]
             commands.Initialize()
@@ -156,6 +187,7 @@ function main() {
     })(finish => {
         let E = new EventEmitter()
         E.refreshPackages = _ => E.emit('refreshPackages')
+        E.refreshContexts = _ => E.emit('refreshContexts')
         let root = {}
         return UMG(SizeBox,{WidthOverride:400},
             UMG.div({Size:{Rule:'Fill'}},
@@ -194,15 +226,43 @@ ${getNumClassesExported()} classes exported`
                             {
                                 Id: 'Name',
                                 Width: 0.7
+                            },
+                            {
+                                Id: 'Status',
+                                Width: 0.3
                             }
                         ],
-                        OnGenerateRowEvent:item => {
+                        OnContextMenuOpening: elem => {
+                            let design =
+                                UMG(JavascriptMultiBox,{
+                                    CommandList : commandList,
+                                    OnHook : __ => {
+                                        let builder = JavascriptMenuLibrary.CreateMenuBuilder(commandList,true,builder => {
+                                            builder.AddToolBarButton(commands.CommandInfos[2])
+                                            builder.AddToolBarButton(commands.CommandInfos[3])
+                                            JavascriptMultiBox.Bind(builder)
+                                        })
+                                    }
+                                })
+
+                            return I(design)
+                        },
+                        OnGenerateRowEvent:(item,column) => {
                             return I(
-                                UMG.text({Font:font},item ? item.target : 'Context')
+                                UMG.text({Font:font},column == 'Name' ? 
+                                    item ? item.target : 'Context' :
+                                    item ? item.status : 'Status' 
+                                )
                             )
                         },
                         $link:elem => {
-                            elem.alive = true
+                            elem.JavascriptContext = Context
+                            elem.alive = true                            
+                            elem.proxy = {
+                                OnSelectionChanged: item => {
+                                    selectedPackage = item
+                                }, 
+                            }
 
                             let old
                             function refresh() {
@@ -210,13 +270,41 @@ ${getNumClassesExported()} classes exported`
                                     let out
                                     {
                                         out = JavascriptLibrary.GetObjectsOfClass(JavascriptContext, [], false, 0x10).Results
-                                        out = out.map(x => x.GetDisplayName())
-                                        let cur = out.join(',')
+                                        out = out.map(x => [x.GetDisplayName(),x.IsDebugContext() ? 'Debug' : ''])
+                                        let cur = _.flatten(out).join(',')
                                         if (cur != old) {
                                             old = cur
-                                            out = out.map(x => {
+                                            out = out.map(x => {                                                
                                                 let y = new JavascriptObject()
-                                                y.target = x
+                                                let [a,b] = x
+                                                y.target = x[0]
+                                                y.status = x[1]
+
+                                                function find() {
+                                                    let out = JavascriptLibrary.GetObjectsOfClass(JavascriptContext, [], false, 0x10).Results
+                                                    let x = _.filter(out,x => x.GetDisplayName() == y.target)
+                                                    if (x.length) {
+                                                        return Promise.resolve(x[0])
+                                                    } else {
+                                                        return Promise.reject(new Error('not found'))
+                                                    }
+                                                }
+
+                                                function refreshContexts() {
+                                                    E.refreshContexts()
+                                                    return Promise.resolve()
+                                                }
+
+                                                y.actions = {
+                                                    debug : _ => find().then(obj=>obj.SetAsDebugContext()).then(gc).then(refreshContexts),
+                                                    undebug : _ => find().then(obj=>obj.ResetAsDebugContext()).then(gc).then(refreshContexts),
+                                                }
+
+                                                if (y.status == 'Debug') { 
+                                                    delete y.actions.debug
+                                                } else {
+                                                    delete y.actions.undebug
+                                                }
                                                 return y
                                             })
                                         } else {
@@ -228,7 +316,7 @@ ${getNumClassesExported()} classes exported`
                                 }
                                 let cur = fetch()
                                 if (cur) {
-                                    elem.Items = cur
+                                    root.Contexts = elem.Items = cur
                                     elem.RequestListRefresh()
                                 }
                             }
@@ -239,10 +327,14 @@ ${getNumClassesExported()} classes exported`
                                 setTimeout(tick,1000)
                             }
 
+                            elem.refresh = refresh
+
                             tick()
+                            E.on('refreshContexts',elem.refresh)
                         },
                         $unlink:elem => {
                             elem.alive = false
+                            E.removeListener('refreshContexts',elem.refresh)
                         }
                     })
                 ),
