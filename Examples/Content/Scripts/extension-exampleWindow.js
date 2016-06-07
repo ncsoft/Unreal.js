@@ -6,6 +6,8 @@ const githubUrl = 'https://api.github.com/repos/ncsoft/Unreal.js'
 const homepageUrl = "https://github.com/ncsoft/Unreal.js"
 const svnPath = `${Context.GetDir('Engine')}/Binaries/ThirdParty/svn/Win64/svn`
 
+let extensionId = global.$extensionUnreal = (global.$extensionUnreal || 0) + 1
+
 function main() {
     const UMG = require('UMG')
     let {EventEmitter} = require('events')
@@ -22,6 +24,7 @@ function main() {
     style.StyleSetName = 'EditorStyle'
 
     let workDir = Context.GetDir('GameContent')+'/Scripts/Downloaded'
+    let selectedPackage    
 
     function fetchGithub() {
         return request('GET',githubUrl)
@@ -35,28 +38,116 @@ function main() {
         return _.filter(_.keys(global),x=>!!global[x].StaticClass).length
     }
 
-    function installPackage(pack) {
-        return JavascriptProcess.Create(
-            svnPath,
-            `co ${pack.details}`,
-            false,
-            false,
-            false,0,workDir).Wait()
-    }
-
-    function packageToObject(p) {
+    function packageToObject(p,E) {
         let o = new JavascriptObject()
         o.package = p
         let details = p.details
         let split = details.lastIndexOf('/')
         o.installed = false
+
+        const packageDir = workDir + details.substr(split)
         if (split >= 0) {
-            o.installed = JavascriptLibrary.DirectoryExists(workDir + details.substr(split))
+            o.installed = JavascriptLibrary.DirectoryExists(packageDir)
+        }
+
+        function refreshPackages() {
+            E.refreshPackages()
+            return Promise.resolve()
+        }
+
+        function installPackage() {
+            return new Promise(resolve => {
+                JavascriptLibrary.MakeDirectory(workDir,false)
+                let p = JavascriptProcess.Create(
+                    svnPath,
+                    `co ${details}`,
+                    false,
+                    false,
+                    false,0,workDir)
+                function tick() {
+                    if (!p.IsRunning()) {
+                        resolve()
+                        return
+                    }
+                    process.nextTick(tick)
+                }
+                tick()
+            }).then(refreshPackages)
+        }
+        function removePackage() {
+            return new Promise((resolve,reject) => {
+                if (JavascriptLibrary.DeleteDirectory(packageDir,true,true)) {
+                    resolve()
+                } else {
+                    reject(new Error('delete failed'))
+                }
+            }).then(refreshPackages)
+        }
+        o.actions = {
+            install: installPackage,
+            uninstall : removePackage
+        }
+        if (o.installed) {
+            delete o.actions.install
+        } else {
+            delete o.actions.uninstall
         }
         return o
     }
 
+    function makeCommands() {
+        let context = JavascriptMenuLibrary.NewBindingContext('UnrealJS' + extensionId,'Test menu','','EditorStyle');
+        let commands = new JavascriptUICommands
+
+        let hasPendingExecution
+
+        function init() {
+            commands.BindingContext = context
+            commands.Commands = [
+            {
+                Id: 'install',
+                FriendlyName : 'Install this package',
+                Description : 'Install this package',
+                ActionType : 'Button'
+            },
+            {
+                Id: 'uninstall',
+                FriendlyName : 'Remove this package',
+                Description : 'Remove this package',
+                ActionType : 'Button'
+            }
+            ]
+            commands.Initialize()
+        }
+
+        commands.OnExecuteAction = (what) => {
+            hasPendingExecution = true
+            selectedPackage.actions[what]()
+                .then(_ => console.log(`${what} completed`))
+                .catch(e => console.error(String(e)))
+                .then(_ => hasPendingExecution = false)
+        }
+
+        commands.OnCanExecuteAction = (what) => {
+            return !hasPendingExecution && selectedPackage && !!selectedPackage.actions[what]
+        }
+
+        function uninit() {
+            commands.Uninitialize();
+            context.Destroy();
+        }
+
+        init();
+
+        commands.destroy = uninit
+
+        return commands
+    }
+
+    let commands = makeCommands()
+
     let commandList = JavascriptMenuLibrary.CreateUICommandList()
+    commands.Bind(commandList)
 
     makeWindow("$window",
     {
@@ -64,6 +155,8 @@ function main() {
         Title:'Unreal.js'
     })(finish => {
         let E = new EventEmitter()
+        E.refreshPackages = _ => E.emit('refreshPackages')
+        let root = {}
         return UMG(SizeBox,{WidthOverride:400},
             UMG.div({Size:{Rule:'Fill'}},
                 UMG.span({},
@@ -82,6 +175,7 @@ function main() {
                         },
                         $unlink:elem => {
                             elem.alive = false
+                            commands.destroy()
                         }
                     })
                 ),
@@ -122,7 +216,6 @@ ${getNumClassesExported()} classes exported`
                                             old = cur
                                             out = out.map(x => {
                                                 let y = new JavascriptObject()
-                                                console.log(x)
                                                 y.target = x
                                                 return y
                                             })
@@ -156,14 +249,20 @@ ${getNumClassesExported()} classes exported`
                 UMG(SizeBox,{HeightOverride:200},
                     UMG(JavascriptListView,{
                         ItemHeight:20,
-                        OnContextMenuOpening:_ => {
-                            let widget
-                            commandList.CreateMenuBuilder(false,_builder => {
-                                let builder = JavascriptMenuBuilder.C(_builder)
-                                builder.BeginSection("test")
-                                builder.EndSection()
-                            })
-                            return null
+                        OnContextMenuOpening: elem => {
+                            let design =
+                                UMG(JavascriptMultiBox,{
+                                    CommandList : commandList,
+                                    OnHook : __ => {
+                                        let builder = JavascriptMenuLibrary.CreateMenuBuilder(commandList,true,builder => {
+                                            builder.AddToolBarButton(commands.CommandInfos[0])
+                                            builder.AddToolBarButton(commands.CommandInfos[1])
+                                            JavascriptMultiBox.Bind(builder)
+                                        })
+                                    }
+                                })
+
+                            return I(design)
                         },
                         OnGenerateRowEvent:(item,column) => {
                             const isName = column == 'Name'
@@ -193,19 +292,32 @@ ${getNumClassesExported()} classes exported`
                             elem.JavascriptContext = Context
                             elem.alive = true
                             elem.proxy = {
-                                OnDoubleClick : item => {
-                                    JavascriptLibrary.MakeDirectory(workDir,false)
-                                    installPackage(item.package)
-                                }
+                                OnDoubleClick : item => {                                    
+                                    item.actions.install()
+                                },
+                                OnSelectionChanged: item => {
+                                    selectedPackage = item
+                                },
                             }
-                            fetchPackages().then(repository => {
-                                if (!elem.alive) throw new Error("interrupted")
-                                elem.Items = repository.packages.map(packageToObject)
-                                elem.RequestListRefresh()
-                            })
+
+                            function refresh() {
+                                fetchPackages().then(repository => {
+                                    if (!elem.alive) throw new Error("interrupted")
+                                    // root.Items = ... is necessary to keep these items not to be collected by GC
+                                    // because JavascriptObject has a JS object attached.
+                                    root.Items = elem.Items = repository.packages.map(x => packageToObject(x,E))
+                                    elem.RequestListRefresh()
+                                })
+                            }
+
+                            refresh()
+                            elem.refresh = refresh
+
+                            E.on('refreshPackages',elem.refresh)
                         },
                         $unlink:elem => {
                             elem.alive = false
+                            E.removeListener('refreshPackages',elem.refresh)
                         }
                     })
                 ),
