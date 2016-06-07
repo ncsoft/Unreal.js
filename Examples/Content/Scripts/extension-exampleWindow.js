@@ -20,7 +20,7 @@ function packageRegistryService() {
 
         function install() {
             return makeDir()
-                .then(_ => new Promise(resolve => {                
+                .then(_ => new Promise(resolve => {
                     let p = JavascriptProcess.Create(
                         svnPath,
                         `co ${details}`,
@@ -213,6 +213,7 @@ function main() {
     let commandList = JavascriptMenuLibrary.CreateUICommandList()
     commands.Bind(commandList)
 
+    let throbber
     makeWindow("$window",
     {
         SizingRule:'AutoSized',
@@ -367,76 +368,88 @@ ${getNumClassesExported()} classes exported`
                     })
                 ),
                 UMG(SizeBox,{HeightOverride:200},
-                    UMG(JavascriptListView,{
-                        ItemHeight:20,
-                        OnContextMenuOpening: elem => I(
-                            UMG(JavascriptMultiBox,{
-                                CommandList : commandList,
-                                OnHook : __ => {
-                                    JavascriptMenuLibrary.CreateMenuBuilder(commandList,true,builder => {
-                                        builder.AddToolBarButton(commands.CommandInfos[0])
-                                        builder.AddToolBarButton(commands.CommandInfos[1])
-                                        JavascriptMultiBox.Bind(builder)
+                    UMG.div(
+                    {
+                        'Slot.HorizontalAlignment':'HAlign_Fill',
+                        'Slot.VerticalAlignment':'VAlign_Fill'
+                    },
+                        UMG(JavascriptListView,{
+                            ItemHeight:20,
+                            OnContextMenuOpening: elem => I(
+                                UMG(JavascriptMultiBox,{
+                                    CommandList : commandList,
+                                    OnHook : __ => {
+                                        JavascriptMenuLibrary.CreateMenuBuilder(commandList,true,builder => {
+                                            builder.AddToolBarButton(commands.CommandInfos[0])
+                                            builder.AddToolBarButton(commands.CommandInfos[1])
+                                            JavascriptMultiBox.Bind(builder)
+                                        })
+                                    }
+                                })
+                            ),
+                            OnGenerateRowEvent:(item,column) => {
+                                const isName = column == 'Name'
+                                return I(
+                                    UMG.text(
+                                        {
+                                            Font:font,
+                                            ToolTipText: isName && item ? item.package.details : ''
+                                        },
+                                        isName ?
+                                            (item ? item.package.name : 'Package name') :
+                                            (item ? item.installed ? "Installed" : "" : 'Status')
+                                    )
+                                )
+                            },
+                            Columns:[
+                                {
+                                    Id: 'Name',
+                                    Width: 0.7
+                                },
+                                {
+                                    Id: 'Status',
+                                    Width: 0.3
+                                }
+                            ],
+                            $link:elem => {
+                                elem.JavascriptContext = Context
+                                elem.alive = true
+                                elem.proxy = {
+                                    OnDoubleClick : item => {
+                                        item.actions.install()
+                                    },
+                                    OnSelectionChanged: item => {
+                                        selectedPackage = item
+                                    },
+                                }
+
+                                function refresh() {
+                                    throbber.SetVisibility('Visible')
+                                    registry.fetch().then(packages => {
+                                        if (!elem.alive) throw new Error("interrupted")
+                                        // root.Items = ... is necessary to keep these items not to be collected by GC
+                                        // because JavascriptObject has a JS object attached.
+                                        root.Items = elem.Items = packages.map(x => packageToObject(x,E))
+                                        throbber.SetVisibility('Hidden')
+                                        elem.RequestListRefresh()
                                     })
                                 }
-                            })
-                        ),
-                        OnGenerateRowEvent:(item,column) => {
-                            const isName = column == 'Name'
-                            return I(
-                                UMG.text(
-                                    {
-                                        Font:font,
-                                        ToolTipText: isName && item ? item.package.details : ''
-                                    },
-                                    isName ?
-                                        (item ? item.package.name : 'Package name') :
-                                        (item ? item.installed ? "Installed" : "" : 'Status')
-                                )
-                            )
-                        },
-                        Columns:[
-                            {
-                                Id: 'Name',
-                                Width: 0.7
+
+                                process.nextTick(refresh)
+                                elem.refresh = refresh
+
+                                E.on('refreshPackages',elem.refresh)
                             },
-                            {
-                                Id: 'Status',
-                                Width: 0.3
+                            $unlink:elem => {
+                                elem.alive = false
+                                E.removeListener('refreshPackages',elem.refresh)
                             }
-                        ],
-                        $link:elem => {
-                            elem.JavascriptContext = Context
-                            elem.alive = true
-                            elem.proxy = {
-                                OnDoubleClick : item => {
-                                    item.actions.install()
-                                },
-                                OnSelectionChanged: item => {
-                                    selectedPackage = item
-                                },
-                            }
-
-                            function refresh() {
-                                registry.fetch().then(packages => {
-                                    if (!elem.alive) throw new Error("interrupted")
-                                    // root.Items = ... is necessary to keep these items not to be collected by GC
-                                    // because JavascriptObject has a JS object attached.
-                                    root.Items = elem.Items = packages.map(x => packageToObject(x,E))
-                                    elem.RequestListRefresh()
-                                })
-                            }
-
-                            refresh()
-                            elem.refresh = refresh
-
-                            E.on('refreshPackages',elem.refresh)
-                        },
-                        $unlink:elem => {
-                            elem.alive = false
-                            E.removeListener('refreshPackages',elem.refresh)
-                        }
-                    })
+                        }),
+                        UMG(Throbber,{
+                            'Slot.HorizontalAlignment':'HAlign_Center',
+                            $link:elem => throbber = elem
+                        })
+                    )
                 ),
 
                 UMG(Spacer,{'Slot.Size.Rule' : 'Fill'}),
