@@ -1,14 +1,80 @@
 /// <reference path="typings/ue.d.ts" />
 "use strict"
 
-const repositoryUrl = 'https://raw.githubusercontent.com/ncsoft/Unreal.js-packages/master/repository.json'
+function packageRegistryService() {
+    const repositoryUrl = 'https://raw.githubusercontent.com/ncsoft/Unreal.js-packages/master/repository.json'
+    const svnPath = `${Context.GetDir('Engine')}/Binaries/ThirdParty/svn/Win64/svn`
+
+    const request = require('request')
+    let workDir = Context.GetDir('GameContent')+'/Scripts/Downloaded'
+
+    function makeDir() {
+        JavascriptLibrary.MakeDirectory(workDir,false)
+        return Promise.resolve()
+    }
+
+    function packageDetail(p) {
+        let {name,details} = p
+        let split = details.lastIndexOf('/')
+        let packageDir = workDir + details.substr(split)
+
+        function install() {
+            return makeDir()
+                .then(_ => new Promise(resolve => {                
+                    let p = JavascriptProcess.Create(
+                        svnPath,
+                        `co ${details}`,
+                        false,
+                        false,
+                        false,0,workDir)
+                    function tick() {
+                        if (!p.IsRunning()) {
+                            resolve()
+                            return
+                        }
+                        process.nextTick(tick)
+                    }
+                    tick()
+                })
+            )
+        }
+
+        function remove() {
+            return new Promise((resolve,reject) => {
+                if (JavascriptLibrary.DeleteDirectory(packageDir,true,true)) {
+                    resolve()
+                } else {
+                    reject(new Error('delete failed'))
+                }
+            })
+        }
+        return {
+            packageDir : packageDir,
+            details : details,
+            name : name,
+            installed : JavascriptLibrary.DirectoryExists(packageDir),
+            install : install,
+            remove : remove
+        }
+    }
+
+    function fetchPackages() {
+        return request("GET",repositoryUrl)
+            .then(repository => repository.packages.map(packageDetail))
+    }
+
+    return {
+        fetch: fetchPackages
+    }
+}
+
 const githubUrl = 'https://api.github.com/repos/ncsoft/Unreal.js'
 const homepageUrl = "https://github.com/ncsoft/Unreal.js"
-const svnPath = `${Context.GetDir('Engine')}/Binaries/ThirdParty/svn/Win64/svn`
 
 let extensionId = global.$extensionUnreal = (global.$extensionUnreal || 0) + 1
 
 function main() {
+    let registry = packageRegistryService()
     const UMG = require('UMG')
     let {EventEmitter} = require('events')
 
@@ -23,15 +89,10 @@ function main() {
     const style = new JavascriptStyleSet
     style.StyleSetName = 'EditorStyle'
 
-    let workDir = Context.GetDir('GameContent')+'/Scripts/Downloaded'
-    let selectedPackage    
+    let selectedPackage
 
     function fetchGithub() {
         return request('GET',githubUrl)
-    }
-
-    function fetchPackages() {
-        return request("GET",repositoryUrl)
     }
 
     function getNumClassesExported() {
@@ -42,13 +103,7 @@ function main() {
         let o = new JavascriptObject()
         o.package = p
         let details = p.details
-        let split = details.lastIndexOf('/')
-        o.installed = false
-
-        const packageDir = workDir + details.substr(split)
-        if (split >= 0) {
-            o.installed = JavascriptLibrary.DirectoryExists(packageDir)
-        }
+        o.installed = p.installed
 
         function refreshPackages() {
             E.refreshPackages()
@@ -58,49 +113,27 @@ function main() {
         function installPackage() {
             var note = new JavascriptNotification
             note.Text = `Installing ${details}`
-            note.Text = `Installing ${details}`
             note.bFireAndForget = false
             note.bUseImage = true
             note.Image = style.GetBrush('LevelEditor.Build')
             note.Pending()
             note.Fire()
 
-            return new Promise(resolve => {
-                JavascriptLibrary.MakeDirectory(workDir,false)
-                let p = JavascriptProcess.Create(
-                    svnPath,
-                    `co ${details}`,
-                    false,
-                    false,
-                    false,0,workDir)
-                function tick() {
-                    if (!p.IsRunning()) {
-                        resolve()
-                        return
-                    }
-                    process.nextTick(tick)
-                }
-                tick()
-            })
-            .then(refreshPackages)
-            .then(_ => {
-                note.Success()
-                note.Fadeout()
-            })
-            .catch(e => {
-                note.Fail()
-                note.Fadeout()
-                throw e
-            })
+            return o.package.install()
+                .then(refreshPackages)
+                .then(_ => {
+                    note.Success()
+                    note.Fadeout()
+                })
+                .catch(e => {
+                    note.Fail()
+                    note.Fadeout()
+                    console.error(String(e),e.stack)
+                    throw e
+                })
         }
         function removePackage() {
-            return new Promise((resolve,reject) => {
-                if (JavascriptLibrary.DeleteDirectory(packageDir,true,true)) {
-                    resolve()
-                } else {
-                    reject(new Error('delete failed'))
-                }
-            }).then(refreshPackages)
+            return p.remove().then(refreshPackages)
         }
         o.actions = {
             install: installPackage,
@@ -232,36 +265,31 @@ ${getNumClassesExported()} classes exported`
                                 Width: 0.3
                             }
                         ],
-                        OnContextMenuOpening: elem => {
-                            let design =
-                                UMG(JavascriptMultiBox,{
-                                    CommandList : commandList,
-                                    OnHook : __ => {
-                                        let builder = JavascriptMenuLibrary.CreateMenuBuilder(commandList,true,builder => {
-                                            builder.AddToolBarButton(commands.CommandInfos[2])
-                                            builder.AddToolBarButton(commands.CommandInfos[3])
-                                            JavascriptMultiBox.Bind(builder)
-                                        })
-                                    }
-                                })
-
-                            return I(design)
-                        },
-                        OnGenerateRowEvent:(item,column) => {
-                            return I(
-                                UMG.text({Font:font},column == 'Name' ? 
-                                    item ? item.target : 'Context' :
-                                    item ? item.status : 'Status' 
-                                )
+                        OnContextMenuOpening: elem => I(
+                            UMG(JavascriptMultiBox,{
+                                CommandList : commandList,
+                                OnHook : __ => {
+                                    JavascriptMenuLibrary.CreateMenuBuilder(commandList,true,builder => {
+                                        builder.AddToolBarButton(commands.CommandInfos[2])
+                                        builder.AddToolBarButton(commands.CommandInfos[3])
+                                        JavascriptMultiBox.Bind(builder)
+                                    })
+                                }
+                            })
+                        ),
+                        OnGenerateRowEvent:(item,column) => I(
+                            UMG.text({Font:font},column == 'Name' ?
+                                item ? item.target : 'Context' :
+                                item ? item.status : 'Status'
                             )
-                        },
+                        ),
                         $link:elem => {
                             elem.JavascriptContext = Context
-                            elem.alive = true                            
+                            elem.alive = true
                             elem.proxy = {
                                 OnSelectionChanged: item => {
                                     selectedPackage = item
-                                }, 
+                                },
                             }
 
                             let old
@@ -274,7 +302,7 @@ ${getNumClassesExported()} classes exported`
                                         let cur = _.flatten(out).join(',')
                                         if (cur != old) {
                                             old = cur
-                                            out = out.map(x => {                                                
+                                            out = out.map(x => {
                                                 let y = new JavascriptObject()
                                                 let [a,b] = x
                                                 y.target = x[0]
@@ -300,7 +328,7 @@ ${getNumClassesExported()} classes exported`
                                                     undebug : _ => find().then(obj=>obj.ResetAsDebugContext()).then(gc).then(refreshContexts),
                                                 }
 
-                                                if (y.status == 'Debug') { 
+                                                if (y.status == 'Debug') {
                                                     delete y.actions.debug
                                                 } else {
                                                     delete y.actions.undebug
@@ -341,21 +369,18 @@ ${getNumClassesExported()} classes exported`
                 UMG(SizeBox,{HeightOverride:200},
                     UMG(JavascriptListView,{
                         ItemHeight:20,
-                        OnContextMenuOpening: elem => {
-                            let design =
-                                UMG(JavascriptMultiBox,{
-                                    CommandList : commandList,
-                                    OnHook : __ => {
-                                        let builder = JavascriptMenuLibrary.CreateMenuBuilder(commandList,true,builder => {
-                                            builder.AddToolBarButton(commands.CommandInfos[0])
-                                            builder.AddToolBarButton(commands.CommandInfos[1])
-                                            JavascriptMultiBox.Bind(builder)
-                                        })
-                                    }
-                                })
-
-                            return I(design)
-                        },
+                        OnContextMenuOpening: elem => I(
+                            UMG(JavascriptMultiBox,{
+                                CommandList : commandList,
+                                OnHook : __ => {
+                                    JavascriptMenuLibrary.CreateMenuBuilder(commandList,true,builder => {
+                                        builder.AddToolBarButton(commands.CommandInfos[0])
+                                        builder.AddToolBarButton(commands.CommandInfos[1])
+                                        JavascriptMultiBox.Bind(builder)
+                                    })
+                                }
+                            })
+                        ),
                         OnGenerateRowEvent:(item,column) => {
                             const isName = column == 'Name'
                             return I(
@@ -384,7 +409,7 @@ ${getNumClassesExported()} classes exported`
                             elem.JavascriptContext = Context
                             elem.alive = true
                             elem.proxy = {
-                                OnDoubleClick : item => {                                    
+                                OnDoubleClick : item => {
                                     item.actions.install()
                                 },
                                 OnSelectionChanged: item => {
@@ -393,11 +418,11 @@ ${getNumClassesExported()} classes exported`
                             }
 
                             function refresh() {
-                                fetchPackages().then(repository => {
+                                registry.fetch().then(packages => {
                                     if (!elem.alive) throw new Error("interrupted")
                                     // root.Items = ... is necessary to keep these items not to be collected by GC
                                     // because JavascriptObject has a JS object attached.
-                                    root.Items = elem.Items = repository.packages.map(x => packageToObject(x,E))
+                                    root.Items = elem.Items = packages.map(x => packageToObject(x,E))
                                     elem.RequestListRefresh()
                                 })
                             }
