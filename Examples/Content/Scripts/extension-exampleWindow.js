@@ -7,7 +7,7 @@ const UMG = require('UMG')
 
 function packageRegistryService() {
     const repositoryUrl = 'https://raw.githubusercontent.com/ncsoft/Unreal.js-packages/master/repository.json'
-    const svnPath = `${Context.GetDir('Engine')}/Binaries/ThirdParty/svn/Win64/svn`
+    const svnPath = `${Context.GetDir('Engine')}/Binaries/ThirdParty/svn/${JavascriptProcess.GetString('BinariesSubdirectory')}/svn`
 
     const request = require('request')
     let workDir = Context.GetDir('GameContent')+'/Scripts/Downloaded'
