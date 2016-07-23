@@ -14,6 +14,8 @@ function makeDelegates() {
                 launchUrl("http://ncsoft.com")
             }
         },
+        OnIsActionChecked: (what) => false,
+        OnCanExecuteAction: (what) => true,
         $bye: function () {
         }
     }
@@ -96,9 +98,9 @@ function main() {
             },
         ]
 
-        commands.OnExecuteAction = (what) => {
-            delegates().OnExecuteAction(what)
-        }
+        commands.OnExecuteAction = (what) => delegates().OnExecuteAction(what)
+        commands.OnIsActionChecked = (what) => delegates().OnIsActionChecked(what)
+        commands.OnCanExecuteAction = (what) => delegates().OnCanExecuteAction(what)
 
         commands.Initialize()
 
