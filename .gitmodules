@@ -1,3 +1,6 @@
 [submodule "Plugins/UnrealJS"]
 	path = Plugins/UnrealJS
 	url = https://github.com/ncsoft/Unreal.js-core
+[submodule "Examples/Plugins/UnrealJS"]
+	path = Examples/Plugins/UnrealJS
+	url = https://github.com/ncsoft/Unreal.js-core
