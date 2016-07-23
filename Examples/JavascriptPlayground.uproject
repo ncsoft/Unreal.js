@@ -2,5 +2,18 @@
 	"FileVersion": 3,
 	"EngineAssociation": "4.12",
 	"Category": "",
-	"Description": ""
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "JavascriptPlayground",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "CodeEditor",
+			"Enabled": true
+		}
+	]
 }
