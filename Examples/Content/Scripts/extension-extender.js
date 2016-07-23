@@ -55,5 +55,6 @@ if (!global.$ext) {
     }
 }
 
-module.exports = function () {    
+module.exports = function () {
+    return function () {}    
 }
