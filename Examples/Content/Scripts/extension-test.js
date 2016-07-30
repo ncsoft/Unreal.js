@@ -5,19 +5,6 @@ const async_task_timeout_in_seconds = 10
 
 let _ = require('lodash')
 let root_path = Root.GetDir('GameContent') + 'Scripts/tests'
-let test_files = []
-function read_dir(dir) {
-    let out = Root.ReadDirectory(dir)
-    if (out.$) {
-        let items = _.filter(out.OutItems, (item) => !item.bIsDirectory && /^((?!node_modules).)*$/.test(item.Name) && /[\^\/]test\-[^\.]*\.js$/.test(item.Name))
-        test_files = test_files.concat(items.map((item) => item.Name.substr(root_path.length + 1)))
-        out.OutItems.forEach((item) => {
-            if (item.bIsDirectory) {
-                read_dir(item.Name)
-            } 
-        })
-    }
-}
 
 // sync run with timer support 
 function run_sync(P,timeout) {
@@ -208,11 +195,43 @@ function load(file) {
     }
 }
 
-module.exports = function () {
+function shot() {
+    let test_files = []
+
+    function read_dir(dir) {
+        let out = Root.ReadDirectory(dir)
+        if (out.$) {
+            let items = _.filter(out.OutItems, (item) => !item.bIsDirectory && /^((?!node_modules).)*$/.test(item.Name) && /[\^\/]test\-[^\.]*\.js$/.test(item.Name))
+            test_files = test_files.concat(items.map((item) => item.Name.substr(root_path.length + 1)))
+            out.OutItems.forEach((item) => {
+                if (item.bIsDirectory) {
+                    read_dir(item.Name)
+                }
+            })
+        }
+    }
+
     read_dir(root_path)
     let byes = test_files.map(load)
 
     return function () {
         byes.forEach(fn => fn())
     }
+}
+
+module.exports = function () {
+    let bye = shot()
+
+    function refresh() {
+        bye && bye()
+        bye = shot()    
+    }    
+
+    let w = new DirectoryWatcher()
+    w.OnChanged.Add(refresh)
+    w.Watch(root_path)
+    return function () {
+        w.Unwatch()
+        bye && bye()
+    } 
 } 
