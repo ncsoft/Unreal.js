@@ -9,6 +9,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "promise": "^7.1.1",
     "springy": "^2.7.1"
   }
 }
