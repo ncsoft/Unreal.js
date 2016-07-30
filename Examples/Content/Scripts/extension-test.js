@@ -3,9 +3,6 @@
 
 const async_task_timeout_in_seconds = 10
 
-// V8 handles 'Promise' natively and it prevents sync test to control execution. 
-let Promise = require('promise') 
-
 let _ = require('lodash')
 let root_path = Root.GetDir('GameContent') + 'Scripts/tests'
 let test_files = []
@@ -73,7 +70,24 @@ function load(file) {
         scope = prev
 
         if (!prev) {
-            // FJavascriptAutomatedTest (V8/Public/JavascriptTestLibrary.h)    
+            // FJavascriptAutomatedTest (V8/Public/JavascriptTestLibrary.h)
+            let running 
+            let delegate = Root.OnTick.toJSON()
+            let prev, deadline
+            function start() {
+                prev = Date.now()
+                deadline = $time + async_task_timeout_in_seconds
+            }
+
+            function poll() {
+                let cur = Date.now()
+                let elapsed = cur - prev
+                delegate(elapsed / 1000.0)
+                prev = cur
+
+                return ($time < deadline) 
+            }            
+                   
             let recipe = _.extend({
                 Name: name.replace(/[ \t]/g, '_'),
                 bComplexTask: false,
@@ -82,8 +96,25 @@ function load(file) {
                 TestFunctionNames: pending.slice(),
                 Function: function (params) {
                     let {TestFunctionName, Tester} = params
-                    tests[TestFunctionName](Tester)
-                }
+                    if (!running) {
+                        start()
+                        Tester.SetContinue(true)
+                        running = tests[TestFunctionName](Tester).then(_ => {
+                            Tester.SetContinue(false)
+                            running = false
+                        }).catch(_ => {
+                            Tester.SetContinue(false)
+                            running = false
+                        })
+                    } else {
+                        if (poll()) {
+                            Tester.SetContinue(true)
+                        } else {
+                            Tester.AddError("Async time out")
+                            running = false
+                        }
+                    }                    
+                }  
             },opts)
 
             pending.length = 0
@@ -159,9 +190,7 @@ function load(file) {
         key = b.join('.')
         pending.push(key)
         tests[key] = function (Tester) {
-            if (!run_sync(_ => run(bound, body, Tester))) {
-                Tester.AddError("Async test time-out")
-            }
+            return run(bound, body, Tester)
         }
     }
 
@@ -186,4 +215,4 @@ module.exports = function () {
     return function () {
         byes.forEach(fn => fn())
     }
-}
+} 
