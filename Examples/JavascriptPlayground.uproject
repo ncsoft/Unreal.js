@@ -9,11 +9,5 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}
-	],
-	"Plugins": [
-		{
-			"Name": "CodeEditor",
-			"Enabled": true
-		}
 	]
 }
