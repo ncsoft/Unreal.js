@@ -6,6 +6,26 @@ const uclass = require('uclass')().bind(this,global)
 
 let game_mode, ui_mode
 
+/// Object.observe not supported
+function Observe_Proxy(obj, callback, condition = true) {
+    return new Proxy(obj, {
+        get: (target, prop) => {
+            return Reflect.get(target, prop)
+        },
+        set: (target, prop, value) => {
+            condition && callback(prop)
+            return Reflect.set(target, prop, value)
+        }
+    })
+}
+Object.observe = (obj, callback, acceptlist) => {
+    const isCallback = _.includes(acceptlist, 'update')
+    Observe_Proxy(obj, callback, isCallback)
+}
+Object.unobserve = (obj, callback) => {
+    Observe_Proxy(obj, callback)
+}
+
 function tutorial_WebSocket() {
     // borrowed from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
     function ab2str(buf) {

@@ -46,7 +46,10 @@ function main() {
     let MyCharacter_C = compile(MyCharacter)
 
     function randomPoint() {
-        return GWorld.GetRandomPoint(GWorld.NavigationSystem.MainNavData)
+        /// UE4 4.13 version not support 'GetRandomPoint'
+        /// Replace 'GetRandomPoint' to 'GetRandomReachablePointInRadius'
+        const Origin = Vector.C({X:0,Y:0,Z:0}), Radius = 1500
+        return GWorld.GetRandomReachablePointInRadius(Origin, Radius)
     }
 
     function createCharacter() {
