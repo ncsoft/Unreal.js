@@ -15,7 +15,7 @@ Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4.
  2. `cd <YourProject>/Plugins/UnrealJS && ./install-v8-libs`
 
 ### Features
-- Powered by latest V8 (ES6, 5.6.140)
+- Powered by latest V8 (ES6, 5.5-lkgr)
 - CommonJS modules
 - Full access to the whole UnrealEngine API
 - Free to subclass existing classes including blueprint
