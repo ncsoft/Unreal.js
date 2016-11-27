@@ -1,6 +1,5 @@
 let _ = require('lodash')
 let npm = require('./lib/npm')
-let network = require('./lib/network')
 let dynamic_binding_context = require('./lib/bindings')
 let instantiator = require('instantiator')
 let UMG = require('UMG')
@@ -41,6 +40,8 @@ async function deeplearning_demo(elem, check_health,neurons = [10,7,5,5]) {
     }
 
     await npm('convnetjs')
+
+    let network = require('./lib/network')
 
     const num_iter = 100000
     const batch_size = 64
