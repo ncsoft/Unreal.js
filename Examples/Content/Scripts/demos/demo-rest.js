@@ -20,7 +20,7 @@ async function demo(defer) {
     }
 
     const url = "http://www.blogcdn.com/massively.joystiq.com/media/2013/03/ncsoft.jpg"
-    const url2 = "https://d3h4ic4mid7cwj.cloudfront.net/wp-content/uploads/tencent_penguin.jpg"
+    const url2 = "https://pbs.twimg.com/profile_images/593636604482228224/mWPsqBsm.jpg"
     const font = {
         FontObject : GEngine.SmallFont,
         Size : 25
