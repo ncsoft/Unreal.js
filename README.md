@@ -12,7 +12,7 @@ Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4.
 
 - Search unreal.js on the epic marketplace 
 - Manual installation
- 1. `git https://github.com/ncsoft/Unreal.js-core <YourProject>/Plugins/UnrealJS`
+ 1. `git clone https://github.com/ncsoft/Unreal.js-core <YourProject>/Plugins/UnrealJS`
  2. `cd <YourProject>/Plugins/UnrealJS && ./install-v8-libs`
 
 ### Features
