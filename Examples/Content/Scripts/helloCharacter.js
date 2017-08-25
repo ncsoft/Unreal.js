@@ -48,8 +48,8 @@ function main() {
     function randomPoint() {
         /// UE4 4.13 version not support 'GetRandomPoint'
         /// Replace 'GetRandomPoint' to 'GetRandomReachablePointInRadius'
-        const Origin = Vector.C({X:0,Y:0,Z:0}), Radius = 1500
-        return GWorld.GetRandomReachablePointInRadius(Origin, Radius)
+        const Origin = Vector.C({X:0,Y:0,Z:0}), RandomPos = Vector.C({X:0, Y:0, Z:0}), Radius = 1500
+        return GWorld.K2_GetRandomReachablePointInRadius(Origin, RandomPos, Radius).RandomLocation;
     }
 
     function createCharacter() {
@@ -78,6 +78,7 @@ function main() {
         return character
     }
 
+    
     // spawn 20 characters
     let characters = _.range(0,20).map(()=>{
         while (true) {
