@@ -5,7 +5,7 @@ async function npm(what) {
     if (m) return m
 
     function locate_npm() {
-        let cmd = `-e console.log([...process.argv[0].replace(/\\\\/g,'/').split('/').slice(0,-1),'node_modules/npm/cli.js'].join('/'))`
+        let cmd = `-e console.log([...process.argv[0].replace(/\\\\/g,'/').split('/').slice(0,-1),'node_modules/npm/bin/npm-cli.js'].join('/'))`
         let p = JavascriptProcess.Create('node', cmd, false, true, true, 0, '', true)
         p.Wait()
         return p.ReadFromPipe().split('\n')[0]
