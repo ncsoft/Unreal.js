@@ -278,6 +278,7 @@ function main() {
                 },
                 $link:elem => {
                     elem.JavascriptContext = Context
+                    elem.EntryWidgetClass = JavascriptUserObjectListEntry
                     elem.proxy = {
                         OnSelectionChanged: item => {
                             data = item

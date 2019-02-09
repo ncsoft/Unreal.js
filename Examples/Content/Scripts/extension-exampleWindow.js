@@ -281,6 +281,7 @@ function main() {
                 ),
                 $link:elem => {
                     elem.JavascriptContext = Context
+                    elem.EntryWidgetClass = JavascriptUserObjectListEntry
                     elem.alive = true
                     elem.proxy = {
                         OnSelectionChanged: item => contexts.setCurrent(item)
@@ -395,6 +396,7 @@ function main() {
                         ],
                         $link:elem => {
                             elem.JavascriptContext = Context
+                            elem.EntryWidgetClass = JavascriptUserObjectListEntry
                             elem.alive = true
                             elem.proxy = {
                                 OnDoubleClick : item => item.actions.install(),
