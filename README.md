@@ -9,6 +9,7 @@ Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4.
 - [Update notes](https://github.com/ncsoft/Unreal.js/wiki/Update-notes)
 - [Link to NDC 2017 presentation (KR)](https://www.slideshare.net/crocuis/unrealjs-ue4-75499471)
 - [Link to NDC 2017 presentation Video (KR)](http://ndc.vod.nexoncdn.co.kr/NDC2017/videos/NDC2017_0114.mp4)
+- Support Platform : Win64, Mac, Linux, Android, iOS 
 
 ## Installation
 
