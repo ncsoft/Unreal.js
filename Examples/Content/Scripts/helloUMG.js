@@ -217,7 +217,7 @@ function main() {
                                             },
                                             $link:elem => {
                                                 elem.JavascriptContext = Context
-                                                elem.EntryWidgetClass = JavascriptUserObjectListEntry
+                                                elem.EntryWidgetClass = WidgetBlueprint.Load('/Game/JavascriptUserObjectListEntry_BP.JavascriptUserObjectListEntry_BP').GeneratedClass
                                                 elem.proxy = {}
                                                 elem.proxy.OnSelectionChanged = (row) => {
                                                     console.log('selection')

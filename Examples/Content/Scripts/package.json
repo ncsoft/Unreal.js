@@ -9,6 +9,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "convnetjs": "^0.3.0",
     "springy": "^2.7.1"
   }
 }

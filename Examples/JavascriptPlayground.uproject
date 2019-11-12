@@ -1,15 +1,8 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "4.21",
+	"EngineAssociation": "4.23",
 	"Category": "",
 	"Description": "",
-	"Modules": [
-		{
-			"Name": "JavascriptPlayground",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		}
-	],
 	"Plugins": [
 		{
 			"Name": "UnrealJS",
