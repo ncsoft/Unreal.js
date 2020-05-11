@@ -46,7 +46,7 @@ Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4.
 - [Wiki](https://github.com/ncsoft/Unreal.js/wiki)
  
 ### License
-- Licensed under the MIT license
+- Licensed under the BSD 3-Clause "New" or "Revised" License 
 - see [LICENSE](https://github.com/ncsoft/Unreal.js/blob/master/LICENSE) for details
 
 ### Examples
