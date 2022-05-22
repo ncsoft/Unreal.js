@@ -2,7 +2,7 @@
 [![fork this repo](http://githubbadges.com/fork.svg?user=ncsoft&repo=Unreal.js&style=default)](https://github.com/ncsoft/Unreal.js/fork)
 # Unreal.js 
 
-Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine4. 
+Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine. 
 
 - [Link to Demo project](https://github.com/ncsoft/Unreal.js-demo)
 - [Link to the Unreal Engine Marketplace](https://www.unrealengine.com/marketplace/unrealjs) (4.11 ~ 5.0)
