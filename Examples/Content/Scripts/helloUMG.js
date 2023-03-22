@@ -1,4 +1,5 @@
 let UMG = require('UMG')
+const style = require('stylePreset')
     
 function GetPC() {
     return PlayerController.C(GWorld.GetAllActorsOfClass(PlayerController).OutActors[0])
@@ -17,8 +18,16 @@ function editor() {
         UMG(MultiLineEditableTextBox, {
             'slot.size.size-rule': 'Fill',
             WidgetStyle: {
-                'font.font-object' : GEngine.SmallFont, 
-                'font.size': 20 
+                TextStyle: {
+                    'font.font-object' : GEngine.SmallFont, 
+                    'font.size': 20 
+                },
+                ForegroundColor: style.colors.black,
+                FocusedForegroundColor: style.colors.black,
+                BackgroundColor: style.colors.gray,
+                BackgroundImageNormal: { TintColor: style.colors.gray },
+                BackgroundImageHovered: { TintColor: style.colors.gray },
+                BackgroundImageFocused: { TintColor: style.colors.gray },
             },
             Text: source,        
             $link: _elem => {
@@ -38,6 +47,7 @@ function main() {
     widget = GWorld.CreateWidget(JavascriptWidget, PC)
     widget.JavascriptContext = Context
     widget.bSupportsKeyboardFocus = true
+    widget.bIsFocusable = true
     
     class TestWidget extends JavascriptWidget {
         OnPaint(context) {
@@ -268,7 +278,7 @@ function main() {
 
     // Switch PC to UI only mode.
     PC.bShowMouseCursor = true
-    PC.SetInputMode_UIOnly(page)
+    WidgetBlueprintLibrary.SetInputMode_UIOnlyEx(PC,widget,'DoNotLock',false)
 
     return function () {
         onMessage = null

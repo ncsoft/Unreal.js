@@ -38,7 +38,7 @@ function main() {
             this.Mesh.AddLocalRotation({Yaw:270})
 
             // All UObject has static function .Load(asset-path{string})
-            this.Mesh.SetSkeletalMesh(SkeletalMesh.Load('/Game/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin'))
+            this.Mesh.SetSkeletalMeshAsset(SkeletalMesh.Load('/Game/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin'))
             this.Mesh.SetAnimInstanceClass(AnimBlueprint.Load('/Game/Mannequin/Animations/ThirdPerson_AnimBP.ThirdPerson_AnimBP').GeneratedClass)
         }
     }
@@ -49,7 +49,7 @@ function main() {
         /// UE4 4.13 version not support 'GetRandomPoint'
         /// Replace 'GetRandomPoint' to 'GetRandomReachablePointInRadius'
         const Origin = Vector.C({X:0,Y:0,Z:0}), RandomPos = Vector.C({X:0, Y:0, Z:0}), Radius = 1500
-        return GWorld.K2_GetRandomReachablePointInRadius(Origin, RandomPos, Radius).RandomLocation;
+        return NavigationSystemV1.GetRandomReachablePointInRadius(GWorld, Origin, RandomPos, Radius).RandomLocation
     }
 
     function createCharacter() {
@@ -75,6 +75,7 @@ function main() {
 
         wander()
 
+        console.log(`character is created at (X=${pos.X}, Y=${pos.Y})`)
         return character
     }
 

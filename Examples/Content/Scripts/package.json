@@ -10,6 +10,7 @@
   "description": "",
   "dependencies": {
     "convnetjs": "^0.3.0",
+    "lodash": "^4.17.21",
     "springy": "^2.7.1"
   }
 }

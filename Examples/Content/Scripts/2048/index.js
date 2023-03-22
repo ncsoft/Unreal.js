@@ -7,12 +7,12 @@
         }
 
         let PC = GetPC()
-
-        // Widget을 만들자
+       // Widget을 만들자
         var widget = WidgetBlueprintLibrary.CreateWidget(GWorld, JavascriptWidget, PC)
         widget.proxy = {}
         widget.JavascriptContext = Context
         widget.bSupportsKeyboardFocus = true
+        widget.bIsFocusable = true
 
         // Setup location / rotation
         PC.GetControlledPawn().SetActorLocation({X:854,Z:300})
@@ -35,7 +35,7 @@
 
         // UIOnly mode로 설정
         PC.bShowMouseCursor = true
-        WidgetBlueprintLibrary.SetInputMode_UIOnly(PC,page)
+        WidgetBlueprintLibrary.SetInputMode_UIOnlyEx(PC,widget,'DoNotLock',false)
 
         // Game 설정
         var game = null
@@ -60,7 +60,6 @@
             // for live reload
             game()
             widget.RemoveFromViewport()
-            // live_jade()
         }
     }
 })()

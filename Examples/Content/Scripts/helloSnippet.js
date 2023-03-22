@@ -1,7 +1,7 @@
 const UMG = require('UMG')
 const _ = require('lodash')
 const request = require('request')
-const fontSize = 12
+const fontSize = 15
 
 function textStyle(color) {
     return TextBlockStyle({
@@ -57,16 +57,22 @@ function editor() {
         })
     }
     
-    load('nakosung/2466994e78e887d19c2b')
+    load('dochigun-nc/bc997d56a30009e6d0fbf41c21e710a8')
+
+    const style = require('stylePreset')
 
     return UMG(MyEditor_C, { 'slot.size.size-rule': 'Fill' },
         UMG.div({ 'slot.size.size-rule': 'Fill' },
             UMG.span({},
-                UMG(EditableTextBox,{
+                UMG(EditableTextBox,{                    
                     'slot.size.size-rule': 'Fill',
                     WidgetStyle:{
-                        'font.size':fontSize,
-                        'font.font-object': GEngine.SmallFont,
+                        TextStyle: { 
+                            'font.size': fontSize * 1.2,
+                            'font.font-object': GEngine.SmallFont
+                        },
+                        ForegroundColor: style.colors.black,
+                        BackgroundImageNormal: { TintColor: style.colors.gray }
                     },
                     Text:gist,
                     HintText:'Gist id',
@@ -80,12 +86,21 @@ function editor() {
                     UMG.text({
                         'font.size':fontSize * 1.5,
                         'font.font-object': GEngine.SmallFont,
+                        'ColorAndOpacity': style.colors.black
                     },"RUN (F5)")
                 )
             ),
             UMG(MultiLineEditableTextBox, {
                 'slot.size.size-rule': 'Fill',
-                WidgetStyle: { 'font.size': fontSize },
+                WidgetStyle: { 
+                    TextStyle: { 'font.size': fontSize },
+                    ForegroundColor: style.colors.black,
+                    FocusedForegroundColor: style.colors.black,
+                    BackgroundColor: style.colors.gray,
+                    BackgroundImageNormal: { TintColor: style.colors.gray },
+                    BackgroundImageHovered: { TintColor: style.colors.gray },
+                    BackgroundImageFocused: { TintColor: style.colors.gray },
+                },
                 Text: source,
                 $link: _elem => {
                     elem = _elem
@@ -157,6 +172,7 @@ function main() {
     widget = GWorld.CreateWidget(JavascriptWidget, PC)
     widget.JavascriptContext = Context
     widget.bSupportsKeyboardFocus = true
+    widget.bIsFocusable = true
 
     let design = UMG.span({},
         UMG.div({'slot.size.value':0.5}),
@@ -176,7 +192,7 @@ function main() {
 
     // Switch PC to UI only mode.
     PC.bShowMouseCursor = true
-    PC.SetInputMode_UIOnly(page)
+    WidgetBlueprintLibrary.SetInputMode_UIOnlyEx(PC,widget,'DoNotLock',false)
 
     return function() {
         onMessage = null

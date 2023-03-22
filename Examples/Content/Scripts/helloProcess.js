@@ -23,6 +23,7 @@ function makeDisplay() {
                 GEngine.SmallFont,
                 text,
                 {X:this.Canvas.SizeX/2,Y:this.Canvas.SizeY/2},
+                {X:1,Y:1},
                 {R:1,G:1,B:1,A:1},
                 0,
                 {R:0,G:0,B:0,A:1},

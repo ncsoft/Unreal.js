@@ -105,7 +105,7 @@ class SpringyRenderer {
                 pos.X -= size.X/2
                 pos.Y -= size.Y/2
                 canvas.DrawTexture(null,pos,size,{},{},{A:0.2},'BLEND_Translucent')
-                canvas.DrawText(font,node.data.label,lower(toScreen(p)),{R:1,G:1,B:1,A:1},0,{R:0,G:0,B:0,A:1},{X:1,Y:1},true,true,true,{R:0,G:0,B:0,A:1})
+                canvas.DrawText(font,node.data.label,lower(toScreen(p)),{X:1,Y:1},{R:1,G:1,B:1,A:1},0,{R:0,G:0,B:0,A:1},{X:1,Y:1},true,true,true,{R:0,G:0,B:0,A:1})
             })
         }
 
