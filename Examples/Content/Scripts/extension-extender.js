@@ -62,7 +62,15 @@ function main() {
         style.SetContentRoot(Root.GetDir('Game'))
         style.AddImageBrush(
             'UnrealJS.About',
-            style.RootToContentDir('Plugins/UnrealJS/Resources/Icon128.png'),
+            style.RootToContentDir('images/UnrealJs.png'),
+            { X: 40, Y: 40 },
+            { R: 1, G: 1, B: 1, A: 1 },
+            'NoTile',
+            'FullColor'
+        )
+        style.AddImageBrush(
+            'UnrealJS.NC',
+            style.RootToContentDir('images/NC.png'),
             { X: 40, Y: 40 },
             { R: 1, G: 1, B: 1, A: 1 },
             'NoTile',
@@ -88,13 +96,15 @@ function main() {
                 Id: 'About',
                 FriendlyName: 'Unreal.js',
                 Description: 'Learn about unreal.js',
-                ActionType: 'Button'
+                ActionType: 'Button',
+                IconStyleName: 'UnrealJS.About'
             },
             {
                 Id: 'NCsoft',
                 FriendlyName: 'Visit NCsoft',
                 Description: 'Learn about NCsoft',
-                ActionType: 'Button'
+                ActionType: 'Button',
+                IconStyleName: 'UnrealJS.NC'
             },
         ]
 

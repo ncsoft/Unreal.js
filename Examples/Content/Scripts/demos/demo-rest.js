@@ -1,39 +1,27 @@
 /// <reference path="../typings/ue.d.ts">/>
 
-let _ = require('lodash')
-let instantiator = require('instantiator')
 let UMG = require('UMG')
-let delay = require('./lib/delay')
 let viewport_widget = require('./lib/viewport-widget')
+let rest_texture = require('./lib/remote-texture')
 
 async function demo(defer) {    
     let elem = viewport_widget()
     defer(_ => elem.destroy())
 
-    async function rest_texture(url) {
-        return new Promise((resolve,reject) => {
-            let job = AsyncTaskDownloadImage.DownloadImage(url)
-            let texture = null
-            job.OnSuccess = [resolve]
-            job.OnFail = [reject]
-        })
-    }
-
-    const url = "http://www.blogcdn.com/massively.joystiq.com/media/2013/03/ncsoft.jpg"
-    const url2 = "https://pbs.twimg.com/profile_images/593636604482228224/mWPsqBsm.jpg"
+    const url = 'https://github.com/ncsoft/Unreal.js-core/raw/master/Resources/Icon128.png'
     const font = {
         FontObject : GEngine.SmallFont,
         Size : 25
     }
 
-    let texture = await rest_texture(url)
+    let texture
     let set_image
-    async function set_url(url) {
+    async function set_url(imageUrl) {
         if (!set_image) {
-            console.log('?',url)
+            console.error('?',imageUrl)
             return
         }
-        set_image(await rest_texture(url))
+        set_image(await rest_texture(imageUrl))
     }
 
     let editStyle = {
@@ -45,26 +33,20 @@ async function demo(defer) {
     }
 
     let design = UMG.div({},
-            UMG.text({},"demo4"),
+            UMG.text({},"Input url to show image :"),
             UMG(EditableText,{
                 WidgetStyle:editStyle,
-                HintText:'url',
+                HintText:'Url to show image',
                 Text:url,
                 OnTextChanged:text => {
                     set_url(text)
                 }
             }),
-            UMG(EditableText,{WidgetStyle:editStyle,Text:url2}),
             UMG.span({},
                 UMG(SizeBox,{WidthOverride:256,HeightOverride:256},
                     UMG(UImage,{
                         $link:elem => set_image = texture => {
-                            elem.Brush.ResourceObject = texture
-                            elem.SetBrush(elem.Brush)
-                        },
-                        Brush:{
-                            ImageSize:{X:256,Y:256},
-                            ResourceObject:texture
+                            elem.SetBrushFromTexture(texture, false)
                         }
                     })
                 )

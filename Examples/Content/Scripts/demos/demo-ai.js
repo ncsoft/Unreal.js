@@ -15,4 +15,6 @@ async function demo(defer) {
     await Promise.all(_.range(2).map(mixamo))
 }
 
+demo.description = "This demonstrates how easy writing logic code with unreal.js is."
+
 module.exports = demo

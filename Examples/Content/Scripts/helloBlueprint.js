@@ -3,7 +3,7 @@
 "use strict"
 
 // Blueprint class can be subclassed!
-class MyActor extends Blueprint.Load('/Game/ExampleBlueprint').GeneratedClass {
+class MyActor extends Blueprint.Load('/Game/Blueprints/ExampleBlueprint').GeneratedClass {
     // constructor
     ctor() {
         // Subobject initialization, property initialization

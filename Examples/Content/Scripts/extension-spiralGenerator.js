@@ -32,10 +32,10 @@ function generate_spiral(world, opts) {
             A: 1
         } 
         let mi = world.CreateDynamicMaterialInstance(mtrl)
-        mi.SetVectorParameterValue('color', color)
-        let sma = StaticMeshActor.C(world.BeginSpawningActorFromClass(StaticMeshActor, t, false))
+        MaterialEditingLibrary.SetMaterialInstanceVectorParameterValue(mi, 'color', color)
+        let sma = StaticMeshActor.C(world.BeginDeferredActorSpawnFromClass(StaticMeshActor, t, 'AlwaysSpawn', null))
         sma.StaticMeshComponent.SetMobility('Movable')
-        sma.StaticMeshComponent.StaticMesh = mesh			
+        sma.StaticMeshComponent.SetStaticMesh(mesh)
         sma.StaticMeshComponent.SetMaterial(0, mi)
         sma.StaticMeshComponent.ReregisterComponent()
         sma.FinishSpawningActor(t)
@@ -125,7 +125,7 @@ function main() {
         data.N = 100;
         data.height = Math.random() * 800 + 200
         data.mesh = StaticMesh.Load('/Engine/BasicShapes/Sphere')
-        data.mtrl = Material.Load('/Game/Color.Color')
+        data.mtrl = Material.Load('/Game/Geometry/Materials/Color.Color')
         data.desc = Math.random().toString(16)
         return data
     }
@@ -278,7 +278,7 @@ function main() {
                 },
                 $link:elem => {
                     elem.JavascriptContext = Context
-                    elem.EntryWidgetClass = WidgetBlueprint.Load('/Game/JavascriptUserObjectListEntry_BP.JavascriptUserObjectListEntry_BP').GeneratedClass
+                    elem.EntryWidgetClass = WidgetBlueprint.Load('/Game/Blueprints/JavascriptUserObjectListEntry_BP.JavascriptUserObjectListEntry_BP').GeneratedClass
                     elem.proxy = {
                         OnSelectionChanged: item => {
                             data = item

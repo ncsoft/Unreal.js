@@ -161,7 +161,7 @@ function main() {
     }
 
     function getNumClassesExported() {
-        return _.filter(_.keys(global),x=>!!global[x].StaticClass).length
+        return _.filter(_.keys(global),x=> global[x] && !!global[x].StaticClass).length
     }
 
     function packageToObject(p,E) {
@@ -244,7 +244,7 @@ function main() {
                 FriendlyName : 'Remove this package',
                 Description : 'Remove this package',
                 ActionType : 'Button'
-            }
+            } 
         ]
     })
 
@@ -281,7 +281,7 @@ function main() {
                 ),
                 $link:elem => {
                     elem.JavascriptContext = Context
-                    elem.EntryWidgetClass = WidgetBlueprint.Load('/Game/JavascriptUserObjectListEntry_BP.JavascriptUserObjectListEntry_BP').GeneratedClass
+                    elem.EntryWidgetClass = WidgetBlueprint.Load('/Game/Blueprints/EntryWidget_C').GeneratedClass
                     elem.alive = true
                     elem.proxy = {
                         OnSelectionChanged: item => contexts.setCurrent(item)
@@ -370,6 +370,7 @@ function main() {
                     UMG(JavascriptListView,{
                         ItemHeight:20,
                         OnContextMenuOpening: packages.contextMenu,
+                        EntryWidgetClass: WidgetBlueprint.Load('/Game/Blueprints/EntryWidget_C').GeneratedClass,                
                         OnGenerateRowEvent:(item,column) => {
                             const isName = column == 'Name'
                             return I(
@@ -396,7 +397,6 @@ function main() {
                         ],
                         $link:elem => {
                             elem.JavascriptContext = Context
-                            elem.EntryWidgetClass = WidgetBlueprint.Load('/Game/JavascriptUserObjectListEntry_BP.JavascriptUserObjectListEntry_BP').GeneratedClass
                             elem.alive = true
                             elem.proxy = {
                                 OnDoubleClick : item => item.actions.install(),

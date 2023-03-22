@@ -26,7 +26,8 @@ async function mixamo(index=0) {
     }
 
     async function wander() {
-        let loc = GWorld.GetRandomReachablePointInRadius(controller.GetActorLocation(), 1000)
+        const dummy = controller.GetActorLocation()
+        let { RandomLocation: loc } = NavigationSystemV1.GetRandomReachablePointInRadius(character, controller.GetActorLocation(), dummy, 1000)
         await moveto(loc)
     }
 
@@ -64,7 +65,7 @@ async function mixamo(index=0) {
         return function () {
             if (!character.IsValid()) return
             wc.UnregisterComponent()
-            character.DestroyComponent(wc)
+            wc.DestroyComponent(character)
         }
     }
 
@@ -127,8 +128,7 @@ async function mixamo(index=0) {
                 UMG.text({
                     Font:font,
                     $link:_elem => elem = _elem
-                },"test!"),
-                UMG(PropertyEditor,{$link:elem => elem.SetObject(controller.GetPathFollowingComponent())})
+                },"test!")
             )
         )
         function loop() {

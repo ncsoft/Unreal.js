@@ -54,7 +54,14 @@ async function deeplearning_demo(elem, check_health,neurons = [10,7,5,5]) {
         UMG.div({},
             design,
             UMG.span({},
-                ActionButton("Load pretrained network",_ => net.fromJSON(localStorage.get(path))),
+                ActionButton("Load pretrained network",_ => { 
+                    const data = localStorage.get(path)
+                    if (data) {
+                        net.fromJSON(localStorage.get(path)) 
+                    } else {
+                        console.error('No pretrained network found. save one first.')
+                    }
+                }),
                 ActionButton("Save trained network",_ => localStorage.set(path,net.toJSON()))
             ),
             UMG.text(bind('Text','status',x=>x))

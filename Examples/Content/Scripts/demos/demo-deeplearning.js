@@ -24,6 +24,6 @@ async function demo(defer) {
     await deeplearning_demo(inner, _ => alive)
 }
 
-
+demo.description = "This demonstrates unreal.js can be benefited from huge javascript community."
 
 module.exports = demo

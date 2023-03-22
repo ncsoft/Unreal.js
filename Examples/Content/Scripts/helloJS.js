@@ -4,7 +4,7 @@ const UMG = require('UMG')
 const _ = require('lodash')
 const uclass = require('uclass')().bind(this,global)
 
-let game_mode, ui_mode
+let changeToGameMode, changeToUIMode
 
 /// Object.observe not supported
 function Observe_Proxy(obj, callback, condition = true) {
@@ -77,20 +77,20 @@ function tutorial_WebSocket() {
 }
 
 function tutorial_StaticMeshActor() {
-    game_mode()
+    changeToGameMode()
     console.log('creating a static mesh actor')
     class MySMA extends StaticMeshActor {
         ctor() {
-            let smc = this.StaticMeshComponent
-            let mtrl = GWorld.CreateDynamicMaterialInstance(Material.Load('/Game/Color.Color'))
-            mtrl.SetVectorParameterValue('Color',{G:1,A:1})
-            smc.SetStaticMesh(StaticMesh.Load('/Engine/BasicShapes/Cube.Cube'))
-            smc.SetMaterial(0,mtrl)
+            let staticMeshComponent = this.StaticMeshComponent
+            let materialInstance = GWorld.CreateDynamicMaterialInstance(Material.Load('/Game/Color.Color'))
+            materialInstance.SetVectorParameterValue('Color',{G:1,A:1})
+            staticMeshComponent.SetStaticMesh(StaticMesh.Load('/Engine/BasicShapes/Cube.Cube'))
+            staticMeshComponent.SetMaterial(0,materialInstance)
         }
     }
     let actor = new (uclass(MySMA))(GWorld,{Z:100})
     return _ => {
-        ui_mode()
+        changeToUIMode()
         actor.DestroyActor()
     }
 }
@@ -133,9 +133,8 @@ function Logger() {
 
 function tutorial_Draggable(root) {
     for (var i=0; i<1000; ++i) {
-i += i;
-}
-
+        i += i;
+    }
 
     //v8.SetSamplingInterval(100)
     //v8.StartProfiling("main",false)
@@ -273,7 +272,7 @@ i += i;
     let interval2 = setInterval(_ => data3.shift(), 500)
     
     function bye() {
-       clearInterval(interval)
+        clearInterval(interval)
         clearInterval(interval2)
     }
 
@@ -465,6 +464,7 @@ function main() {
     class AppWidget extends JavascriptWidget {
         ctor() {
             this.bSupportsKeyboardFocus = true
+            this.bIsFocusable = true
         }
     }
 
@@ -475,17 +475,18 @@ function main() {
     widget.SetRootWidget(page)
     widget.AddToViewport()
     
-    ui_mode = _ => {
+    changeToUIMode = _ => {
         PlayerController.C(PC).bShowMouseCursor = true
-        PlayerController.C(PC).SetInputMode_UIOnly(widget,false)                
+        WidgetBlueprintLibrary.SetInputMode_UIOnlyEx(PC,widget,'DoNotLock',false)
+        
     }
     
-    game_mode = _ => {
+    changeToGameMode = _ => {
         PlayerController.C(PC).bShowMouseCursor = true
-        PlayerController.C(PC).SetInputMode_GameAndUI(widget,false,false)                
+        WidgetBlueprintLibrary.SetInputMode_GameAndUIEx(PC,widget,'DoNotLock',false,false)                
     }
     
-    ui_mode()        
+    changeToUIMode()        
     
     return function () {
         page.bye()

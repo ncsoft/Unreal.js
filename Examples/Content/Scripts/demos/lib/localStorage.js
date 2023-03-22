@@ -6,7 +6,11 @@ let localStorage = {
     get: key => {
         let path = pathForLocalStorageKey(key)
         try {            
-            return JSON.parse(Context.ReadStringFromFile(path))
+            const jsonString = Context.ReadStringFromFile(path)
+            if (jsonString) {
+                return JSON.parse(jsonString)
+            }
+            return null
         } catch (e) {
             console.log(e.stack)
             return

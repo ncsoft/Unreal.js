@@ -58,4 +58,6 @@ async function demo(defer) {
     }
 }
 
+demo.description = "This demonstrates unreal.js can replace Level blueprint and async/await"
+
 module.exports = demo

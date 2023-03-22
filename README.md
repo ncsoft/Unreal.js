@@ -1,11 +1,9 @@
-[![star this repo](http://githubbadges.com/star.svg?user=ncsoft&repo=Unreal.js&style=default)](https://github.com/ncsoft/Unreal.js)
-[![fork this repo](http://githubbadges.com/fork.svg?user=ncsoft&repo=Unreal.js&style=default)](https://github.com/ncsoft/Unreal.js/fork)
 # Unreal.js 
 
 Unreal.js is a plug-in which brings V8-powered Javascript into UnrealEngine. 
 
 - [Link to Demo project](https://github.com/ncsoft/Unreal.js-demo)
-- [Link to the Unreal Engine Marketplace](https://www.unrealengine.com/marketplace/unrealjs) (4.11 ~ 5.0)
+- [Link to the Unreal Engine Marketplace](https://www.unrealengine.com/marketplace/unrealjs) (4.11-4.27, 5.0-5.1)
 - [Update notes](https://github.com/ncsoft/Unreal.js/wiki/Update-notes)
 - [Link to NDC 2017 presentation (KR)](https://www.slideshare.net/crocuis/unrealjs-ue4-75499471)
 - [Link to NDC 2017 presentation Video (KR)](http://ndc.vod.nexoncdn.co.kr/NDC2017/videos/NDC2017_0114.mp4)
